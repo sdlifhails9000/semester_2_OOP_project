@@ -28,67 +28,6 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 // ALERT: Main character is lizard temporarily
 // ALERT: Change Coordinate system to pure vectors??
 
-// Sprite is a subclass of texture with movement functonality
-// class Sprite extends Texture{
-//     // ALERT: SET TO BACKGROUND DIMENSIONS
-//     private static float worldHeight = 3000;
-//     private static float worldWidth = 3000;
-
-//     public float currentX= 0, currentY=0; // Always world Coordinates
-//     private float movingToX, movingToY;
-//     private float speed = 500;
-//     private boolean isMoving = false;
-
-//     private float width = this.getWidth();
-//     private float height = this.getHeight();
-
-//     // Creates the Texture(Parent Class)
-//     Sprite(String path) {
-//         super(path);
-//     }
-
-
-//     // Move Functionality
-//     // Set the position of the sprite
-//     public void setPosition(float x, float y) {
-//         this.currentX = x;
-//         this.currentY = y;
-//     }
-
-//     // Set the destination for the sprite to move towards
-//     public void setDestination(Vector3 coords) {
-//         // Recieves World Coordinates
-//         isMoving = true;
-//         this.movingToX = coords.x-(width/2);    // Subtracts sprite width to centre
-//         this.movingToY = coords.y-(height/2);
-//     }
-
-//     public void move(float delta,OrthographicCamera camera) {
-//         // Check if supposed to move
-//         if(!isMoving)
-//             return;
-
-//         movingToX = MathUtils.clamp(movingToX, 0, worldWidth-width);
-//         movingToY = MathUtils.clamp(movingToY, 0, worldHeight-height);
-
-//         Vector2 destVector = new Vector2(movingToX - currentX, movingToY - currentY);   // Calculate vector
-        
-
-
-//         if (destVector.len() > 5) {
-//             destVector.nor().scl(delta*speed);    // Normalize than multiply(scale) by speed and delta time
-//             // Change current coordiantes
-//             currentX += destVector.x;
-//             currentY += destVector.y;
-//         }
-//         else
-//         {
-//             isMoving = false;
-//         }
-//     }
-
-// }
-
 public class MainGame extends ApplicationAdapter {
     //-----MAP WORK DECLARATION START----
     //ALERT: google why we use tmxmaploader and tiledmap together
@@ -120,26 +59,19 @@ public class MainGame extends ApplicationAdapter {
     private float cameraHeight = 50;
 
     //Player move speed and camera move speed
-    float speed = 20f;                 // -> Player Move Speed (based off above world size)
-    float cameraSpeed = 30;             // -> Camera Move Speed (Based off above world size)
-
-    //Use them to define starting position for camera and sprite
-    int startX = 10;
-    int startY = 10;
+    float cameraSpeed = 40f;             // -> Camera Move Speed (Based off above world size)
 
     //Health bar percent (testing to show dmg taken and if health bar works as intended)
     float healthPercent = 0.2f;   //(Keep value between 0 and 1)
 
-    //For angle calculation to rotate sprite    (used in updateMovement())
-    float angle;
-
     //Boolean setup to check if moving or not
-    boolean spriteMovement = false;
+    boolean playerMovement = false;
     boolean movingRight;
 
     // Declare Spritbatch and textureAtlas for Images
     SpriteBatch batch;
-    Sprite player, background, healthBarSprite;
+    DynamicSprite player;
+    Sprite background, healthBarSprite;
 
     TextureAtlas atlas;
     TextureAtlas heroAtlas;
@@ -147,15 +79,12 @@ public class MainGame extends ApplicationAdapter {
     //Declaring animations (of type TextureRegions)
     Animation<TextureRegion> heroRunAnimation;
     Animation<TextureRegion> heroIdleAnimation;
-    Animation<TextureRegion> currentAnimation;
 
     //A variable to track elapsed time during animation
     float stateTime;
 
     //Initialize vectors 2d
     Vector2 currentXY;
-    Vector2 targetXY;
-    Vector2 destVector;
 
     //Initialize 3D vector (since we have to unproject camera and it takes vector3 not vector 2)
     Vector3 clickCoords;
@@ -184,13 +113,12 @@ public class MainGame extends ApplicationAdapter {
         //Initialize the animation
         heroRunAnimation = new Animation<TextureRegion>(0.033f, heroAtlas.findRegions("Run"), PlayMode.LOOP);   //heroAtlas.findRegion gives a textureRegion from a big Texture (the big Hero.png)
         heroIdleAnimation = new Animation<TextureRegion>(0.1f, heroAtlas.findRegions("Idle"), PlayMode.LOOP); 
-        currentAnimation = heroIdleAnimation;       //In beginning run the idle animation until action performed
 
         //Initialize stateTime
         stateTime = 0f;
 
         //Initialize the player sprite who will handle animations aswell
-        player = new Sprite(currentAnimation.getKeyFrame(stateTime));       //Initializes sprite with very first frame of currentAnimation (stateTime = 0)
+        player = new DynamicSprite(heroRunAnimation,heroIdleAnimation,stateTime);
 
         
         //Set background and lizard size+position
@@ -199,21 +127,16 @@ public class MainGame extends ApplicationAdapter {
 
         player.setSize(6,8);        //Game world units
         player.setOriginCenter();
-        player.setCenter(startX, startY);            //Centre of world     (setPosition draws from bottom left setCentre draws from centre)
+        player.setCenter(player.startX, player.startY);            //Centre of world     (setPosition draws from bottom left setCentre draws from centre)
 
         //Initialize starting vector coords (sprite coords here its lizard)
-        currentXY = new Vector2(startX, startY);     //Starting points (game World Coords not screen coords)
-
-        //Initialize the 3d version of currentXY (for camera lerping in cameraRoam() method)
-        heroPos = new Vector3(currentXY.x, currentXY.y, 0);
-
 
         // Initialize Camera
         float height = Gdx.graphics.getHeight();    //For aspect ration calculation
         float width = Gdx.graphics.getWidth();
 
         camera = new OrthographicCamera(cameraWidth, cameraHeight * (height / width));        //Visible region (multiplied height by aspect ratio)
-        camera.position.set(startX, startY, 0);         //Same as lizard
+        camera.position.set(player.startX, player.startY, 0);         //Same as lizard
         camera.update();
 
         //Initialize Viewport (for scaling and resizing)
@@ -238,7 +161,7 @@ public class MainGame extends ApplicationAdapter {
         stateTime += delta;     //Update stateTime in render
         
         leftClick();    // Check left click movement
-        updateMovement(delta);
+        updateAllMovements(delta);
         cameraRoam(delta);  // Camera Free Roam
         updateHealthBar();  //Updates position and size of health bar
 
@@ -307,67 +230,23 @@ public class MainGame extends ApplicationAdapter {
             // Vector is basically a class with 3 data members, includes methods for magnitude,normalization(unit vector)
             clickCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0 );
             camera.unproject(clickCoords);  // Converts screen coords to World coords
-
-            float gameX = clickCoords.x;        //clickCoords gives bottom left coords so to make target centre we correct it by adding
-            float gameY = clickCoords.y;        //We do not do correction because sprite is drawn using setCentre not setPosition. Also issue before was in destVector (notes over there)
-
-            spriteMovement = true;      //Movement occured
-        
-        
-            targetXY = new Vector2(gameX, gameY); // Set target vector and subtract dimension of width and height of sprite
-            targetXY.x = MathUtils.clamp(targetXY.x, player.getWidth() / 2, worldWidth - player.getWidth() / 2);        //Doing correction because target is centered
-            targetXY.y = MathUtils.clamp(targetXY.y, player.getHeight() / 2,worldHeight - player.getHeight() / 2);      //Binding it to world width and height dimensions
+            playerMovement = true;      //Movement occured
+            clickCoords.x = MathUtils.clamp(clickCoords.x, player.getWidth() / 2, worldWidth - player.getWidth() / 2);        //Doing correction because target is centered
+            clickCoords.y = MathUtils.clamp(clickCoords.y, player.getHeight() / 2,worldHeight - player.getHeight() / 2);      //Binding it to world width and height dimensions
+            player.movement = true;
         }
     }
-    private void updateMovement(float delta){
-        
-        if (!spriteMovement){      //Signifies no mouseclick yet
-            currentAnimation = heroIdleAnimation;       //Set to idle mode
-            player.setRegion(currentAnimation.getKeyFrame(stateTime));
-            return;
-        }
-        else{
-            currentAnimation = heroRunAnimation;
-            player.setRegion(currentAnimation.getKeyFrame(stateTime));
-        }
-
-        destVector = new Vector2();
-        destVector.set(targetXY).sub(currentXY);
-
-        //-----ROTATION CALCULATION START-----
-        //Sort of skews off at endpoint likeeee just test and see (Works perfectly for bottom edge but skewed for the other 3)
-
-        angle = MathUtils.atan2Deg360(destVector.y, destVector.x);      //atan2Deg360 ensures that whatever y and x is we get angle in range of 0 to 360 not from 180 to -180
-        
-        //-----NOTE----
-        //you can add rotation or not your choice just uncomment the player.setRotation() lines to see it in play
-
-        if (angle > 90 && angle < 270){ 
-            //player.setRotation(angle + 180);        //We have to do a 180 degree CORRECTION offset because setFlip offsets the angle by 180 degrees (inverts x axis)            //This range signifies 2 and 3 quadrant 
-            player.setFlip(true, false);       //Flip the x axis
-        }
-
-        else{
-            //player.setRotation(angle);         //Same reason as above
-            player.setFlip(false, false);      //If its a click in 1 or 4 quadrant no flip just bring sprite to what it was originally (sprite was originally drawn right facing)
-        }
-
-        //-----ROTATION CALCULATION END-----
-
-        if (destVector.len() > 0.5) {         //Previously it was 5 (from saad) which was too big for my gameWorld Coords so adjusted it
-            destVector.nor().scl(delta*speed);    // Normalize then multiply(scale) by speed and delta time
-
-            // Change current coordiantes
-            currentXY.add(destVector);      //Updates the current vector co-ordiantes
-            heroPos.set(currentXY, 0);     //Setting heroPos vector as 3d version of currentXY to be used in cameraRoam()
-            player.setCenter(currentXY.x, currentXY.y);     //Update player position
-        }
-        else{
-            spriteMovement = false;
-        }
-        //No need for updating camera over here as its handled in cameraRoam otherwise it causes conflict between two
-
+    // All movement
+    private void updateAllMovements(float delta){
+        // Arraylist, use polymorphism call movements using for loop for all entities
+        Vector2 targetVector;
+        if (playerMovement)
+            targetVector = new Vector2(clickCoords.x,clickCoords.y);
+        else
+            targetVector = new Vector2(player.getPosition().x,player.getPosition().y);
+        player.updateMovement(targetVector,stateTime,delta);
     }
+
     // Camera Roam
     private void cameraRoam(float delta){
         //Camera measurements
@@ -389,7 +268,8 @@ public class MainGame extends ApplicationAdapter {
         if(!moving){
             // Set camera position to lizard, ALERT change to hero
             //Camera movement
-            camera.position.lerp(heroPos, 0.1f);            //THIS IS WHERE heroPos IS BEING USED (this brings smoothness for camera following)
+
+            camera.position.lerp(player.getPosition(), 0.1f);            //THIS IS WHERE heroPos IS BEING USED (this brings smoothness for camera following)
 
             //No need for the camera clamp commented below because hero is already clamped 
             //and in free roam camera is clamped (it doesnt break you can test)
@@ -422,7 +302,7 @@ public class MainGame extends ApplicationAdapter {
     }
 
     public void updateHealthBar(){
-        healthBarSprite.setCenter(currentXY.x, currentXY.y + 3);        //Setting it just above our hero sprite
+        healthBarSprite.setCenter(player.getPosition().x, player.getPosition().y + 3);        //Setting it just above our hero sprite
         float healthBarWidth = 5 * healthPercent;
         float healthBarHeight = 5;
 
