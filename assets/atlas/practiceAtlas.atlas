@@ -1,0 +1,15 @@
+practiceAtlas.png
+size:2048,2048
+repeat:none
+Background
+bounds:2,899,1920,1080
+Engi
+bounds:1204,364,840,533
+Hero2
+bounds:1204,2,360,360
+Scouticon
+bounds:1566,140,227,222
+healthBar
+bounds:2,97,1200,800
+libgdx
+bounds:2,32,378,63

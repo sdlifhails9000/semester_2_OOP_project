@@ -1,0 +1,62 @@
+{
+    "activeFile": "Objects.tsx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "FloorTileset.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "MainMap.tmx": {
+            "scale": 1.05925,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 399.81118716072683,
+                "y": 400.2832192589096
+            }
+        },
+        "Objects.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Trees.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "WaterTileSet.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "frame.defaultDuration": 175,
+    "last.imagePath": "D:/1.Java Codes/LibgdxGame/assets/practiceMap/TileSetAssets",
+    "map.height": 150,
+    "map.lastUsedFormat": "tmx",
+    "map.width": 150,
+    "mapScene.enableWorlds": true,
+    "openFiles": [
+        "MainMap.tmx",
+        "Objects.tsx",
+        "Trees.tsx",
+        "WaterTileSet.tsx",
+        "FloorTileset.tsx"
+    ],
+    "project": "practiceMap.tiled-project",
+    "recentFiles": [
+        "MainMap.tmx",
+        "FloorTileset.tsx",
+        "WaterTileSet.tsx",
+        "Trees.tsx",
+        "Objects.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    },
+    "tileset.type": 0
+}
