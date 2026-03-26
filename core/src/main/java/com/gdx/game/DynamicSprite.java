@@ -40,11 +40,11 @@ abstract class DynamicSprite extends Sprite{
         // Move this to Player Subclass, this is respawn position HARDCODED
     //Use them to define starting position for camera and sprite
     // Make getters?
-    // public int startX = 10;
+    // public int startX = 10;      COMMENTED OUT BECAUSE MADE A CHILD CLASS
     // public int startY = 10;
 
     protected Vector2 destVector;
-    // protected Vector2 currentXY = new Vector2(startX, startY);     //Starting points (game World Coords not screen coords)
+    // protected Vector2 currentXY = new Vector2(startX, startY);     //Starting points (game World Coords not screen coords)  //IN CHILD CLASS NOW
 
 
     // Creates the Sprite(Parent Class)

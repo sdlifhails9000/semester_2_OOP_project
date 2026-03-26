@@ -70,11 +70,14 @@ public class MainGame extends ApplicationAdapter {
 
     // Declare Spritbatch and textureAtlas for Images
     SpriteBatch batch;
-    DynamicSprite player;
     Sprite background, healthBarSprite;
 
     TextureAtlas atlas;
     TextureAtlas heroAtlas;
+
+    //DynamicSprites (self defined)
+    DynamicSprite player;
+    DynamicSprite testPlayer;
 
     //Declaring animations (of type TextureRegions)
     Animation<TextureRegion> heroRunAnimation;
@@ -117,8 +120,9 @@ public class MainGame extends ApplicationAdapter {
         //Initialize stateTime
         stateTime = 0f;
 
-        //Initialize the player sprite who will handle animations aswell
-        player = new HeroPlayer(heroRunAnimation,heroIdleAnimation,stateTime,100,100,5);
+        //Initialize the DYNAMIC SPRITES
+        player = new HeroPlayer(heroRunAnimation,heroIdleAnimation,stateTime,10,10,20);
+        testPlayer = new HeroPlayer(heroRunAnimation, heroIdleAnimation, stateTime, 15, 15, 30);
 
         
         //Set background and lizard size+position
@@ -129,6 +133,9 @@ public class MainGame extends ApplicationAdapter {
         player.setOriginCenter();
         player.setCenter(player.getPosition().x, player.getPosition().y);            //Centre of world     (setPosition draws from bottom left setCentre draws from centre)
 
+        testPlayer.setSize(6,8);
+        testPlayer.setOriginCenter();
+        testPlayer.setCenter(testPlayer.getPosition().x, testPlayer.getPosition().y);
         //Initialize starting vector coords (sprite coords here its lizard)
 
         // Initialize Camera
@@ -218,6 +225,7 @@ public class MainGame extends ApplicationAdapter {
         //Draw the sprites
         //background.draw(batch);    //No need for this as now as you can see above we render in our own map
         player.draw(batch);    // Draw player
+        testPlayer.draw(batch); //Draw testPlayer
         healthBarSprite.draw(batch);    //Draw HealthBar
 
         batch.end();
@@ -230,21 +238,33 @@ public class MainGame extends ApplicationAdapter {
             // Vector is basically a class with 3 data members, includes methods for magnitude,normalization(unit vector)
             clickCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0 );
             camera.unproject(clickCoords);  // Converts screen coords to World coords
+
             playerMovement = true;      //Movement occured
+
             clickCoords.x = MathUtils.clamp(clickCoords.x, player.getWidth() / 2, worldWidth - player.getWidth() / 2);        //Doing correction because target is centered
             clickCoords.y = MathUtils.clamp(clickCoords.y, player.getHeight() / 2,worldHeight - player.getHeight() / 2);      //Binding it to world width and height dimensions
+
             player.movement = true;
+            testPlayer.movement = true;     //Test case (Try to automate this later on)
         }
     }
     // All movement
     private void updateAllMovements(float delta){
         // Arraylist, use polymorphism call movements using for loop for all entities
         Vector2 targetVector;
-        if (playerMovement)
+        Vector2 testTargetVector;            //Test case (later on use polymorphism to call movement and loop for all entities)
+
+        if (playerMovement){
             targetVector = new Vector2(clickCoords.x,clickCoords.y);
-        else
+            testTargetVector = new Vector2(clickCoords.x,clickCoords.y);
+        }
+        else{
             targetVector = new Vector2(player.getPosition().x,player.getPosition().y);
-        player.updateMovement(targetVector,stateTime,delta);
+            testTargetVector = new Vector2(testPlayer.getPosition().x, testPlayer.getPosition().y);
+        }
+           
+        player.updateMovement(targetVector, stateTime, delta);
+        testPlayer.updateMovement(testTargetVector, stateTime, delta);
     }
 
     // Camera Roam
