@@ -1,4 +1,6 @@
-// TOBE AN ABSTRACT CLASS
+// TOBE AN ABSTRACT CLASS  (DONE)
+//Made another abstract method named Update()
+//This is because player movement updates in a different way while goblins updates in a different way
 
 package com.gdx.game;
 
@@ -57,6 +59,10 @@ abstract class DynamicSprite extends Sprite{
 
     // Get Postion
     abstract public Vector3 getPosition();
+
+    //Method which calls updateMovement and passes correct targetVector
+    //ALERT: I think this may cause issue later on when other subclasses are made so later make it a concrete which handles HeroPlayer by default and is overriden in the rest
+    abstract public void Update(Vector3 clickCoords, float stateTime, float delta);     //Made to handle updateMovement for different subclasses
 
     // Movement Method
     abstract public void updateMovement(Vector2 targetVector , float stateTime , float delta);
@@ -128,6 +134,20 @@ class HeroPlayer extends DynamicSprite{
             movement = false;
         }
         //No need for updating camera over here as its handled in cameraRoam otherwise it causes conflict between two
+
+    }
+
+    @Override
+    public void Update(Vector3 clickCoords, float stateTime, float delta){
+        Vector2 targetVector;
+
+        if (movement){
+            targetVector = new Vector2(clickCoords.x, clickCoords.y);
+        }
+        else{
+            targetVector = new Vector2(this.getPosition().x, this.getPosition().y);
+        }
+        this.updateMovement(targetVector, stateTime, delta);
 
     }
 }

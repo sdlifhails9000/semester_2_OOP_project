@@ -1,6 +1,13 @@
+//NOTES
+    //Make arraylists of all types so for playertypes whose movement attack, etc has same logic make an array list for that
+    //For goblins (Whose movement logic is obv different from player (they wont use LeftClick()) make a seperate array list and then update where necessary
+    //REASON why i removed updateAllMovement() was that each subclass will have its unique way of feeding value to whatever updateMovement it has defined
+    //So i thought to make that updateAllMovement an abstract method THOUGH if its uesless later on when we actually make other child classes.
+    //Then just make Update() in DynamicSprite a concrete method in whatever way you see fit.
+
 package com.gdx.game;
 
-//import java.util.ArrayList;
+import java.util.ArrayList;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -79,6 +86,9 @@ public class MainGame extends ApplicationAdapter {
     DynamicSprite player;
     DynamicSprite testPlayer;
 
+    //Declare array for DynamicSprites  (Right now for players later make seperate for goblins etc because their movement logic is different)
+    ArrayList<DynamicSprite> playerEntities;
+
     //Declaring animations (of type TextureRegions)
     Animation<TextureRegion> heroRunAnimation;
     Animation<TextureRegion> heroIdleAnimation;
@@ -124,18 +134,20 @@ public class MainGame extends ApplicationAdapter {
         player = new HeroPlayer(heroRunAnimation,heroIdleAnimation,stateTime,10,10,20);
         testPlayer = new HeroPlayer(heroRunAnimation, heroIdleAnimation, stateTime, 15, 15, 30);
 
-        
+        //Initialize the dynamicSprite array and add the players
+        playerEntities = new ArrayList<DynamicSprite>();
+        playerEntities.add(player);
+        playerEntities.add(testPlayer);
         //Set background and lizard size+position
         //background.setSize(worldWidth, worldHeight);      NO NEED ANYMORE
         //background.setPosition(0,0);
 
-        player.setSize(6,8);        //Game world units
-        player.setOriginCenter();
-        player.setCenter(player.getPosition().x, player.getPosition().y);            //Centre of world     (setPosition draws from bottom left setCentre draws from centre)
+        for(DynamicSprite e : playerEntities){
+            e.setSize(6,8);                     //With this we wont have to write these 3 lines for each dynamicSprite
+            e.setOriginCenter();
+            e.setCenter(e.getPosition().x, e.getPosition().y);
 
-        testPlayer.setSize(6,8);
-        testPlayer.setOriginCenter();
-        testPlayer.setCenter(testPlayer.getPosition().x, testPlayer.getPosition().y);
+        }
         //Initialize starting vector coords (sprite coords here its lizard)
 
         // Initialize Camera
@@ -167,8 +179,10 @@ public class MainGame extends ApplicationAdapter {
         float delta = Gdx.graphics.getDeltaTime();
         stateTime += delta;     //Update stateTime in render
         
-        leftClick();    // Check left click movement
-        updateAllMovements(delta);
+        leftClick(delta);    // Check left click movement
+
+        //updateAllMovements(delta);    //No need for this now it has been shifted to dynamicSprite
+
         cameraRoam(delta);  // Camera Free Roam
         updateHealthBar();  //Updates position and size of health bar
 
@@ -204,7 +218,7 @@ public class MainGame extends ApplicationAdapter {
 
         //Clear our map resources
         map.dispose();
-        mapRenderer.dispose();      //THIS DISPOSE ISNT NECESSARY BECAUSE OUR MAP IS HANDLED IN batch ABOVE but its a good practice
+        mapRenderer.dispose();  
     }
 
 
@@ -223,49 +237,52 @@ public class MainGame extends ApplicationAdapter {
         batch.begin();
 
         //Draw the sprites
-        //background.draw(batch);    //No need for this as now as you can see above we render in our own map
-        player.draw(batch);    // Draw player
-        testPlayer.draw(batch); //Draw testPlayer
         healthBarSprite.draw(batch);    //Draw HealthBar
+
+        //Draw all the dynamicSprites by for loop
+        for (DynamicSprite e : playerEntities){
+            e.draw(batch);
+        }
+        
 
         batch.end();
     }
     
     // Mouse Click Event
-    private void leftClick(){
+    private void leftClick(float delta){
         
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             // Vector is basically a class with 3 data members, includes methods for magnitude,normalization(unit vector)
             clickCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0 );
             camera.unproject(clickCoords);  // Converts screen coords to World coords
 
-            playerMovement = true;      //Movement occured
-
-            clickCoords.x = MathUtils.clamp(clickCoords.x, player.getWidth() / 2, worldWidth - player.getWidth() / 2);        //Doing correction because target is centered
-            clickCoords.y = MathUtils.clamp(clickCoords.y, player.getHeight() / 2,worldHeight - player.getHeight() / 2);      //Binding it to world width and height dimensions
-
-            player.movement = true;
-            testPlayer.movement = true;     //Test case (Try to automate this later on)
+            //We use for loop for playerEntities because bots i.e goblins etc will not get leftClick. Their movement call is seperate
+            for (DynamicSprite e: playerEntities){
+                e.movement = true;
+                clickCoords.x = MathUtils.clamp(clickCoords.x, e.getWidth() / 2, worldWidth - e.getWidth() / 2);        //Doing correction because target is centered
+                clickCoords.y = MathUtils.clamp(clickCoords.y, e.getHeight() / 2,worldHeight - e.getHeight() / 2);      //Binding it to world width and height dimensions
+                e.Update(clickCoords, stateTime, delta);
+            }
         }
     }
     // All movement
-    private void updateAllMovements(float delta){
-        // Arraylist, use polymorphism call movements using for loop for all entities
-        Vector2 targetVector;
-        Vector2 testTargetVector;            //Test case (later on use polymorphism to call movement and loop for all entities)
+    // private void updateAllMovements(float delta){
+    //     // Arraylist, use polymorphism call movements using for loop for all entities
+    //     Vector2 targetVector;
+    //     Vector2 testTargetVector;            //Test case (later on use polymorphism to call movement and loop for all entities)
 
-        if (playerMovement){
-            targetVector = new Vector2(clickCoords.x,clickCoords.y);
-            testTargetVector = new Vector2(clickCoords.x,clickCoords.y);
-        }
-        else{
-            targetVector = new Vector2(player.getPosition().x,player.getPosition().y);
-            testTargetVector = new Vector2(testPlayer.getPosition().x, testPlayer.getPosition().y);
-        }
+    //     if (playerMovement){
+    //         targetVector = new Vector2(clickCoords.x,clickCoords.y);
+    //         testTargetVector = new Vector2(clickCoords.x,clickCoords.y);
+    //     }
+    //     else{
+    //         targetVector = new Vector2(player.getPosition().x,player.getPosition().y);
+    //         testTargetVector = new Vector2(testPlayer.getPosition().x, testPlayer.getPosition().y);
+    //     }
            
-        player.updateMovement(targetVector, stateTime, delta);
-        testPlayer.updateMovement(testTargetVector, stateTime, delta);
-    }
+    //     player.updateMovement(targetVector, stateTime, delta);
+    //     testPlayer.updateMovement(testTargetVector, stateTime, delta);
+    // }
 
     // Camera Roam
     private void cameraRoam(float delta){
