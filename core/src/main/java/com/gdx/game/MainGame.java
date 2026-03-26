@@ -118,7 +118,7 @@ public class MainGame extends ApplicationAdapter {
         stateTime = 0f;
 
         //Initialize the player sprite who will handle animations aswell
-        player = new DynamicSprite(heroRunAnimation,heroIdleAnimation,stateTime);
+        player = new HeroPlayer(heroRunAnimation,heroIdleAnimation,stateTime,100,100,5);
 
         
         //Set background and lizard size+position
@@ -127,7 +127,7 @@ public class MainGame extends ApplicationAdapter {
 
         player.setSize(6,8);        //Game world units
         player.setOriginCenter();
-        player.setCenter(player.startX, player.startY);            //Centre of world     (setPosition draws from bottom left setCentre draws from centre)
+        player.setCenter(player.getPosition().x, player.getPosition().y);            //Centre of world     (setPosition draws from bottom left setCentre draws from centre)
 
         //Initialize starting vector coords (sprite coords here its lizard)
 
@@ -136,7 +136,7 @@ public class MainGame extends ApplicationAdapter {
         float width = Gdx.graphics.getWidth();
 
         camera = new OrthographicCamera(cameraWidth, cameraHeight * (height / width));        //Visible region (multiplied height by aspect ratio)
-        camera.position.set(player.startX, player.startY, 0);         //Same as lizard
+        camera.position.set(player.getPosition());         //Takes vector3 so pass in the whole method made in DynamicSprite class
         camera.update();
 
         //Initialize Viewport (for scaling and resizing)

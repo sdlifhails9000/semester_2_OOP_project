@@ -28,23 +28,23 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 // import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 // DynamicSprite is a subclass of Sprite with movement functonality
-class DynamicSprite extends Sprite{
+abstract class DynamicSprite extends Sprite{
 
     // Data members
     public boolean movement = false;
-    private float speed = 20f;  // -> Player Move Speed (based off above world size)
+    //protected float speed = 20f;  // -> Player Move Speed (based off above world size)
         // Declare Animation variables
-    private Animation<TextureRegion> runAnimation;
-    private Animation<TextureRegion> idleAnimation;
+    protected Animation<TextureRegion> runAnimation;
+    protected Animation<TextureRegion> idleAnimation;
 
         // Move this to Player Subclass, this is respawn position HARDCODED
     //Use them to define starting position for camera and sprite
     // Make getters?
-    public int startX = 10;
-    public int startY = 10;
+    // public int startX = 10;
+    // public int startY = 10;
 
-    private Vector2 destVector;
-    private Vector2 currentXY = new Vector2(startX, startY);     //Starting points (game World Coords not screen coords)
+    protected Vector2 destVector;
+    // protected Vector2 currentXY = new Vector2(startX, startY);     //Starting points (game World Coords not screen coords)
 
 
     // Creates the Sprite(Parent Class)
@@ -56,13 +56,33 @@ class DynamicSprite extends Sprite{
 
 
     // Get Postion
+    abstract public Vector3 getPosition();
+
+    // Movement Method
+    abstract public void updateMovement(Vector2 targetVector , float stateTime , float delta);
+}
+//Child class number 1
+
+class HeroPlayer extends DynamicSprite{
+    //Data Members
+    int startX;
+    int startY;
+    float speed;
+    Vector2 currentXY;
+
+    HeroPlayer(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation, float stateTime, int startX, int startY, float speed){
+        super(runAnimation, idleAnimation, stateTime);
+        this.startX = startX;
+        this.startY = startY;
+        this.speed = speed;
+        this.currentXY = new Vector2(this.startX, this.startY);
+    }
+    @Override
     public Vector3 getPosition(){
         return new Vector3(currentXY,0);
     }
-
-    // Movement Method
-    public void updateMovement(Vector2 targetVector , float stateTime , float delta){
-    
+    @Override
+    public void updateMovement(Vector2 targetVector, float stateTime , float delta){
         //For angle calculation to rotate sprite
         float angle;
 
@@ -108,7 +128,6 @@ class DynamicSprite extends Sprite{
             movement = false;
         }
         //No need for updating camera over here as its handled in cameraRoam otherwise it causes conflict between two
-
 
     }
 }
