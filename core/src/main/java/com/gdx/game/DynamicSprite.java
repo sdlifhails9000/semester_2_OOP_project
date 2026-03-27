@@ -30,40 +30,72 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 // import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 // DynamicSprite is a subclass of Sprite with movement functonality
-abstract class DynamicSprite extends Sprite{
+abstract class DynamicSprite extends Sprite {
+    // This will be the state that everything DynamicSprite is in
+    enum State {
+        IDLE,
+        MOVING,
+        ATTACK,
+        EMOTE
+    }
 
     // Data members
-    //protected float speed = 20f;  // -> Player Move Speed (based off above world size)
-        // Declare Animation variables
+    protected float speed = 20f;  // -> Player Move Speed (based off above world size)
+
+    // Declare Animation variables
     protected Animation<TextureRegion> runAnimation;
     protected Animation<TextureRegion> idleAnimation;
 
-        // Move this to Player Subclass, this is respawn position HARDCODED
+    // Currently used animation
+    protected Animation<TextureRegion> currentAnimation;
+
+    // Move this to Player Subclass, this is respawn position HARDCODED
     //Use them to define starting position for camera and sprite
     // Make getters?
-    // public int startX = 10;      COMMENTED OUT BECAUSE MADE A CHILD CLASS
-    // public int startY = 10;
+    // public int startX;      // COMMENTED OUT BECAUSE MADE A CHILD CLASS
+    // public int startY;
 
     protected Vector2 destVector;
-    protected Vector2 targetVector;     //Every subclass will define its own target in Update() method
-    // protected Vector2 currentXY = new Vector2(startX, startY);     //Starting points (game World Coords not screen coords)  //IN CHILD CLASS NOW
+    protected Vector2 moveTargetVector;     //Every subclass will define its own target in Update() method
+    protected Vector2 attackTargetVector;
+    protected Vector2 currentXY;     //Starting points (game World Coords not screen coords)  //IN CHILD CLASS NOW
 
+    State state;
 
     // Creates the Sprite(Parent Class)
-    DynamicSprite(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation , float stateTime) {
+    DynamicSprite(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation , float stateTime, int startX, int startY, float speed) {
         super(idleAnimation.getKeyFrame(stateTime));
         this.idleAnimation = idleAnimation;
         this.runAnimation = runAnimation;
+        // Add attack and death animation later
+
+        this.speed = speed;
+        this.currentXY = new Vector2(startX, startY);
+
+        state = State.IDLE;
+        currentAnimation = idleAnimation;
     }
 
     //Concrete methods (Getter and setter)
-    public void setTarget(Vector2 clickCoords){
-        this.targetVector = new Vector2(clickCoords);
+
+    // Only used when you click left click
+    public void setMoveTarget(Vector2 clickCoords){
+        this.moveTargetVector = new Vector2(clickCoords);
     }
 
-    public Vector2 getTarget(){
-        return targetVector;
+    public Vector2 getMoveTarget(){
+        return moveTargetVector;
     }
+
+    // Only set when you click right click. Only set it if the position is near an enemy
+    public void setAttackTarget(Vector2 clickCoords){
+        this.attackTargetVector = new Vector2(clickCoords);
+    }
+
+    public Vector2 getAttackTarget(){
+        return attackTargetVector;
+    }
+
     // Get Postion
     abstract public Vector2 getPosition();
 
@@ -72,40 +104,11 @@ abstract class DynamicSprite extends Sprite{
     //abstract public void Update(Vector3 clickCoords, float stateTime, float delta);     //Made to handle updateMovement for different subclasses
 
     // Movement Method
-    abstract public void updateMovement(Vector2 targetVector , float stateTime , float delta);
-}
-//Child class number 1
-
-class HeroPlayer extends DynamicSprite{
-    //Data Members
-    int startX;
-    int startY;
-    float speed;
-    Vector2 currentXY;
-
-    HeroPlayer(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation, float stateTime, int startX, int startY, float speed){
-        super(runAnimation, idleAnimation, stateTime);
-        this.startX = startX;
-        this.startY = startY;
-        this.speed = speed;
-        this.currentXY = new Vector2(this.startX, this.startY);
-    }
-    @Override
-    public Vector2 getPosition(){
-        return new Vector2(currentXY);
-    }
-    @Override
     public void updateMovement(Vector2 targetVector, float stateTime , float delta){
         //For angle calculation to rotate sprite
         float angle;
-
-        if (targetVector == null){      //Signifies no mouseclick yet
-            this.setRegion(idleAnimation.getKeyFrame(stateTime));
-            return;
-         }
-        else{
-            this.setRegion(runAnimation.getKeyFrame(stateTime));
-        }
+    
+        setRegion(runAnimation.getKeyFrame(stateTime));
 
         destVector = new Vector2();
         destVector.set(targetVector).sub(currentXY);        //Calculate the destination vector
@@ -135,13 +138,72 @@ class HeroPlayer extends DynamicSprite{
 
             // Change current coordiantes
             currentXY.add(destVector);      //Updates the current vector co-ordiantes
+            // Add clamping later
             this.setCenter(currentXY.x, currentXY.y);     //Update player position
-        }
-        else{
-            targetVector = null;
+        } else {
+            moveTargetVector = null;
         }
         //No need for updating camera over here as its handled in cameraRoam otherwise it causes conflict between two
 
+    }
+
+    public void updateIdleAnimation(float stateTime) {
+        setRegion(idleAnimation.getKeyFrame(stateTime));
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    abstract public void Update(State state, float stateTime, float delta);
+
+}
+//Child class number 1
+
+class HeroPlayer extends DynamicSprite{
+    // Later
+    // enum Class {
+    //     HEAVY,
+    //     LIGHT,
+    // }
+    // final float HEAVY_SPEED, LIGHT_SPEED
+
+    HeroPlayer(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation, float stateTime, int startX, int startY, float speed) {
+        super(runAnimation, idleAnimation, stateTime, startX, startY, speed);
+    }
+
+    @Override
+    public Vector2 getPosition(){
+        return new Vector2(currentXY);
+    }
+
+
+    @Override
+    public void Update(State state, float stateTime, float delta) {
+        switch (state) {
+        case MOVING:
+            updateMovement(getMoveTarget(), stateTime, delta);
+            break;
+
+        case IDLE:
+            updateIdleAnimation(stateTime);
+            break;
+
+        // case ATTACK:
+        //     updateMovement();
+
+        //     /*
+        //     if (near an enemy) {
+        //         updateAttack;
+        //     } else {
+        //         updateMovement;
+        //     }
+        //     */
+
+        default:
+            System.out.println("NOT HANDLED YET");
+            break;
+        }
     }
 
     // @Override
