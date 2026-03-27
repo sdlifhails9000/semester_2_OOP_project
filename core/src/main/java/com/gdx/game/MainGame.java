@@ -7,6 +7,7 @@
 
 package com.gdx.game;
 
+import java.time.DayOfWeek;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -34,6 +35,7 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 // ALERT: Main character is lizard temporarily
 // ALERT: Change Coordinate system to pure vectors??
+
 
 public class MainGame extends ApplicationAdapter {
     //-----MAP WORK DECLARATION START----
@@ -139,6 +141,7 @@ public class MainGame extends ApplicationAdapter {
         playerEntities = new ArrayList<DynamicSprite>();
         playerEntities.add(player);
         playerEntities.add(testPlayer);
+
         //Set background and lizard size+position
         //background.setSize(worldWidth, worldHeight);      NO NEED ANYMORE
         //background.setPosition(0,0);
@@ -147,7 +150,6 @@ public class MainGame extends ApplicationAdapter {
             e.setSize(6,8);                     //With this we wont have to write these 3 lines for each dynamicSprite
             e.setOriginCenter();
             e.setCenter(e.getPosition().x, e.getPosition().y);
-
         }
         //Initialize starting vector coords (sprite coords here its lizard)
 
@@ -168,8 +170,6 @@ public class MainGame extends ApplicationAdapter {
         //Initialize the tiledMap
         map = mapLoader.load("practiceMap\\MainMap.tmx");
 
-        
-
         //Initialize the mapRenderer (this is the main working unit here which scales the tiledMap with our current game units)
         mapRenderer = new OrthogonalTiledMapRenderer(map, scale);       //We can pass our own spritebatch for optimization but will have to change some internal methods so jst let it use its own spritebatch for map
     }
@@ -180,7 +180,7 @@ public class MainGame extends ApplicationAdapter {
         float delta = Gdx.graphics.getDeltaTime();
         stateTime += delta;     //Update stateTime in render
         
-        leftClick(delta);    // Check left click movement
+        clickEvent(delta);    // Check left click movement
 
         //updateAllMovements(delta);    //No need for this now it has been shifted to dynamicSprite
 
@@ -249,11 +249,13 @@ public class MainGame extends ApplicationAdapter {
         batch.end();
     }
     
+    // Implement later for handling keyboard events
+    private void keyEvent(float delta) {
+
+    }
+    
     // Mouse Click Event
-    private void leftClick(float delta){        //A method specifically for our player
-        for (DynamicSprite e : playerEntities){
-            e.updateMovement(e.getTarget(), stateTime, delta);
-        }
+    private void clickEvent(float delta){        //A method specifically for our player
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             // Vector is basically a class with 3 data members, includes methods for magnitude,normalization(unit vector)
             clickCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0 );
@@ -264,9 +266,17 @@ public class MainGame extends ApplicationAdapter {
 
             //We use for loop for playerEntities because bots i.e goblins etc will not get leftClick. Their movement call is seperate
             for (DynamicSprite e: playerEntities){
-                clickCoords.x = MathUtils.clamp(clickCoords.x, e.getWidth() / 2, worldWidth - e.getWidth() / 2);        //Doing correction because target is centered
-                clickCoords.y = MathUtils.clamp(clickCoords.y, e.getHeight() / 2,worldHeight - e.getHeight() / 2);      //Binding it to world width and height dimensions
-                e.setTarget(clickCoords2D);     //Using the small fix for edge case above
+                clickCoords2D.x = MathUtils.clamp(clickCoords2D.x, e.getWidth() / 2, worldWidth - e.getWidth() / 2);        //Doing correction because target is centered
+                clickCoords2D.y = MathUtils.clamp(clickCoords2D.y, e.getHeight() / 2,worldHeight - e.getHeight() / 2);      //Binding it to world width and height dimensions
+                e.setMoveTarget(clickCoords2D);     //Using the small fix for edge case above
+            }
+        }
+
+        for (DynamicSprite e : playerEntities) {
+            if (e.getMoveTarget() == null) {
+                e.Update(DynamicSprite.State.IDLE, stateTime, delta);
+            } else {
+                e.Update(DynamicSprite.State.MOVING, stateTime, delta);
             }
         }
     }
