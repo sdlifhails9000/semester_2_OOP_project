@@ -86,11 +86,11 @@ public class MainGame extends ApplicationAdapter {
     TextureAtlas heroAtlas;
 
     //DynamicSprites (self defined)
-    DynamicSprite player;
-    DynamicSprite testPlayer;
+    DynamicEntity player;
+    DynamicEntity testEnemy;
 
     //Declare array for DynamicSprites  (Right now for players later make seperate for goblins etc because their movement logic is different)
-    ArrayList<DynamicSprite> playerEntities;
+    ArrayList<DynamicEntity> playerEntities;
 
     //Declaring animations (of type TextureRegions)
     Animation<TextureRegion> heroRunAnimation;
@@ -134,19 +134,24 @@ public class MainGame extends ApplicationAdapter {
         stateTime = 0f;
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(heroRunAnimation ,heroIdleAnimation, heroIdleAnimation, stateTime,10,10,20);     //Replace 3 animation with attack FUTURE YOU
-        testPlayer = new HeroPlayer(heroRunAnimation, heroIdleAnimation, heroIdleAnimation, stateTime, 15, 15, 30);
+        player = new HeroPlayer(heroRunAnimation ,heroIdleAnimation, heroRunAnimation, stateTime,
+            10,10,20, 100, 30, 5);     //Replace 3 animation with attack FUTURE YOU
+        testEnemy = new HeroPlayer(heroRunAnimation, heroIdleAnimation, heroRunAnimation, stateTime,
+            15, 15, 30, 100, 30, 5);
+
+        player.attackTarget = testEnemy;
+        testEnemy.attackTarget = player;
 
         //Initialize the dynamicSprite array and add the players
-        playerEntities = new ArrayList<DynamicSprite>();
+        playerEntities = new ArrayList<DynamicEntity>();
         playerEntities.add(player);
-        playerEntities.add(testPlayer);
+        playerEntities.add(testEnemy);
 
         //Set background and lizard size+position
         //background.setSize(worldWidth, worldHeight);      NO NEED ANYMORE
         //background.setPosition(0,0);
 
-        for(DynamicSprite e : playerEntities){
+        for(DynamicEntity e : playerEntities){
             e.setSize(6,8);                     //With this we wont have to write these 3 lines for each dynamicSprite
             e.setOriginCenter();
             e.setCenter(e.getPosition().x, e.getPosition().y);
@@ -182,7 +187,7 @@ public class MainGame extends ApplicationAdapter {
         
         clickEvent(delta);    // Check left click movement
 
-        for (DynamicSprite e : playerEntities) {
+        for (DynamicEntity e : playerEntities) {
             e.Update(stateTime, delta);
         }
 
@@ -243,10 +248,9 @@ public class MainGame extends ApplicationAdapter {
         healthBarSprite.draw(batch);    //Draw HealthBar
 
         //Draw all the dynamicSprites by for loop
-        for (DynamicSprite e : playerEntities){
+        for (DynamicEntity e : playerEntities){
             e.draw(batch);
         }
-        
 
         batch.end();
     }
@@ -263,15 +267,14 @@ public class MainGame extends ApplicationAdapter {
             clickCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0 );
             camera.unproject(clickCoords);  // Converts screen coords to World coords
             
+            
             //NOTE: Handling an edge case, because camera is only place which needs Vector3
             Vector2 clickCoords2D = new Vector2(clickCoords.x, clickCoords.y);     //We do this because clickCoords is only place where we need a 3d Vector. Everywhere else a 2d
 
             //We use for loop for playerEntities because bots i.e goblins etc will not get leftClick. Their movement call is seperate
-            for (DynamicSprite e: playerEntities){
-                clickCoords2D.x = MathUtils.clamp(clickCoords2D.x, e.getWidth() / 2, worldWidth - e.getWidth() / 2);        //Doing correction because target is centered
-                clickCoords2D.y = MathUtils.clamp(clickCoords2D.y, e.getHeight() / 2,worldHeight - e.getHeight() / 2);      //Binding it to world width and height dimensions
-                e.setMove(clickCoords2D);     //Using the small fix for edge case above
-            }
+            clickCoords2D.x = MathUtils.clamp(clickCoords2D.x, player.getWidth() / 2, worldWidth - player.getWidth() / 2);        //Doing correction because target is centered
+            clickCoords2D.y = MathUtils.clamp(clickCoords2D.y, player.getHeight() / 2,worldHeight - player.getHeight() / 2);      //Binding it to world width and height dimensions
+            player.setMove(clickCoords2D);     //Using the small fix for edge case above
         }
     }
     // All movement

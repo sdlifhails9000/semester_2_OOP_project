@@ -14,7 +14,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 //import com.badlogic.gdx.graphics.Texture;
 // import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+
 //import com.badlogic.gdx.math.Vector3;
 // import com.badlogic.gdx.graphics.OrthographicCamera;
 // import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -23,19 +25,20 @@ import com.badlogic.gdx.graphics.g2d.Animation;           //Animation imports ar
 import com.badlogic.gdx.graphics.g2d.Sprite;
 // import com.badlogic.gdx.utils.viewport.*;       //Gets all viewport types (FixViewport, StrectViewport, ExtendViewport, etc)
 
+
 //Tiled Map Loaders
 // import com.badlogic.gdx.maps.tiled.TiledMap;
 // import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 // import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 // DynamicSprite is a subclass of Sprite with movement functonality
-abstract class DynamicSprite extends Sprite {
+abstract class DynamicEntity extends Entity {
     // This will be the state that everything DynamicSprite is in
     enum State {
         IDLE,
         MOVING,
         ATTACK,
-        DEAD;
+        DEAD,
     }
 
     // Data members
@@ -43,7 +46,6 @@ abstract class DynamicSprite extends Sprite {
 
     //Declare Animation Variables
     protected Animation<TextureRegion> runAnimation;
-    protected Animation<TextureRegion> idleAnimation;
     protected Animation<TextureRegion> attackAnimation;
 
     // Currently used animation
@@ -57,16 +59,19 @@ abstract class DynamicSprite extends Sprite {
 
     protected Vector2 destVector;
     protected Vector2 moveTargetVector;     //Every subclass will define its own target in Update() method
-    protected Vector2 attackTargetVector;
-    protected Vector2 currentXY;     //Starting points (game World Coords not screen coords)  //IN CHILD CLASS NOW
+
 
     State state;
 
-    DynamicSprite attackTarget;     //Stores entity to attack
+    DynamicEntity attackTarget;     //Stores entity to attack
+
+    float health;
 
     // Creates the Sprite(Parent Class)
-    DynamicSprite(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation , Animation<TextureRegion> attackAnimation, float stateTime, int startX, int startY, float speed) {
-        super(idleAnimation.getKeyFrame(stateTime));    //Sacred line no touchy
+    // TODO Pass the animations as a list and the other stuff as a list
+    DynamicEntity(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation , Animation<TextureRegion> attackAnimation,
+                  float stateTime, int startX, int startY, float speed, float maxHealth, float damageStrength, float attackRange) {
+        super(idleAnimation, stateTime, maxHealth, damageStrength, attackRange);
         this.idleAnimation = idleAnimation;
         this.runAnimation = runAnimation;
         this.attackAnimation = attackAnimation;
@@ -85,7 +90,6 @@ abstract class DynamicSprite extends Sprite {
     // Only used when you click left click
     public void setMove(Vector2 clickCoords){
         this.moveTargetVector = new Vector2(clickCoords);
-        currentAnimation = runAnimation;
     }
 
     public Vector2 getMove(){
@@ -93,15 +97,22 @@ abstract class DynamicSprite extends Sprite {
     }
 
     // Only set when you click right click. Only set it if the position is near an enemy
-    public void setAttack(DynamicSprite entity){
+    public void setAttackInfo(DynamicEntity entity){
         attackTarget = entity;
-        state = State.ATTACK;
-        currentAnimation = attackAnimation;
-
     }
 
-    public Vector2 getAttack(){
-        return attackTargetVector;
+    public DynamicEntity getAttackInfo() {
+        return attackTarget;
+    }
+
+    public boolean isCloseToEnemy() {
+        Rectangle enemyBounds = attackTarget.getBoundingRectangle();
+        Vector2 center = new Vector2();
+        enemyBounds.getCenter(center);
+
+        boolean isClose = center.dst(currentXY) <= attackRange;
+
+        return isClose;
     }
 
     // Get Postion
@@ -110,6 +121,7 @@ abstract class DynamicSprite extends Sprite {
     //Method which calls updateMovement and passes correct targetVector
     //ALERT: I think this may cause issue later on when other subclasses are made so later make it a concrete which handles HeroPlayer by default and is overriden in the rest
     //abstract public void Update(Vector3 clickCoords, float stateTime, float delta);     //Made to handle updateMovement for different subclasses
+
 
     // Movement Method
     public void updateMovement(Vector2 targetVector, float stateTime , float delta){
@@ -147,23 +159,18 @@ abstract class DynamicSprite extends Sprite {
             // Add clamping later
             this.setCenter(currentXY.x, currentXY.y);     //Update player position
         } 
-        else {
+        else if (isCloseToEnemy() || destVector.len() <= 0.5) {
             moveTargetVector = null;
         }
         //No need for updating camera over here as its handled in cameraRoam otherwise it causes conflict between two
 
     }
 
-    public void updateIdleAnimation(float stateTime) {
-        setRegion(idleAnimation.getKeyFrame(stateTime));
-    }
-
-    abstract public void Update(float stateTime, float delta);
 
 }
 //Child class number 1
 
-class HeroPlayer extends DynamicSprite{
+class HeroPlayer extends DynamicEntity{
     // Later
     // enum Class {
     //     HEAVY,
@@ -171,8 +178,12 @@ class HeroPlayer extends DynamicSprite{
     // }
     // final float HEAVY_SPEED, LIGHT_SPEED
 
-    HeroPlayer(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation, Animation<TextureRegion> attackAnimation, float stateTime, int startX, int startY, float speed) {
-        super(runAnimation, idleAnimation, attackAnimation, stateTime, startX, startY, speed);
+    HeroPlayer(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation, Animation<TextureRegion> attackAnimation,
+               float stateTime, int startX, int startY, float speed,
+               float maxHealth, float damageStrength, float attackRange) {
+        super(runAnimation, idleAnimation, attackAnimation, stateTime, startX, startY, speed,
+              maxHealth, damageStrength, attackRange);
+        attackRange = 50f;
     }
 
     @Override
@@ -189,6 +200,10 @@ class HeroPlayer extends DynamicSprite{
             state = State.MOVING;
             currentAnimation = runAnimation;
         }
+        else if (isCloseToEnemy()) {
+            state = State.ATTACK;
+            currentAnimation = attackAnimation;
+        }
         else if (moveTargetVector == null){
             state = State.IDLE;    
             currentAnimation = idleAnimation;
@@ -196,28 +211,21 @@ class HeroPlayer extends DynamicSprite{
         //Modify the else if above to check for range and reuse updateMovement
 
         switch(state){
-            case MOVING:
-                updateMovement(getMove(), stateTime, delta);
-                break;
+        case MOVING:
+            updateMovement(getMove(), stateTime, delta);
+            break;
 
-            case IDLE:
-                updateIdleAnimation(stateTime);
-                break;
+        case IDLE:
+            // Do absolutely nothing...
+            break;
 
-            // case ATTACK:
-            //     updateMovement();
+        case ATTACK:
+            updateAttack(attackTarget, delta);
+            break;
 
-            //     /*
-            //     if (near an enemy) {
-            //         updateAttack;
-            //     } else {
-            //         updateMovement;
-            //     }
-            //     */
-
-            default:
-                System.out.println("NOT HANDLED YET");
-                break;
+        default:
+            System.out.println("NOT HANDLED YET");
+            break;
         }   
     }
 
