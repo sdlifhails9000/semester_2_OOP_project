@@ -134,8 +134,8 @@ public class MainGame extends ApplicationAdapter {
         stateTime = 0f;
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(heroRunAnimation,heroIdleAnimation,stateTime,10,10,20);
-        testPlayer = new HeroPlayer(heroRunAnimation, heroIdleAnimation, stateTime, 15, 15, 30);
+        player = new HeroPlayer(heroRunAnimation ,heroIdleAnimation, heroIdleAnimation, stateTime,10,10,20);     //Replace 3 animation with attack FUTURE YOU
+        testPlayer = new HeroPlayer(heroRunAnimation, heroIdleAnimation, heroIdleAnimation, stateTime, 15, 15, 30);
 
         //Initialize the dynamicSprite array and add the players
         playerEntities = new ArrayList<DynamicSprite>();
@@ -182,7 +182,9 @@ public class MainGame extends ApplicationAdapter {
         
         clickEvent(delta);    // Check left click movement
 
-        //updateAllMovements(delta);    //No need for this now it has been shifted to dynamicSprite
+        for (DynamicSprite e : playerEntities) {
+            e.Update(stateTime, delta);
+        }
 
         cameraRoam(delta);  // Camera Free Roam
         updateHealthBar();  //Updates position and size of health bar
@@ -268,15 +270,7 @@ public class MainGame extends ApplicationAdapter {
             for (DynamicSprite e: playerEntities){
                 clickCoords2D.x = MathUtils.clamp(clickCoords2D.x, e.getWidth() / 2, worldWidth - e.getWidth() / 2);        //Doing correction because target is centered
                 clickCoords2D.y = MathUtils.clamp(clickCoords2D.y, e.getHeight() / 2,worldHeight - e.getHeight() / 2);      //Binding it to world width and height dimensions
-                e.setMoveTarget(clickCoords2D);     //Using the small fix for edge case above
-            }
-        }
-
-        for (DynamicSprite e : playerEntities) {
-            if (e.getMoveTarget() == null) {
-                e.Update(DynamicSprite.State.IDLE, stateTime, delta);
-            } else {
-                e.Update(DynamicSprite.State.MOVING, stateTime, delta);
+                e.setMove(clickCoords2D);     //Using the small fix for edge case above
             }
         }
     }

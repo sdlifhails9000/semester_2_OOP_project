@@ -1,6 +1,5 @@
-// TOBE AN ABSTRACT CLASS  (DONE)
-//Made another abstract method named Update()
-//This is because player movement updates in a different way while goblins updates in a different way
+//TODO:
+//Add Attack range when constructing DynamicSprite and rewrite updateMovement to be resued in the updateAttack accordingly 
 
 package com.gdx.game;
 
@@ -36,15 +35,16 @@ abstract class DynamicSprite extends Sprite {
         IDLE,
         MOVING,
         ATTACK,
-        EMOTE
+        DEAD;
     }
 
     // Data members
     protected float speed = 20f;  // -> Player Move Speed (based off above world size)
 
-    // Declare Animation variables
+    //Declare Animation Variables
     protected Animation<TextureRegion> runAnimation;
     protected Animation<TextureRegion> idleAnimation;
+    protected Animation<TextureRegion> attackAnimation;
 
     // Currently used animation
     protected Animation<TextureRegion> currentAnimation;
@@ -62,11 +62,15 @@ abstract class DynamicSprite extends Sprite {
 
     State state;
 
+    DynamicSprite attackTarget;     //Stores entity to attack
+
     // Creates the Sprite(Parent Class)
-    DynamicSprite(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation , float stateTime, int startX, int startY, float speed) {
-        super(idleAnimation.getKeyFrame(stateTime));
+    DynamicSprite(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation , Animation<TextureRegion> attackAnimation, float stateTime, int startX, int startY, float speed) {
+        super(idleAnimation.getKeyFrame(stateTime));    //Sacred line no touchy
         this.idleAnimation = idleAnimation;
         this.runAnimation = runAnimation;
+        this.attackAnimation = attackAnimation;
+        
         // Add attack and death animation later
 
         this.speed = speed;
@@ -79,20 +83,24 @@ abstract class DynamicSprite extends Sprite {
     //Concrete methods (Getter and setter)
 
     // Only used when you click left click
-    public void setMoveTarget(Vector2 clickCoords){
+    public void setMove(Vector2 clickCoords){
         this.moveTargetVector = new Vector2(clickCoords);
+        currentAnimation = runAnimation;
     }
 
-    public Vector2 getMoveTarget(){
+    public Vector2 getMove(){
         return moveTargetVector;
     }
 
     // Only set when you click right click. Only set it if the position is near an enemy
-    public void setAttackTarget(Vector2 clickCoords){
-        this.attackTargetVector = new Vector2(clickCoords);
+    public void setAttack(DynamicSprite entity){
+        attackTarget = entity;
+        state = State.ATTACK;
+        currentAnimation = attackAnimation;
+
     }
 
-    public Vector2 getAttackTarget(){
+    public Vector2 getAttack(){
         return attackTargetVector;
     }
 
@@ -108,8 +116,6 @@ abstract class DynamicSprite extends Sprite {
         //For angle calculation to rotate sprite
         float angle;
     
-        setRegion(runAnimation.getKeyFrame(stateTime));
-
         destVector = new Vector2();
         destVector.set(targetVector).sub(currentXY);        //Calculate the destination vector
 
@@ -133,14 +139,15 @@ abstract class DynamicSprite extends Sprite {
 
         //-----ROTATION CALCULATION END-----
 
-        if (destVector.len() > 0.5) {         //Previously it was 5 (from saad) which was too big for my gameWorld Coords so adjusted it
+        if (destVector.len() > 0.5) {         //ALERT: Add a check for bounding box aswell so if we click in open area it goes there using 0.5 otherwise by bounding box calculations
             destVector.nor().scl(delta*speed);    // Normalize then multiply(scale) by speed and delta time
 
             // Change current coordiantes
             currentXY.add(destVector);      //Updates the current vector co-ordiantes
             // Add clamping later
             this.setCenter(currentXY.x, currentXY.y);     //Update player position
-        } else {
+        } 
+        else {
             moveTargetVector = null;
         }
         //No need for updating camera over here as its handled in cameraRoam otherwise it causes conflict between two
@@ -151,11 +158,7 @@ abstract class DynamicSprite extends Sprite {
         setRegion(idleAnimation.getKeyFrame(stateTime));
     }
 
-    public void setState(State state) {
-        this.state = state;
-    }
-
-    abstract public void Update(State state, float stateTime, float delta);
+    abstract public void Update(float stateTime, float delta);
 
 }
 //Child class number 1
@@ -168,8 +171,8 @@ class HeroPlayer extends DynamicSprite{
     // }
     // final float HEAVY_SPEED, LIGHT_SPEED
 
-    HeroPlayer(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation, float stateTime, int startX, int startY, float speed) {
-        super(runAnimation, idleAnimation, stateTime, startX, startY, speed);
+    HeroPlayer(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation, Animation<TextureRegion> attackAnimation, float stateTime, int startX, int startY, float speed) {
+        super(runAnimation, idleAnimation, attackAnimation, stateTime, startX, startY, speed);
     }
 
     @Override
@@ -179,31 +182,43 @@ class HeroPlayer extends DynamicSprite{
 
 
     @Override
-    public void Update(State state, float stateTime, float delta) {
-        switch (state) {
-        case MOVING:
-            updateMovement(getMoveTarget(), stateTime, delta);
-            break;
+    public void Update(float stateTime, float delta) {
+        this.setRegion(currentAnimation.getKeyFrame(stateTime));    //Updates current Animation or you get slender man running
 
-        case IDLE:
-            updateIdleAnimation(stateTime);
-            break;
-
-        // case ATTACK:
-        //     updateMovement();
-
-        //     /*
-        //     if (near an enemy) {
-        //         updateAttack;
-        //     } else {
-        //         updateMovement;
-        //     }
-        //     */
-
-        default:
-            System.out.println("NOT HANDLED YET");
-            break;
+        if (moveTargetVector != null)  {
+            state = State.MOVING;
+            currentAnimation = runAnimation;
         }
+        else if (moveTargetVector == null){
+            state = State.IDLE;    
+            currentAnimation = idleAnimation;
+        }
+        //Modify the else if above to check for range and reuse updateMovement
+
+        switch(state){
+            case MOVING:
+                updateMovement(getMove(), stateTime, delta);
+                break;
+
+            case IDLE:
+                updateIdleAnimation(stateTime);
+                break;
+
+            // case ATTACK:
+            //     updateMovement();
+
+            //     /*
+            //     if (near an enemy) {
+            //         updateAttack;
+            //     } else {
+            //         updateMovement;
+            //     }
+            //     */
+
+            default:
+                System.out.println("NOT HANDLED YET");
+                break;
+        }   
     }
 
     // @Override
