@@ -16,7 +16,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 // import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
+//import com.badlogic.gdx.math.Vector3;
 // import com.badlogic.gdx.graphics.OrthographicCamera;
 // import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.Animation;           //Animation imports are these two
@@ -33,7 +33,6 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 abstract class DynamicSprite extends Sprite{
 
     // Data members
-    public boolean movement = false;
     //protected float speed = 20f;  // -> Player Move Speed (based off above world size)
         // Declare Animation variables
     protected Animation<TextureRegion> runAnimation;
@@ -46,6 +45,7 @@ abstract class DynamicSprite extends Sprite{
     // public int startY = 10;
 
     protected Vector2 destVector;
+    protected Vector2 targetVector;     //Every subclass will define its own target in Update() method
     // protected Vector2 currentXY = new Vector2(startX, startY);     //Starting points (game World Coords not screen coords)  //IN CHILD CLASS NOW
 
 
@@ -56,13 +56,20 @@ abstract class DynamicSprite extends Sprite{
         this.runAnimation = runAnimation;
     }
 
+    //Concrete methods (Getter and setter)
+    public void setTarget(Vector2 clickCoords){
+        this.targetVector = new Vector2(clickCoords);
+    }
 
+    public Vector2 getTarget(){
+        return targetVector;
+    }
     // Get Postion
-    abstract public Vector3 getPosition();
+    abstract public Vector2 getPosition();
 
     //Method which calls updateMovement and passes correct targetVector
     //ALERT: I think this may cause issue later on when other subclasses are made so later make it a concrete which handles HeroPlayer by default and is overriden in the rest
-    abstract public void Update(Vector3 clickCoords, float stateTime, float delta);     //Made to handle updateMovement for different subclasses
+    //abstract public void Update(Vector3 clickCoords, float stateTime, float delta);     //Made to handle updateMovement for different subclasses
 
     // Movement Method
     abstract public void updateMovement(Vector2 targetVector , float stateTime , float delta);
@@ -84,15 +91,15 @@ class HeroPlayer extends DynamicSprite{
         this.currentXY = new Vector2(this.startX, this.startY);
     }
     @Override
-    public Vector3 getPosition(){
-        return new Vector3(currentXY,0);
+    public Vector2 getPosition(){
+        return new Vector2(currentXY);
     }
     @Override
     public void updateMovement(Vector2 targetVector, float stateTime , float delta){
         //For angle calculation to rotate sprite
         float angle;
 
-        if (!movement){      //Signifies no mouseclick yet
+        if (targetVector == null){      //Signifies no mouseclick yet
             this.setRegion(idleAnimation.getKeyFrame(stateTime));
             return;
          }
@@ -101,7 +108,7 @@ class HeroPlayer extends DynamicSprite{
         }
 
         destVector = new Vector2();
-        destVector.set(targetVector).sub(currentXY);
+        destVector.set(targetVector).sub(currentXY);        //Calculate the destination vector
 
         //-----ROTATION CALCULATION START-----
         //Sort of skews off at endpoint likeeee just test and see (Works perfectly for bottom edge but skewed for the other 3)
@@ -131,23 +138,19 @@ class HeroPlayer extends DynamicSprite{
             this.setCenter(currentXY.x, currentXY.y);     //Update player position
         }
         else{
-            movement = false;
+            targetVector = null;
         }
         //No need for updating camera over here as its handled in cameraRoam otherwise it causes conflict between two
 
     }
 
-    @Override
-    public void Update(Vector3 clickCoords, float stateTime, float delta){
-        Vector2 targetVector;
+    // @Override
+    // public void Update(Vector3 clickCoords, float stateTime, float delta){
 
-        if (movement){
-            targetVector = new Vector2(clickCoords.x, clickCoords.y);
-        }
-        else{
-            targetVector = new Vector2(this.getPosition().x, this.getPosition().y);
-        }
-        this.updateMovement(targetVector, stateTime, delta);
+    //     if (clickCoords != null){
+    //         targetVector = new Vector2(clickCoords.x, clickCoords.y);
+    //     }
+    //     this.updateMovement(targetVector, stateTime, delta);
 
-    }
+    // }
 }

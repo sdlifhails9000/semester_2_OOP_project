@@ -45,7 +45,8 @@ public class MainGame extends ApplicationAdapter {
     //Declare Map var using TiledMpa
     TiledMap map;
 
-    //Declare mapRendered by OrthogonalTiledMapRenderer
+    //Declare mapRendered by OrthogonalTiledMapRenderer 
+    
     OrthogonalTiledMapRenderer mapRenderer;
 
     //-----MAP WORK DECLARATION END----
@@ -72,7 +73,7 @@ public class MainGame extends ApplicationAdapter {
     float healthPercent = 0.2f;   //(Keep value between 0 and 1)
 
     //Boolean setup to check if moving or not
-    boolean playerMovement = false;
+    //boolean playerMovement = false;       //No need i calculate if movement is required based of targetVector
     boolean movingRight;
 
     // Declare Spritbatch and textureAtlas for Images
@@ -155,7 +156,7 @@ public class MainGame extends ApplicationAdapter {
         float width = Gdx.graphics.getWidth();
 
         camera = new OrthographicCamera(cameraWidth, cameraHeight * (height / width));        //Visible region (multiplied height by aspect ratio)
-        camera.position.set(player.getPosition());         //Takes vector3 so pass in the whole method made in DynamicSprite class
+        camera.position.set(player.getPosition(), 0);         //Takes vector3 so pass in the whole method made in DynamicSprite class
         camera.update();
 
         //Initialize Viewport (for scaling and resizing)
@@ -249,19 +250,23 @@ public class MainGame extends ApplicationAdapter {
     }
     
     // Mouse Click Event
-    private void leftClick(float delta){
-        
+    private void leftClick(float delta){        //A method specifically for our player
+        for (DynamicSprite e : playerEntities){
+            e.updateMovement(e.getTarget(), stateTime, delta);
+        }
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             // Vector is basically a class with 3 data members, includes methods for magnitude,normalization(unit vector)
             clickCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0 );
             camera.unproject(clickCoords);  // Converts screen coords to World coords
+            
+            //NOTE: Handling an edge case, because camera is only place which needs Vector3
+            Vector2 clickCoords2D = new Vector2(clickCoords.x, clickCoords.y);     //We do this because clickCoords is only place where we need a 3d Vector. Everywhere else a 2d
 
             //We use for loop for playerEntities because bots i.e goblins etc will not get leftClick. Their movement call is seperate
             for (DynamicSprite e: playerEntities){
-                e.movement = true;
                 clickCoords.x = MathUtils.clamp(clickCoords.x, e.getWidth() / 2, worldWidth - e.getWidth() / 2);        //Doing correction because target is centered
                 clickCoords.y = MathUtils.clamp(clickCoords.y, e.getHeight() / 2,worldHeight - e.getHeight() / 2);      //Binding it to world width and height dimensions
-                e.Update(clickCoords, stateTime, delta);
+                e.setTarget(clickCoords2D);     //Using the small fix for edge case above
             }
         }
     }
@@ -305,8 +310,9 @@ public class MainGame extends ApplicationAdapter {
         if(!moving){
             // Set camera position to lizard, ALERT change to hero
             //Camera movement
+            Vector3 playerPosition3D = new Vector3(player.getPosition(), 0);
 
-            camera.position.lerp(player.getPosition(), 0.1f);            //THIS IS WHERE heroPos IS BEING USED (this brings smoothness for camera following)
+            camera.position.lerp(playerPosition3D, 0.1f);            //THIS IS WHERE heroPos IS BEING USED (this brings smoothness for camera following)
 
             //No need for the camera clamp commented below because hero is already clamped 
             //and in free roam camera is clamped (it doesnt break you can test)
