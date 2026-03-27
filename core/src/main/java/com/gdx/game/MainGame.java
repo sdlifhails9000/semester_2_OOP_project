@@ -264,8 +264,8 @@ public class MainGame extends ApplicationAdapter {
 
             //We use for loop for playerEntities because bots i.e goblins etc will not get leftClick. Their movement call is seperate
             for (DynamicSprite e: playerEntities){
-                clickCoords.x = MathUtils.clamp(clickCoords.x, e.getWidth() / 2, worldWidth - e.getWidth() / 2);        //Doing correction because target is centered
-                clickCoords.y = MathUtils.clamp(clickCoords.y, e.getHeight() / 2,worldHeight - e.getHeight() / 2);      //Binding it to world width and height dimensions
+                clickCoords2D.x = MathUtils.clamp(clickCoords2D.x, e.getWidth() / 2, worldWidth - e.getWidth() / 2);        //Doing correction because target is centered
+                clickCoords2D.y = MathUtils.clamp(clickCoords2D.y, e.getHeight() / 2,worldHeight - e.getHeight() / 2);      //Binding it to world width and height dimensions
                 e.setTarget(clickCoords2D);     //Using the small fix for edge case above
             }
         }
