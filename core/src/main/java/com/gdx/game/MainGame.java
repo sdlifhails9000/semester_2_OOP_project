@@ -7,7 +7,7 @@
 
 package com.gdx.game;
 
-import java.time.DayOfWeek;
+//import java.time.DayOfWeek;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -95,6 +95,7 @@ public class MainGame extends ApplicationAdapter {
     //Declaring animations (of type TextureRegions)
     Animation<TextureRegion> heroRunAnimation;
     Animation<TextureRegion> heroIdleAnimation;
+    Animation<TextureRegion> heroAttackAnimation;
 
     //A variable to track elapsed time during animation
     float stateTime;
@@ -129,14 +130,15 @@ public class MainGame extends ApplicationAdapter {
         //Initialize the animation
         heroRunAnimation = new Animation<TextureRegion>(0.033f, heroAtlas.findRegions("Run"), PlayMode.LOOP);   //heroAtlas.findRegion gives a textureRegion from a big Texture (the big Hero.png)
         heroIdleAnimation = new Animation<TextureRegion>(0.1f, heroAtlas.findRegions("Idle"), PlayMode.LOOP); 
+        heroAttackAnimation = new Animation<TextureRegion>(0.5f, heroAtlas.findRegions("Attack"), PlayMode.LOOP);
 
         //Initialize stateTime
         stateTime = 0f;
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(heroRunAnimation ,heroIdleAnimation, heroRunAnimation, stateTime,
+        player = new HeroPlayer(heroRunAnimation ,heroIdleAnimation, heroAttackAnimation, stateTime,
             10,10,20, 100, 30, 5);     //Replace 3 animation with attack FUTURE YOU
-        testEnemy = new HeroPlayer(heroRunAnimation, heroIdleAnimation, heroRunAnimation, stateTime,
+        testEnemy = new HeroPlayer(heroRunAnimation, heroIdleAnimation, heroAttackAnimation, stateTime,
             15, 15, 30, 100, 30, 5);
 
         player.attackTarget = testEnemy;
@@ -152,7 +154,7 @@ public class MainGame extends ApplicationAdapter {
         //background.setPosition(0,0);
 
         for(DynamicEntity e : playerEntities){
-            e.setSize(6,8);                     //With this we wont have to write these 3 lines for each dynamicSprite
+            e.setSize(10,14);                     //With this we wont have to write these 3 lines for each dynamicSprite
             e.setOriginCenter();
             e.setCenter(e.getPosition().x, e.getPosition().y);
         }
@@ -256,9 +258,9 @@ public class MainGame extends ApplicationAdapter {
     }
     
     // Implement later for handling keyboard events
-    private void keyEvent(float delta) {
+    // private void keyEvent(float delta) {
 
-    }
+    // }
     
     // Mouse Click Event
     private void clickEvent(float delta){        //A method specifically for our player

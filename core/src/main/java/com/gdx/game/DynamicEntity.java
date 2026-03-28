@@ -22,7 +22,7 @@ import com.badlogic.gdx.math.Vector2;
 // import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.Animation;           //Animation imports are these two
 // import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
-import com.badlogic.gdx.graphics.g2d.Sprite;
+//import com.badlogic.gdx.graphics.g2d.Sprite;
 // import com.badlogic.gdx.utils.viewport.*;       //Gets all viewport types (FixViewport, StrectViewport, ExtendViewport, etc)
 
 
@@ -117,10 +117,6 @@ abstract class DynamicEntity extends Entity {
 
     // Get Postion
     abstract public Vector2 getPosition();
-
-    //Method which calls updateMovement and passes correct targetVector
-    //ALERT: I think this may cause issue later on when other subclasses are made so later make it a concrete which handles HeroPlayer by default and is overriden in the rest
-    //abstract public void Update(Vector3 clickCoords, float stateTime, float delta);     //Made to handle updateMovement for different subclasses
 
 
     // Movement Method
