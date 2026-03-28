@@ -3,70 +3,89 @@ package com.gdx.game;
 // TODO Add projectiles for towers
 // make the tower an Entity and make it's projectiles DynamicEntities that harm enemies
 
-//import java.util.ArrayList;
-
-// import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
-// import com.badlogic.gdx.graphics.GL20;
-// import com.badlogic.gdx.Gdx;
-// import com.badlogic.gdx.Input;
-// import com.badlogic.gdx.Input.Keys;
-//import com.badlogic.gdx.graphics.Texture;
-// import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-//import com.badlogic.gdx.math.MathUtils;
-//import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
-//import com.badlogic.gdx.math.Vector3;
-// import com.badlogic.gdx.graphics.OrthographicCamera;
-// import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.Animation;           //Animation imports are these two
-// import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-// import com.badlogic.gdx.utils.viewport.*;       //Gets all viewport types (FixViewport, StrectViewport, ExtendViewport, etc)
-
-//Tiled Map Loaders
-// import com.badlogic.gdx.maps.tiled.TiledMap;
-// import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-// import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 abstract class Entity extends Sprite {
+    enum State {
+        IDLE,
+        MOVING,
+        ATTACK,
+        DEAD,
+    }
+
     protected float maxHealth;
     protected float currentHealth;
-    protected float damageStrength;
+    protected float attackStrength;
     protected float attackRange;
-    protected int frameCount;
-
-    protected float timeBetweenAttacks;     //Calculated over here
-
+    protected float attackSpeed;
 
     protected Vector2 currentXY;     //Starting points (game World Coords not screen coords)  //IN CHILD CLASS NOW
 
     protected float stateTime = 0; // Time since last attack
 
+    DynamicEntity attackTarget;     //Stores entity to attack
+
+    State state;
+
     Animation<TextureRegion> idleAnimation;
     Animation<TextureRegion> attackAnimation;
     Animation<TextureRegion> deadAnimation;
+
+    Animation<TextureRegion> currentAnimation;
     
+    Entity(Animation<TextureRegion> attack,
+           Animation<TextureRegion> dead,
+           Animation<TextureRegion> idle,
+           float stateTime, float startX, float startY,
+           float maxHealth,
+           float attackRange,
+           float attackSpeed,
+           float attackStrength) {
 
-    Entity(Animation<TextureRegion> idleAnimation, Animation<TextureRegion> attackAnimation, Animation<TextureRegion> deadAnimation, 
-        float stateTime, float maxHealth, float damageStrength, float attackRange){
+        super(idle.getKeyFrame(stateTime));
 
-        super(idleAnimation.getKeyFrame(stateTime));
+        this.attackAnimation = attack;
+        this.idleAnimation = idle;
+        this.deadAnimation = dead;
+
+        this.currentXY = new Vector2(startX, startY);
+
+        this.stateTime = stateTime;
         this.maxHealth = maxHealth;
-        this.currentHealth = maxHealth;
-        this.damageStrength = damageStrength;
         this.attackRange = attackRange;
-
-        this.attackAnimation = attackAnimation;
-        this.deadAnimation = deadAnimation;
-        this.idleAnimation = idleAnimation;
-
-        this.timeBetweenAttacks = attackAnimation.getFrameDuration() * attackAnimation.getKeyFrames().length;       //Calculates itself
+        this.attackSpeed = attackSpeed;
+        this.attackStrength = attackStrength;
+        
+        state = State.IDLE;
+        currentAnimation = idleAnimation;
+    }
+    
+    // Only set when you click right click. Only set it if the position is near an enemy
+    protected void setAttackInfo(DynamicEntity entity){
+        attackTarget = entity;
     }
 
-    void takeDamage(float damage) {
+    public DynamicEntity getAttackInfo() {
+        return attackTarget;
+    }
+
+    protected boolean isCloseToEnemy() {
+        Rectangle enemyBounds = attackTarget.getBoundingRectangle();
+        Vector2 center = new Vector2();
+        enemyBounds.getCenter(center);
+
+        boolean isClose = center.dst(currentXY) <= attackRange;
+
+        return isClose;
+    }
+
+    protected void takeDamage(float damage) {
         currentHealth -= damage;
 
         if (currentHealth <= 0f) {
@@ -74,10 +93,10 @@ abstract class Entity extends Sprite {
         }
     }
 
-        void updateAttack(Entity target, float delta) {                 //Override this for tower entity (If you dont want a rotating tower entity)
+    protected void updateAttack(float delta) {                 //Override this for tower entity (If you dont want a rotating tower entity)
         // Check if we have passed the interval of attack and reset the timer
-        if (stateTime >= timeBetweenAttacks) {
-            target.takeDamage(damageStrength);
+        if (stateTime >= attackSpeed) {
+            attackTarget.takeDamage(attackStrength);
             System.out.printf("Damage dealt... %f\n", currentHealth);
             stateTime = 0;
         }
@@ -85,7 +104,7 @@ abstract class Entity extends Sprite {
         // Calculate the angle and flip accordingly
 
         Vector2 displacement = new Vector2();
-        target.getBoundingRectangle().getCenter(displacement);
+        attackTarget.getBoundingRectangle().getCenter(displacement);
         displacement.sub(currentXY);
 
         float angle = MathUtils.atan2Deg360(displacement.y, displacement.x);

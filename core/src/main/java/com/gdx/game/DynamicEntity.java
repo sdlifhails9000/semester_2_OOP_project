@@ -34,50 +34,34 @@ import com.badlogic.gdx.graphics.g2d.Animation;           //Animation imports ar
 // DynamicSprite is a subclass of Sprite with movement functonality
 abstract class DynamicEntity extends Entity {
     // This will be the state that everything DynamicSprite is in
-    enum State {
-        IDLE,
-        MOVING,
-        ATTACK,
-        DEAD,
-    }
-
-    // Data members
-    protected float speed = 20f;  // -> Player Move Speed (based off above world size)
 
     //Declare Animation Variables
     protected Animation<TextureRegion> runAnimation;
 
-    // Currently used animation
-    protected Animation<TextureRegion> currentAnimation;
-
-    // Move this to Player Subclass, this is respawn position HARDCODED
-    //Use them to define starting position for camera and sprite
-    // Make getters?
-    // public int startX;      // COMMENTED OUT BECAUSE MADE A CHILD CLASS
-    // public int startY;
-
-    protected Vector2 destVector;
     protected Vector2 moveTargetVector;     //Every subclass will define its own target in Update() method
-
-
-    State state;
-
-    DynamicEntity attackTarget;     //Stores entity to attack
-
-    float health;
+    protected float speed;
 
     // Creates the Sprite(Parent Class)
     // TODO Pass the animations as a list and the other stuff as a list
-    DynamicEntity(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation , Animation<TextureRegion> attackAnimation, Animation<TextureRegion> deadAnimation,
-                  float stateTime, int startX, int startY, float speed, float maxHealth, float damageStrength, float attackRange) {
-        super(idleAnimation, attackAnimation, deadAnimation, stateTime, maxHealth, damageStrength, attackRange);
+    DynamicEntity(Animation<TextureRegion> attack,
+                  Animation<TextureRegion> run,
+                  Animation<TextureRegion> dead,
+                  Animation<TextureRegion> idle,
+                  float stateTime, float startX, float startY,
+                  float maxHealth,
+                  float attackRange,
+                  float attackSpeed,
+                  float attackStrength,
+                  float speed) {
 
-        this.runAnimation = runAnimation; 
+        super(
+            attack, dead, idle,
+            stateTime, startX, startY,
+            maxHealth, attackRange, attackSpeed, attackStrength
+        );
+        
+        this.runAnimation = run;
         this.speed = speed;
-        this.currentXY = new Vector2(startX, startY);
-
-        state = State.IDLE;
-        currentAnimation = idleAnimation;
     }
 
     //Concrete methods (Getter and setter)
@@ -91,36 +75,18 @@ abstract class DynamicEntity extends Entity {
         return moveTargetVector;
     }
 
-    // Only set when you click right click. Only set it if the position is near an enemy
-    public void setAttackInfo(DynamicEntity entity){
-        attackTarget = entity;
-    }
-
-    public DynamicEntity getAttackInfo() {
-        return attackTarget;
-    }
-
-    public boolean isCloseToEnemy() {
-        Rectangle enemyBounds = attackTarget.getBoundingRectangle();
-        Vector2 center = new Vector2();
-        enemyBounds.getCenter(center);
-
-        boolean isClose = center.dst(currentXY) <= attackRange;
-
-        return isClose;
-    }
 
     // Get Postion
     abstract public Vector2 getPosition();
 
 
     // Movement Method
-    public void updateMovement(Vector2 targetVector, float stateTime , float delta){
+    public void updateMovement(float stateTime , float delta){
         //For angle calculation to rotate sprite
         float angle;
     
-        destVector = new Vector2();
-        destVector.set(targetVector).sub(currentXY);        //Calculate the destination vector
+        Vector2 destVector = new Vector2();
+        destVector.set(moveTargetVector).sub(currentXY);        //Calculate the destination vector
 
         //-----ROTATION CALCULATION START-----
         //Sort of skews off at endpoint likeeee just test and see (Works perfectly for bottom edge but skewed for the other 3)
@@ -130,12 +96,11 @@ abstract class DynamicEntity extends Entity {
         //-----NOTE----
         //you can add rotation or not your choice just uncomment the player.setRotation() lines to see it in play
 
-        if (angle > 90 && angle < 270){ 
+        if (angle > 90 && angle < 270) { 
             //player.setRotation(angle + 180);        //We have to do a 180 degree CORRECTION offset because setFlip offsets the angle by 180 degrees (inverts x axis)            //This range signifies 2 and 3 quadrant 
             this.setFlip(true, false);       //Flip the x axis
         }
-
-        else{
+        else {
             //player.setRotation(angle);         //Same reason as above
             this.setFlip(false, false);      //If its a click in 1 or 4 quadrant no flip just bring sprite to what it was originally (sprite was originally drawn right facing)
         }
@@ -161,20 +126,21 @@ abstract class DynamicEntity extends Entity {
 }
 //Child class number 1
 
-class HeroPlayer extends DynamicEntity{
-    // Later
-    // enum Class {
-    //     HEAVY,
-    //     LIGHT,
-    // }
-    // final float HEAVY_SPEED, LIGHT_SPEED
-
-    HeroPlayer(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation, Animation<TextureRegion> attackAnimation, Animation<TextureRegion> deadAnimation,
-               float stateTime, int startX, int startY, float speed,
-               float maxHealth, float damageStrength, float attackRange) {
-        super(runAnimation, idleAnimation, attackAnimation, deadAnimation, stateTime, startX, startY, speed,
-              maxHealth, damageStrength, attackRange);
-        attackRange = 50f;
+class HeroPlayer extends DynamicEntity {
+    HeroPlayer(HeroPreset preset, float stateTime, int startX, int startY) {
+        super(
+            HeroLoader.attack(preset),
+            HeroLoader.run(preset),
+            HeroLoader.dead(preset),
+            HeroLoader.idle(preset),
+            stateTime, startX, startY,
+            
+            preset.maxHealth,
+            preset.attackRange,
+            preset.attackSpeed,
+            preset.attackStrength,
+            preset.speed
+        );
     }
 
     @Override
@@ -182,12 +148,13 @@ class HeroPlayer extends DynamicEntity{
         return new Vector2(currentXY);
     }
 
-
     @Override
     public void Update(float stateTime, float delta) {
         this.setRegion(currentAnimation.getKeyFrame(stateTime));    //Updates current Animation or you get slender man running
 
-        if (moveTargetVector != null)  {
+        if (state == State.DEAD) {
+        }
+        else if (moveTargetVector != null)  {
             state = State.MOVING;
             currentAnimation = runAnimation;
         }
@@ -203,30 +170,15 @@ class HeroPlayer extends DynamicEntity{
 
         switch(state){
         case MOVING:
-            updateMovement(getMove(), stateTime, delta);
-            break;
-
-        case IDLE:
-            // Do absolutely nothing...
+            updateMovement(stateTime, delta);
             break;
 
         case ATTACK:
-            updateAttack(attackTarget, delta);
+            updateAttack(delta);
             break;
 
         default:
-            System.out.println("NOT HANDLED YET");
             break;
         }   
     }
-
-    // @Override
-    // public void Update(Vector3 clickCoords, float stateTime, float delta){
-
-    //     if (clickCoords != null){
-    //         targetVector = new Vector2(clickCoords.x, clickCoords.y);
-    //     }
-    //     this.updateMovement(targetVector, stateTime, delta);
-
-    // }
 }

@@ -7,7 +7,6 @@
 
 package com.gdx.game;
 
-//import java.time.DayOfWeek;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -16,7 +15,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
-//import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -28,16 +27,101 @@ import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.utils.viewport.*;       //Gets all viewport types (FixViewport, StrectViewport, ExtendViewport, etc)
 
+import java.util.HashMap;
+import java.util.Map;
+
 //Tiled Map Loaders
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
-// ALERT: Main character is lizard temporarily
-// ALERT: Change Coordinate system to pure vectors??
+// This contain default values for specific hero types
+enum HeroPreset {
+    HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 15f, 150f, 1f),
+    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 10f, 125f, 0.5f);
 
+    final String assetPath;
+
+    final float speed;
+    final float attackStrength;
+    final float attackRange;    
+    final float maxHealth;
+
+    // This will effect the attack animation
+    float attackSpeed;
+
+    HeroPreset(String path, float speed, float damageStrength,
+               float attackRange, float maxHealth, float attackSpeed) {
+        
+        this.assetPath = path;
+        this.speed = speed;
+        this.attackStrength = damageStrength;
+        this.attackRange = attackRange;
+        this.maxHealth = maxHealth;
+        this.attackSpeed = attackSpeed;
+    }
+}
+
+// This class will never have an instance
+class HeroLoader {
+    // A hash map is like a python dictionary, but instead, we can any type as the key
+    private static Map<HeroPreset, TextureAtlas> heroAtlasses;
+    private static Map<HeroPreset, Animation<TextureRegion>> runAnimation;
+    private static Map<HeroPreset, Animation<TextureRegion>> idleAnimation;
+    private static Map<HeroPreset, Animation<TextureRegion>> attackAnimation;
+    private static Map<HeroPreset, Animation<TextureRegion>> deadAnimation;
+
+    public static void load(AssetManager manager) {
+        // I'm keeping the ANGLED BRACKETS blank because the compiler figures out what should go there for you
+        // In this case we defined above the brackets to contain TextureAtlas
+        heroAtlasses = new HashMap<>();
+
+        runAnimation = new HashMap<>();
+        idleAnimation = new HashMap<>();
+        attackAnimation = new HashMap<>();
+        deadAnimation = new HashMap<>();
+
+        for (HeroPreset preset : HeroPreset.values()) {
+            heroAtlasses.put(preset, manager.get(preset.assetPath, TextureAtlas.class));
+
+            Animation<TextureRegion> attack = new Animation<>(
+                0.5f, // this is just a temporary value
+                heroAtlasses.get(preset).findRegions("Attack"), PlayMode.LOOP);
+
+            // Calculate the correct frame duration for the attack speed, OK?
+            float attackFrameDuration = preset.attackSpeed / attack.getKeyFrames().length;
+
+            // this reset the frame duration to the correct amount
+            attack.setFrameDuration(attackFrameDuration);
+            
+            // Load all the animations into the hash map
+            runAnimation.put(preset, new Animation<>(0.5f, heroAtlasses.get(preset).findRegions("Run"), PlayMode.LOOP));
+            attackAnimation.put(preset, attack);
+            idleAnimation.put(preset, new Animation<>(0.5f, heroAtlasses.get(preset).findRegions("Idle"), PlayMode.LOOP));
+            deadAnimation.put(preset, new Animation<>(0.5f, heroAtlasses.get(preset).findRegions("Dead"), PlayMode.LOOP));
+        }
+    }
+
+    public static Animation<TextureRegion> run(HeroPreset preset) {
+        return runAnimation.get(preset);
+    }
+
+    public static Animation<TextureRegion> attack(HeroPreset preset) {
+        return attackAnimation.get(preset);
+    }
+
+    public static Animation<TextureRegion> idle(HeroPreset preset) {
+        return idleAnimation.get(preset);
+    }
+
+    public static Animation<TextureRegion> dead(HeroPreset preset) {
+        return deadAnimation.get(preset);
+    }
+}
 
 public class MainGame extends ApplicationAdapter {
+    public static AssetManager manager = new AssetManager();
+
     //-----MAP WORK DECLARATION START----
     //ALERT: google why we use tmxmaploader and tiledmap together
 
@@ -82,27 +166,12 @@ public class MainGame extends ApplicationAdapter {
     SpriteBatch batch;
     Sprite background, healthBarSprite;
 
-    TextureAtlas atlas;
-    TextureAtlas lightHeroAtlas;
-    TextureAtlas heavyHeroAtlas;
-
     //DynamicSprites (self defined)
     DynamicEntity player;
     DynamicEntity testEnemy;
 
     //Declare array for DynamicSprites  (Right now for players later make seperate for goblins etc because their movement logic is different)
     ArrayList<DynamicEntity> playerEntities;
-
-    //Declaring animations (of type TextureRegions)
-    Animation<TextureRegion> lightHeroRunAnimation;
-    Animation<TextureRegion> lightHeroIdleAnimation;
-    Animation<TextureRegion> lightHeroAttackAnimation;
-    Animation<TextureRegion> lightHeroDeadAnimation;
-
-    Animation<TextureRegion> heavyHeroRunAnimation;
-    Animation<TextureRegion> heavyHeroIdleAnimation;
-    Animation<TextureRegion> heavyHeroAttackAnimation;
-    Animation<TextureRegion> heavyHeroDeadAnimation;
 
     //A variable to track elapsed time during animation
     float stateTime;
@@ -125,35 +194,35 @@ public class MainGame extends ApplicationAdapter {
         // Initialize SpriteBatch
         batch = new SpriteBatch();
 
-        //Initialize TextureAtlas
-        atlas = new TextureAtlas(Gdx.files.internal("atlas\\practiceAtlas.atlas"));
-        lightHeroAtlas = new TextureAtlas(Gdx.files.internal("HeroAtlas\\lightHero.atlas"));
-        heavyHeroAtlas = new TextureAtlas(Gdx.files.internal("HeroAtlas\\\\heavyHero.atlas"));
+        // -------------- Queue all the assets in `manager` --------------
 
-        //Initialize bg and sprite and health bar from atlas
+        manager.load("atlas\\practiceAtlas.atlas", TextureAtlas.class);
+
+        for (HeroPreset preset : HeroPreset.values()) {
+            manager.load(preset.assetPath, TextureAtlas.class);
+        }
+
+        manager.setLoader(TiledMap.class, new TmxMapLoader());
+        manager.load("practiceMap/MainMap.tmx", TiledMap.class);
+        
+        manager.finishLoading();
+
+        // -------------- Make all the necessary thingies --------------
+
+        HeroLoader.load(manager);
+        TextureAtlas atlas = manager.get("atlas\\practiceAtlas.atlas");
+        
+        // Initialize bg and sprite and health bar from atlas
         
         //background = atlas.createSprite("Background");        //No need since we made our tiled map
         healthBarSprite = atlas.createSprite("healthBar");
-
-        //Initialize the animation
-        lightHeroRunAnimation = new Animation<TextureRegion>(0.033f, lightHeroAtlas.findRegions("Run"), PlayMode.LOOP);   //heroAtlas.findRegion gives a textureRegion from a big Texture (the big Hero.png)
-        lightHeroIdleAnimation = new Animation<TextureRegion>(0.1f, lightHeroAtlas.findRegions("Idle"), PlayMode.LOOP); 
-        lightHeroAttackAnimation = new Animation<TextureRegion>(0.1f, lightHeroAtlas.findRegions("Attack"), PlayMode.LOOP);
-        lightHeroDeadAnimation = new Animation<TextureRegion>(0.5f, lightHeroAtlas.findRegions("Dead"), PlayMode.LOOP);
-
-        heavyHeroRunAnimation = new Animation<TextureRegion>(0.033f, heavyHeroAtlas.findRegions("Run"), PlayMode.LOOP);
-        heavyHeroIdleAnimation = new Animation<TextureRegion>(0.1f, heavyHeroAtlas.findRegions("Idle"), PlayMode.LOOP);
-        heavyHeroAttackAnimation = new Animation<TextureRegion>(0.5f, heavyHeroAtlas.findRegions("Attack"), PlayMode.LOOP);
-        heavyHeroDeadAnimation = new Animation<TextureRegion>(0.5f, heavyHeroAtlas.findRegions("Dead"), PlayMode.LOOP);
 
         //Initialize stateTime
         stateTime = 0f;
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(lightHeroRunAnimation ,lightHeroIdleAnimation, lightHeroAttackAnimation, lightHeroDeadAnimation, stateTime,
-            10,10,20, 100, 30, 5);     //Replace 3 animation with attack FUTURE YOU
-        testEnemy = new HeroPlayer(heavyHeroRunAnimation, heavyHeroIdleAnimation, heavyHeroAttackAnimation, heavyHeroDeadAnimation, stateTime,
-            15, 15, 30, 100, 30, 5);
+        player = new HeroPlayer(HeroPreset.LIGHT, stateTime, 10,10);
+        testEnemy = new HeroPlayer(HeroPreset.HEAVY, stateTime, 15, 15);
 
         player.attackTarget = testEnemy;
         testEnemy.attackTarget = player;
@@ -186,10 +255,9 @@ public class MainGame extends ApplicationAdapter {
         viewport = new ExtendViewport(cameraWidth, cameraHeight, camera);  //Same sizing as camera as we want to scale camera coords if resized (for extend no need for aspect ratio google reason)
         
         //----MAPWORK INITIALIZATION----
-        mapLoader  = new TmxMapLoader();
 
         //Initialize the tiledMap
-        map = mapLoader.load("practiceMap\\MainMap.tmx");
+        map = manager.get("practiceMap/MainMap.tmx");
 
         //Initialize the mapRenderer (this is the main working unit here which scales the tiledMap with our current game units)
         mapRenderer = new OrthogonalTiledMapRenderer(map, scale);       //We can pass our own spritebatch for optimization but will have to change some internal methods so jst let it use its own spritebatch for map
@@ -234,14 +302,8 @@ public class MainGame extends ApplicationAdapter {
 
      @Override
     public void dispose() {
-        // ALERT: Use TexturePacker
-        // Dispose all textures in the list
         batch.dispose();
-        atlas.dispose();
-        lightHeroAtlas.dispose();
-
-        //Clear our map resources
-        map.dispose();
+        manager.dispose();
         mapRenderer.dispose();  
     }
 
