@@ -1,5 +1,5 @@
-name=Hero
-filename=
+name=lightHero
+filename=lightHero.atlas
 output=.
 
 alias=true
@@ -35,6 +35,48 @@ legacyOutput=false
 
 scaleFactors=[{suffix:"",factor:1,resampling:bicubic}]
 inputFiles=[{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO ATTACK Animation (GDX PACKER)\\Attack_1.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO ATTACK Animation (GDX PACKER)\\Attack_2.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO ATTACK Animation (GDX PACKER)\\Attack_3.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO ATTACK Animation (GDX PACKER)\\Attack_4.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO DEATH Animation (GDX Packer)\\Dead_1.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO DEATH Animation (GDX Packer)\\Dead_2.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO DEATH Animation (GDX Packer)\\Dead_3.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO DEATH Animation (GDX Packer)\\Dead_4.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO IDLE Animation (GDX PACKER)\\Idle_1.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO IDLE Animation (GDX PACKER)\\Idle_2.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO IDLE Animation (GDX PACKER)\\Idle_3.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO IDLE Animation (GDX PACKER)\\Idle_4.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO IDLE Animation (GDX PACKER)\\Idle_5.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO IDLE Animation (GDX PACKER)\\Idle_6.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO RUN Animation (GDX PACKER)\\Run_1.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO RUN Animation (GDX PACKER)\\Run_2.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO RUN Animation (GDX PACKER)\\Run_3.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO RUN Animation (GDX PACKER)\\Run_4.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO RUN Animation (GDX PACKER)\\Run_5.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HERO RUN Animation (GDX PACKER)\\Run_6.png,type:Input,regionName:null}]
+keepInputFileExtensions=false
+
+
+---
+
+name=heavyHero
+filename=
+output=.
+
+alias=true
+alphaThreshold=0
+debug=false
+duplicatePadding=false
+edgePadding=true
+fast=false
+filterMag=Nearest
+filterMin=Nearest
+ignoreBlankImages=true
+maxHeight=2048
+maxWidth=2048
+minHeight=16
+minWidth=16
+paddingX=2
+paddingY=2
+pot=true
+mof=false
+rotation=false
+stripWhitespaceX=false
+stripWhitespaceY=false
+wrapX=ClampToEdge
+wrapY=ClampToEdge
+premultiplyAlpha=false
+grid=false
+square=false
+bleed=true
+limitMemory=true
+useIndexes=true
+prettyPrint=false
+legacyOutput=false
+
+scaleFactors=[{suffix:"",factor:1,resampling:bicubic}]
+inputFiles=[{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Attack Animations\\Attack_1.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Attack Animations\\Attack_2.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Attack Animations\\Attack_3.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Attack Animations\\Attack_4.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Dead Animations\\Dead_1.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Dead Animations\\Dead_2.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Dead Animations\\Dead_3.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Dead Animations\\Dead_4.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Idle Animations\\Idle_1.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Idle Animations\\Idle_2.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Idle Animations\\Idle_3.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Idle Animations\\Idle_4.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Idle Animations\\Idle_5.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Run Animations\\Run_1.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Run Animations\\Run_2.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Run Animations\\Run_3.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Run Animations\\Run_4.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Run Animations\\Run_5.png,type:Input,regionName:null},{path:C:\\Users\\650 G9\\OneDrive\\الصور\\LibGdx Game Animations (to be packed)\\Warrior Sprite\\Sliced HEAVY hero ANIMATIONS (GDX PACKER)\\HeavyHero Run Animations\\Run_6.png,type:Input,regionName:null}]
 keepInputFileExtensions=false
 
 

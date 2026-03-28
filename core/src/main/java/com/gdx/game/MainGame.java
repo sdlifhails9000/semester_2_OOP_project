@@ -83,7 +83,8 @@ public class MainGame extends ApplicationAdapter {
     Sprite background, healthBarSprite;
 
     TextureAtlas atlas;
-    TextureAtlas heroAtlas;
+    TextureAtlas lightHeroAtlas;
+    TextureAtlas heavyHeroAtlas;
 
     //DynamicSprites (self defined)
     DynamicEntity player;
@@ -93,9 +94,15 @@ public class MainGame extends ApplicationAdapter {
     ArrayList<DynamicEntity> playerEntities;
 
     //Declaring animations (of type TextureRegions)
-    Animation<TextureRegion> heroRunAnimation;
-    Animation<TextureRegion> heroIdleAnimation;
-    Animation<TextureRegion> heroAttackAnimation;
+    Animation<TextureRegion> lightHeroRunAnimation;
+    Animation<TextureRegion> lightHeroIdleAnimation;
+    Animation<TextureRegion> lightHeroAttackAnimation;
+    Animation<TextureRegion> lightHeroDeadAnimation;
+
+    Animation<TextureRegion> heavyHeroRunAnimation;
+    Animation<TextureRegion> heavyHeroIdleAnimation;
+    Animation<TextureRegion> heavyHeroAttackAnimation;
+    Animation<TextureRegion> heavyHeroDeadAnimation;
 
     //A variable to track elapsed time during animation
     float stateTime;
@@ -120,7 +127,8 @@ public class MainGame extends ApplicationAdapter {
 
         //Initialize TextureAtlas
         atlas = new TextureAtlas(Gdx.files.internal("atlas\\practiceAtlas.atlas"));
-        heroAtlas = new TextureAtlas(Gdx.files.internal("HeroAtlas\\Hero.atlas"));
+        lightHeroAtlas = new TextureAtlas(Gdx.files.internal("HeroAtlas\\lightHero.atlas"));
+        heavyHeroAtlas = new TextureAtlas(Gdx.files.internal("HeroAtlas\\\\heavyHero.atlas"));
 
         //Initialize bg and sprite and health bar from atlas
         
@@ -128,17 +136,23 @@ public class MainGame extends ApplicationAdapter {
         healthBarSprite = atlas.createSprite("healthBar");
 
         //Initialize the animation
-        heroRunAnimation = new Animation<TextureRegion>(0.033f, heroAtlas.findRegions("Run"), PlayMode.LOOP);   //heroAtlas.findRegion gives a textureRegion from a big Texture (the big Hero.png)
-        heroIdleAnimation = new Animation<TextureRegion>(0.1f, heroAtlas.findRegions("Idle"), PlayMode.LOOP); 
-        heroAttackAnimation = new Animation<TextureRegion>(0.1f, heroAtlas.findRegions("Attack"), PlayMode.LOOP);
+        lightHeroRunAnimation = new Animation<TextureRegion>(0.033f, lightHeroAtlas.findRegions("Run"), PlayMode.LOOP);   //heroAtlas.findRegion gives a textureRegion from a big Texture (the big Hero.png)
+        lightHeroIdleAnimation = new Animation<TextureRegion>(0.1f, lightHeroAtlas.findRegions("Idle"), PlayMode.LOOP); 
+        lightHeroAttackAnimation = new Animation<TextureRegion>(0.1f, lightHeroAtlas.findRegions("Attack"), PlayMode.LOOP);
+        lightHeroDeadAnimation = new Animation<TextureRegion>(0.5f, lightHeroAtlas.findRegions("Dead"), PlayMode.LOOP);
+
+        heavyHeroRunAnimation = new Animation<TextureRegion>(0.033f, heavyHeroAtlas.findRegions("Run"), PlayMode.LOOP);
+        heavyHeroIdleAnimation = new Animation<TextureRegion>(0.1f, heavyHeroAtlas.findRegions("Idle"), PlayMode.LOOP);
+        heavyHeroAttackAnimation = new Animation<TextureRegion>(0.5f, heavyHeroAtlas.findRegions("Attack"), PlayMode.LOOP);
+        heavyHeroDeadAnimation = new Animation<TextureRegion>(0.5f, heavyHeroAtlas.findRegions("Dead"), PlayMode.LOOP);
 
         //Initialize stateTime
         stateTime = 0f;
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(heroRunAnimation ,heroIdleAnimation, heroAttackAnimation, stateTime,
+        player = new HeroPlayer(lightHeroRunAnimation ,lightHeroIdleAnimation, lightHeroAttackAnimation, lightHeroDeadAnimation, stateTime,
             10,10,20, 100, 30, 5);     //Replace 3 animation with attack FUTURE YOU
-        testEnemy = new HeroPlayer(heroRunAnimation, heroIdleAnimation, heroAttackAnimation, stateTime,
+        testEnemy = new HeroPlayer(heavyHeroRunAnimation, heavyHeroIdleAnimation, heavyHeroAttackAnimation, heavyHeroDeadAnimation, stateTime,
             15, 15, 30, 100, 30, 5);
 
         player.attackTarget = testEnemy;
@@ -224,7 +238,7 @@ public class MainGame extends ApplicationAdapter {
         // Dispose all textures in the list
         batch.dispose();
         atlas.dispose();
-        heroAtlas.dispose();
+        lightHeroAtlas.dispose();
 
         //Clear our map resources
         map.dispose();

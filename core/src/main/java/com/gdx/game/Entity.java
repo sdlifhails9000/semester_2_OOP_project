@@ -7,6 +7,7 @@ package com.gdx.game;
 
 // import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 // import com.badlogic.gdx.graphics.GL20;
 // import com.badlogic.gdx.Gdx;
 // import com.badlogic.gdx.Input;
@@ -37,19 +38,32 @@ abstract class Entity extends Sprite {
     protected float attackRange;
     protected int frameCount;
 
+    protected float timeBetweenAttacks;     //Calculated over here
+
 
     protected Vector2 currentXY;     //Starting points (game World Coords not screen coords)  //IN CHILD CLASS NOW
 
     protected float stateTime = 0; // Time since last attack
 
     Animation<TextureRegion> idleAnimation;
+    Animation<TextureRegion> attackAnimation;
+    Animation<TextureRegion> deadAnimation;
+    
 
-    Entity(Animation<TextureRegion> idleAnimation, float stateTime, float maxHealth, float damageStrength, float attackRange) {
+    Entity(Animation<TextureRegion> idleAnimation, Animation<TextureRegion> attackAnimation, Animation<TextureRegion> deadAnimation, 
+        float stateTime, float maxHealth, float damageStrength, float attackRange){
+
         super(idleAnimation.getKeyFrame(stateTime));
         this.maxHealth = maxHealth;
         this.currentHealth = maxHealth;
         this.damageStrength = damageStrength;
         this.attackRange = attackRange;
+
+        this.attackAnimation = attackAnimation;
+        this.deadAnimation = deadAnimation;
+        this.idleAnimation = idleAnimation;
+
+        this.timeBetweenAttacks = attackAnimation.getFrameDuration() * attackAnimation.getKeyFrames().length;       //Calculates itself
     }
 
     void takeDamage(float damage) {
@@ -60,18 +74,29 @@ abstract class Entity extends Sprite {
         }
     }
 
-    void updateAttack(Entity target, float delta) {
-        // How many seconds after can you attack the other guy
-        float intervalOfAttack = 0.4f;
-
+        void updateAttack(Entity target, float delta) {                 //Override this for tower entity (If you dont want a rotating tower entity)
         // Check if we have passed the interval of attack and reset the timer
-        if (this.stateTime > intervalOfAttack) {
+        if (stateTime >= timeBetweenAttacks) {
             target.takeDamage(damageStrength);
             System.out.printf("Damage dealt... %f\n", currentHealth);
-            this.stateTime = 0;
+            stateTime = 0;
         }
 
-        this.stateTime += delta;
+        // Calculate the angle and flip accordingly
+
+        Vector2 displacement = new Vector2();
+        target.getBoundingRectangle().getCenter(displacement);
+        displacement.sub(currentXY);
+
+        float angle = MathUtils.atan2Deg360(displacement.y, displacement.x);
+
+        if (angle > 90f && angle < 270f) {
+            setFlip(true, false);
+        } else {
+            setFlip(false, false);
+        }
+
+        stateTime += delta;
     }
 
     abstract public void Update(float stateTime, float delta);

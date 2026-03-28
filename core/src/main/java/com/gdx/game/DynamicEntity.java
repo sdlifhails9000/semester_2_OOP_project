@@ -46,7 +46,6 @@ abstract class DynamicEntity extends Entity {
 
     //Declare Animation Variables
     protected Animation<TextureRegion> runAnimation;
-    protected Animation<TextureRegion> attackAnimation;
 
     // Currently used animation
     protected Animation<TextureRegion> currentAnimation;
@@ -69,15 +68,11 @@ abstract class DynamicEntity extends Entity {
 
     // Creates the Sprite(Parent Class)
     // TODO Pass the animations as a list and the other stuff as a list
-    DynamicEntity(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation , Animation<TextureRegion> attackAnimation,
+    DynamicEntity(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation , Animation<TextureRegion> attackAnimation, Animation<TextureRegion> deadAnimation,
                   float stateTime, int startX, int startY, float speed, float maxHealth, float damageStrength, float attackRange) {
-        super(idleAnimation, stateTime, maxHealth, damageStrength, attackRange);
-        this.idleAnimation = idleAnimation;
-        this.runAnimation = runAnimation;
-        this.attackAnimation = attackAnimation;
-        
-        // Add attack and death animation later
+        super(idleAnimation, attackAnimation, deadAnimation, stateTime, maxHealth, damageStrength, attackRange);
 
+        this.runAnimation = runAnimation; 
         this.speed = speed;
         this.currentXY = new Vector2(startX, startY);
 
@@ -174,10 +169,10 @@ class HeroPlayer extends DynamicEntity{
     // }
     // final float HEAVY_SPEED, LIGHT_SPEED
 
-    HeroPlayer(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation, Animation<TextureRegion> attackAnimation,
+    HeroPlayer(Animation<TextureRegion> runAnimation, Animation<TextureRegion> idleAnimation, Animation<TextureRegion> attackAnimation, Animation<TextureRegion> deadAnimation,
                float stateTime, int startX, int startY, float speed,
                float maxHealth, float damageStrength, float attackRange) {
-        super(runAnimation, idleAnimation, attackAnimation, stateTime, startX, startY, speed,
+        super(runAnimation, idleAnimation, attackAnimation, deadAnimation, stateTime, startX, startY, speed,
               maxHealth, damageStrength, attackRange);
         attackRange = 50f;
     }
