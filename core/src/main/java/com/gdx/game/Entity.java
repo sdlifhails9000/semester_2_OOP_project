@@ -32,7 +32,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 
 abstract class Entity extends Sprite {
     protected float maxHealth;
-    protected float health;
+    protected float currentHealth;
     protected float damageStrength;
     protected float attackRange;
     protected int frameCount;
@@ -47,27 +47,27 @@ abstract class Entity extends Sprite {
     Entity(Animation<TextureRegion> idleAnimation, float stateTime, float maxHealth, float damageStrength, float attackRange) {
         super(idleAnimation.getKeyFrame(stateTime));
         this.maxHealth = maxHealth;
-        this.health = maxHealth;
+        this.currentHealth = maxHealth;
         this.damageStrength = damageStrength;
         this.attackRange = attackRange;
     }
 
     void takeDamage(float damage) {
-        health -= damage;
+        currentHealth -= damage;
 
-        if (health <= 0f) {
+        if (currentHealth <= 0f) {
             // Set state to dead
         }
     }
 
     void updateAttack(Entity target, float delta) {
         // How many seconds after can you attack the other guy
-        int intervalOfAttack = 5;
+        float intervalOfAttack = 0.4f;
 
         // Check if we have passed the interval of attack and reset the timer
         if (this.stateTime > intervalOfAttack) {
             target.takeDamage(damageStrength);
-            System.out.printf("Damage dealt... %f\n", health);
+            System.out.printf("Damage dealt... %f\n", currentHealth);
             this.stateTime = 0;
         }
 

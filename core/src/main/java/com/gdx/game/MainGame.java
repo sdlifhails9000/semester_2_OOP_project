@@ -130,7 +130,7 @@ public class MainGame extends ApplicationAdapter {
         //Initialize the animation
         heroRunAnimation = new Animation<TextureRegion>(0.033f, heroAtlas.findRegions("Run"), PlayMode.LOOP);   //heroAtlas.findRegion gives a textureRegion from a big Texture (the big Hero.png)
         heroIdleAnimation = new Animation<TextureRegion>(0.1f, heroAtlas.findRegions("Idle"), PlayMode.LOOP); 
-        heroAttackAnimation = new Animation<TextureRegion>(0.5f, heroAtlas.findRegions("Attack"), PlayMode.LOOP);
+        heroAttackAnimation = new Animation<TextureRegion>(0.1f, heroAtlas.findRegions("Attack"), PlayMode.LOOP);
 
         //Initialize stateTime
         stateTime = 0f;
