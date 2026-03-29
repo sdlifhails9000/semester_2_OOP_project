@@ -37,8 +37,8 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 // This contain default values for specific hero types
 enum HeroPreset {
-    HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 5f, 150f, 1f, 12, 14),
-    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 5f, 125f, 0.5f, 9, 12);
+    HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 5f, 150f, 1f, 15f, 15f),
+    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 5f, 125f, 0.5f, 10f, 10f);
 
     final String assetPath;
 
@@ -103,9 +103,9 @@ class HeroLoader {
             attack.setFrameDuration(attackFrameDuration);
             
             // Load all the animations into the hash map
-            runAnimation.put(preset, new Animation<>(0.033f, heroAtlasses.get(preset).findRegions("Run"), PlayMode.LOOP));
+            runAnimation.put(preset, new Animation<>(0.075f, heroAtlasses.get(preset).findRegions("Run"), PlayMode.LOOP));
             attackAnimation.put(preset, attack);
-            idleAnimation.put(preset, new Animation<>(0.1f, heroAtlasses.get(preset).findRegions("Idle"), PlayMode.LOOP));
+            idleAnimation.put(preset, new Animation<>(0.5f, heroAtlasses.get(preset).findRegions("Idle"), PlayMode.LOOP));
             deadAnimation.put(preset, new Animation<>(0.5f, heroAtlasses.get(preset).findRegions("Dead"), PlayMode.LOOP));
         }
     }
@@ -229,8 +229,8 @@ public class MainGame extends ApplicationAdapter {
         stateTime = 0f;
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(HeroPreset.LIGHT, stateTime, 50,50);
-        testEnemy = new HeroPlayer(HeroPreset.HEAVY, stateTime, 25, 25);
+        player = new HeroPlayer(HeroPreset.HEAVY, stateTime, 50,50);
+        testEnemy = new HeroPlayer(HeroPreset.LIGHT, stateTime, 25, 25);
 
         player.attackTarget = testEnemy;
         testEnemy.attackTarget = player;
