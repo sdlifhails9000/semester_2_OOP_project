@@ -14,7 +14,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 //import com.badlogic.gdx.graphics.Texture;
 // import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
+//import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 //import com.badlogic.gdx.math.Vector3;
@@ -52,12 +52,15 @@ abstract class DynamicEntity extends Entity {
                   float attackRange,
                   float attackSpeed,
                   float attackStrength,
-                  float speed) {
+                  float speed,
+                  float spriteWidth,
+                  float spriteHeight) {
 
         super(
             attack, dead, idle,
             stateTime, startX, startY,
-            maxHealth, attackRange, attackSpeed, attackStrength
+            maxHealth, attackRange, attackSpeed, attackStrength,
+            spriteWidth, spriteHeight
         );
         
         this.runAnimation = run;
@@ -139,7 +142,9 @@ class HeroPlayer extends DynamicEntity {
             preset.attackRange,
             preset.attackSpeed,
             preset.attackStrength,
-            preset.speed
+            preset.speed,
+            preset.spriteWidth,
+            preset.spriteHeight
         );
     }
 

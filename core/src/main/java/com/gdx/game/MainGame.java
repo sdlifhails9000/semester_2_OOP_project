@@ -37,8 +37,8 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 // This contain default values for specific hero types
 enum HeroPreset {
-    HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 15f, 150f, 1f),
-    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 10f, 125f, 0.5f);
+    HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 5f, 150f, 1f, 12, 14),
+    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 5f, 125f, 0.5f, 9, 12);
 
     final String assetPath;
 
@@ -50,8 +50,14 @@ enum HeroPreset {
     // This will effect the attack animation
     float attackSpeed;
 
+    final float spriteWidth;        //Store width and height and set at Entity.java
+    final float spriteHeight;       //This gets rid of manually settings each entity size
+
+    
+
     HeroPreset(String path, float speed, float damageStrength,
-               float attackRange, float maxHealth, float attackSpeed) {
+               float attackRange, float maxHealth, float attackSpeed,
+                float spriteWidth, float spriteHeight) {
         
         this.assetPath = path;
         this.speed = speed;
@@ -59,6 +65,8 @@ enum HeroPreset {
         this.attackRange = attackRange;
         this.maxHealth = maxHealth;
         this.attackSpeed = attackSpeed;
+        this.spriteWidth = spriteWidth;
+        this.spriteHeight = spriteHeight;
     }
 }
 
@@ -95,9 +103,9 @@ class HeroLoader {
             attack.setFrameDuration(attackFrameDuration);
             
             // Load all the animations into the hash map
-            runAnimation.put(preset, new Animation<>(0.5f, heroAtlasses.get(preset).findRegions("Run"), PlayMode.LOOP));
+            runAnimation.put(preset, new Animation<>(0.033f, heroAtlasses.get(preset).findRegions("Run"), PlayMode.LOOP));
             attackAnimation.put(preset, attack);
-            idleAnimation.put(preset, new Animation<>(0.5f, heroAtlasses.get(preset).findRegions("Idle"), PlayMode.LOOP));
+            idleAnimation.put(preset, new Animation<>(0.1f, heroAtlasses.get(preset).findRegions("Idle"), PlayMode.LOOP));
             deadAnimation.put(preset, new Animation<>(0.5f, heroAtlasses.get(preset).findRegions("Dead"), PlayMode.LOOP));
         }
     }
@@ -221,8 +229,8 @@ public class MainGame extends ApplicationAdapter {
         stateTime = 0f;
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(HeroPreset.LIGHT, stateTime, 10,10);
-        testEnemy = new HeroPlayer(HeroPreset.HEAVY, stateTime, 15, 15);
+        player = new HeroPlayer(HeroPreset.LIGHT, stateTime, 50,50);
+        testEnemy = new HeroPlayer(HeroPreset.HEAVY, stateTime, 25, 25);
 
         player.attackTarget = testEnemy;
         testEnemy.attackTarget = player;
@@ -236,8 +244,7 @@ public class MainGame extends ApplicationAdapter {
         //background.setSize(worldWidth, worldHeight);      NO NEED ANYMORE
         //background.setPosition(0,0);
 
-        for(DynamicEntity e : playerEntities){
-            e.setSize(10,14);                     //With this we wont have to write these 3 lines for each dynamicSprite
+        for(DynamicEntity e : playerEntities){   //NO NEED HANDLED IN PRESETS ABOVE
             e.setOriginCenter();
             e.setCenter(e.getPosition().x, e.getPosition().y);
         }

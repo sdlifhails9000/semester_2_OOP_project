@@ -24,6 +24,8 @@ abstract class Entity extends Sprite {
     protected float attackStrength;
     protected float attackRange;
     protected float attackSpeed;
+    protected float spriteWidth;
+    protected float spriteHeight;
 
     protected Vector2 currentXY;     //Starting points (game World Coords not screen coords)  //IN CHILD CLASS NOW
 
@@ -46,7 +48,9 @@ abstract class Entity extends Sprite {
            float maxHealth,
            float attackRange,
            float attackSpeed,
-           float attackStrength) {
+           float attackStrength,
+           float spriteWidth,
+           float spriteHeight) {
 
         super(idle.getKeyFrame(stateTime));
 
@@ -58,10 +62,13 @@ abstract class Entity extends Sprite {
 
         this.stateTime = stateTime;
         this.maxHealth = maxHealth;
+        this.currentHealth = maxHealth;     //Forgot to initialize this
         this.attackRange = attackRange;
         this.attackSpeed = attackSpeed;
         this.attackStrength = attackStrength;
         
+        this.setSize(spriteWidth, spriteHeight);        //Set size here
+
         state = State.IDLE;
         currentAnimation = idleAnimation;
     }
@@ -97,7 +104,7 @@ abstract class Entity extends Sprite {
         // Check if we have passed the interval of attack and reset the timer
         if (stateTime >= attackSpeed) {
             attackTarget.takeDamage(attackStrength);
-            System.out.printf("Damage dealt... %f\n", currentHealth);
+            System.out.printf("Attacker's Current Health... %f\n", currentHealth);
             stateTime = 0;
         }
 
