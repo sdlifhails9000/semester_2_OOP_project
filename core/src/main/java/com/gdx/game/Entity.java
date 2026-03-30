@@ -133,6 +133,7 @@ abstract class Entity extends Sprite {
 
     // COLLISION WORK AHEAD
     // HITBOX GENERATIOND AND RELATED METHODS
+    static Pixmap pixmap;
         public void updateHitBox(){
         Animation<TextureRegion> animation = this.currentAnimation;
         TextureRegion frame = animation.getKeyFrame(stateTime);
@@ -174,7 +175,6 @@ abstract class Entity extends Sprite {
         float worldHeight = (maxY - minY + 1) * scaleY;
 
         this.hitBox = new Rectangle(worldX, worldY, worldWidth, worldHeight);
-        pixmap.dispose(); // Clean up the Pixmap to free memory // Temporarily dispose here
         }
 
     public Rectangle getHitBox(){

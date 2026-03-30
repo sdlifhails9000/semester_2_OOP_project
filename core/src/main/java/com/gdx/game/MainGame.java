@@ -42,8 +42,8 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 // This contain default values for specific hero types
 enum HeroPreset {
-    HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 12, 14),
-    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 10f, 125f, 0.5f, 9, 12);
+    HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12),
+    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 10f, 125f, 0.5f, 10, 10);
 
     final String assetPath;
 
@@ -328,7 +328,9 @@ public class MainGame extends ApplicationAdapter {
     public void dispose() {
         batch.dispose();
         manager.dispose();
-        mapRenderer.dispose();  
+        shapeRenderer.dispose();   // TODO: Remove DEBUG tool
+        mapRenderer.dispose();
+        Entity.pixmap.dispose();    // Dispose pixmap used for hitbox generation
     }
 
 
