@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -18,9 +19,13 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.TextureData;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.Animation;           //Animation imports are these two
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
@@ -37,8 +42,8 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 // This contain default values for specific hero types
 enum HeroPreset {
-    HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 5f, 150f, 1f, 12, 14),
-    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 5f, 125f, 0.5f, 9, 12);
+    HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 12, 14),
+    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 10f, 125f, 0.5f, 9, 12);
 
     final String assetPath;
 
@@ -197,6 +202,10 @@ public class MainGame extends ApplicationAdapter {
     // Declare camera
     OrthographicCamera camera;
 
+    // TODO: REMOVE
+    // DEBUGGING HITBOXES
+    ShapeRenderer shapeRenderer;  // DEBUG tool
+
     @Override
     public void create() {
         // Initialize SpriteBatch
@@ -240,6 +249,11 @@ public class MainGame extends ApplicationAdapter {
         playerEntities.add(player);
         playerEntities.add(testEnemy);
 
+        // COLLISION WORKS AHEAD
+        ArrayList<Entity> enemyList = new ArrayList<Entity>();
+        enemyList.add(testEnemy);
+        DynamicEntity.enemyList = enemyList;
+
         //Set background and lizard size+position
         //background.setSize(worldWidth, worldHeight);      NO NEED ANYMORE
         //background.setPosition(0,0);
@@ -268,6 +282,9 @@ public class MainGame extends ApplicationAdapter {
 
         //Initialize the mapRenderer (this is the main working unit here which scales the tiledMap with our current game units)
         mapRenderer = new OrthogonalTiledMapRenderer(map, scale);       //We can pass our own spritebatch for optimization but will have to change some internal methods so jst let it use its own spritebatch for map
+
+        // TODO: REMOVE
+        shapeRenderer = new ShapeRenderer();  // DEBUG tool
     }
 
     @Override
@@ -338,7 +355,23 @@ public class MainGame extends ApplicationAdapter {
         }
 
         batch.end();
+
+                    
+        // TODO: REMOVE START
+        //DEBUG FOR COLLISION
+        shapeRenderer.setProjectionMatrix(camera.combined);
+        ArrayList<Rectangle> listOfHitbox = new ArrayList<Rectangle>();
+
+        for (DynamicEntity e : playerEntities) {
+            listOfHitbox.add(e.getHitBox());
+        }
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        for(Rectangle rect : listOfHitbox)
+            shapeRenderer.rect(rect.x,rect.y,rect.width,rect.height);
+        shapeRenderer.end();
+        // REMOVE END
     }
+
     
     // Implement later for handling keyboard events
     // private void keyEvent(float delta) {
