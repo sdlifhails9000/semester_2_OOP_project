@@ -132,15 +132,26 @@ abstract class Entity extends Sprite {
 
 
     // COLLISION WORK AHEAD
-    // HITBOX GENERATIOND AND RELATED METHODS
+    // HITBOX GENERATION AND RELATED METHODS
     static Pixmap pixmap;
-        public void updateHitBox(){
+    static Texture pixmapTexture;
+
+    public void updateHitBox(){
         Animation<TextureRegion> animation = this.currentAnimation;
         TextureRegion frame = animation.getKeyFrame(stateTime);
         Texture texture = frame.getTexture(); // the atlas texture containing the frame
-        TextureData textureData = texture.getTextureData(); // raw texture data for pixel access
-        textureData.prepare(); // must prepare before creating a Pixmap
-        Pixmap pixmap = textureData.consumePixmap(); // access pixel values
+
+        if (pixmap == null || pixmapTexture != texture) {   // If pixmap is not initialized or the texture has changed, create a new pixmap, was casuing crash
+            if (pixmap != null) {
+                pixmap.dispose();   // If pixmap has changed dispose the previous one
+            }
+            TextureData textureData = texture.getTextureData(); // raw texture data for pixel access
+            if (!textureData.isPrepared()) {
+                textureData.prepare(); // must prepare before creating a Pixmap
+            }
+            pixmap = textureData.consumePixmap(); // access pixel values
+            pixmapTexture = texture;
+        }
 
         // Bounds of the frame in the atlas
         int startX = frame.getRegionX();

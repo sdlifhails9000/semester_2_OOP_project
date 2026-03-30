@@ -23,9 +23,6 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.TextureData;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.Animation;           //Animation imports are these two
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
@@ -330,7 +327,9 @@ public class MainGame extends ApplicationAdapter {
         manager.dispose();
         shapeRenderer.dispose();   // TODO: Remove DEBUG tool
         mapRenderer.dispose();
-        Entity.pixmap.dispose();    // Dispose pixmap used for hitbox generation
+        if (Entity.pixmap != null) {
+            Entity.pixmap.dispose();    // Dispose pixmap used for hitbox generation
+        }
     }
 
 
