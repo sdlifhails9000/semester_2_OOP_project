@@ -53,9 +53,7 @@ enum HeroPreset {
     float attackSpeed;
 
     final float spriteWidth;        //Store width and height and set at Entity.java
-    final float spriteHeight;       //This gets rid of manually settings each entity size
-
-    
+    final float spriteHeight;       //This gets rid of manually settings each entity size 
 
     HeroPreset(String path, float speed, float damageStrength,
                float attackRange, float maxHealth, float attackSpeed,
@@ -181,7 +179,7 @@ public class MainGame extends ApplicationAdapter {
     DynamicEntity testEnemy;
 
     //Declare array for DynamicSprites  (Right now for players later make seperate for goblins etc because their movement logic is different)
-    ArrayList<DynamicEntity> playerEntities;
+    ArrayList<Entity> entities, heroes, goblins, towers;
 
     //A variable to track elapsed time during animation
     float stateTime;
@@ -238,24 +236,22 @@ public class MainGame extends ApplicationAdapter {
         player = new HeroPlayer(HeroPreset.HEAVY, stateTime, 50,50);
         testEnemy = new HeroPlayer(HeroPreset.LIGHT, stateTime, 25, 25);
 
-        player.attackTarget = testEnemy;
-        testEnemy.attackTarget = player;
-
         //Initialize the dynamicSprite array and add the players
-        playerEntities = new ArrayList<DynamicEntity>();
-        playerEntities.add(player);
-        playerEntities.add(testEnemy);
+        entities = new ArrayList<Entity>();
+        entities.add(player);
+        entities.add(testEnemy);
 
         // COLLISION WORKS AHEAD
         ArrayList<Entity> enemyList = new ArrayList<Entity>();
         enemyList.add(testEnemy);
+        enemyList.add(player);
         DynamicEntity.enemyList = enemyList;
 
         //Set background and lizard size+position
         //background.setSize(worldWidth, worldHeight);      NO NEED ANYMORE
         //background.setPosition(0,0);
 
-        for(DynamicEntity e : playerEntities){   //NO NEED HANDLED IN PRESETS ABOVE
+        for(Entity e : entities){   //NO NEED HANDLED IN PRESETS ABOVE
             e.setOriginCenter();
             e.setCenter(e.getPosition().x, e.getPosition().y);
         }
@@ -292,7 +288,7 @@ public class MainGame extends ApplicationAdapter {
         
         clickEvent(delta);    // Check left click movement
 
-        for (DynamicEntity e : playerEntities) {
+        for (Entity e : entities) {
             e.Update(stateTime, delta);
         }
 
@@ -351,7 +347,7 @@ public class MainGame extends ApplicationAdapter {
         healthBarSprite.draw(batch);    //Draw HealthBar
 
         //Draw all the dynamicSprites by for loop
-        for (DynamicEntity e : playerEntities){
+        for (Entity e : entities){
             e.draw(batch);
         }
 
@@ -363,9 +359,10 @@ public class MainGame extends ApplicationAdapter {
         shapeRenderer.setProjectionMatrix(camera.combined);
         ArrayList<Rectangle> listOfHitbox = new ArrayList<Rectangle>();
 
-        for (DynamicEntity e : playerEntities) {
+        for (Entity e : entities) {
             listOfHitbox.add(e.getHitBox());
         }
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         for(Rectangle rect : listOfHitbox)
             shapeRenderer.rect(rect.x,rect.y,rect.width,rect.height);
@@ -386,14 +383,34 @@ public class MainGame extends ApplicationAdapter {
             clickCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0 );
             camera.unproject(clickCoords);  // Converts screen coords to World coords
             
-            
             //NOTE: Handling an edge case, because camera is only place which needs Vector3
             Vector2 clickCoords2D = new Vector2(clickCoords.x, clickCoords.y);     //We do this because clickCoords is only place where we need a 3d Vector. Everywhere else a 2d
 
             //We use for loop for playerEntities because bots i.e goblins etc will not get leftClick. Their movement call is seperate
             clickCoords2D.x = MathUtils.clamp(clickCoords2D.x, player.getWidth() / 2, worldWidth - player.getWidth() / 2);        //Doing correction because target is centered
             clickCoords2D.y = MathUtils.clamp(clickCoords2D.y, player.getHeight() / 2,worldHeight - player.getHeight() / 2);      //Binding it to world width and height dimensions
-            player.setMove(clickCoords2D);     //Using the small fix for edge case above
+            testEnemy.setMove(clickCoords2D);     //Using the small fix for edge case above
+            // player.setAttackInfo(null);
+        }
+        else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+            clickCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0 );
+            camera.unproject(clickCoords);  // Converts screen coords to World coords
+
+            Vector2 clickCoords2D = new Vector2(clickCoords.x, clickCoords.y);
+            clickCoords2D.x = MathUtils.clamp(clickCoords2D.x, player.getWidth() / 2, worldWidth - player.getWidth() / 2);
+            clickCoords2D.y = MathUtils.clamp(clickCoords2D.y, player.getHeight() / 2,worldHeight - player.getHeight() / 2);
+
+            for (Entity e : entities) {
+                if (e == player) {
+                    continue;
+                }
+
+                if (e.getHitBox().contains(clickCoords2D)) {
+                    player.setMove(clickCoords2D);
+                    player.setAttackInfo(e);
+                    break;
+                }
+            }
         }
     }
     // All movement

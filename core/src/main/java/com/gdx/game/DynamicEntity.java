@@ -85,11 +85,6 @@ abstract class DynamicEntity extends Entity {
         return moveTargetVector;
     }
 
-
-    // Get Postion
-    abstract public Vector2 getPosition();
-
-
     // Movement Method
     public void updateMovement(float stateTime , float delta){
         //For angle calculation to rotate sprite
@@ -131,11 +126,10 @@ abstract class DynamicEntity extends Entity {
             if (checkEnemyCollision()) {
                 currentXY.set(oldPosition);
                 this.setCenter(oldPosition.x, oldPosition.y);   // Move back to old position
-                updateHitBox(); // Remake hitbox
+                // updateHitBox(); // Remake hitbox
                 moveTargetVector = null;
-                return;
             }
-        } else if (isCloseToEnemy() || destVector.len() <= 0.5) {
+        } else if (destVector.len() <= 0.5) {
             moveTargetVector = null;
         }
         //No need for updating camera over here as its handled in cameraRoam otherwise it causes conflict between two
@@ -151,7 +145,11 @@ abstract class DynamicEntity extends Entity {
         }
 
         for (Entity i : enemyList) {
-            if (i.currentXY.dst(this.currentXY) >= 50) {
+            if (i == this) {
+                continue;
+            }
+
+            if (i.currentXY.dst(this.currentXY) >= 20) {
                 continue;
             }
 
@@ -163,7 +161,6 @@ abstract class DynamicEntity extends Entity {
         }
 
         return false;
-    
     }
 
 }
@@ -196,17 +193,18 @@ class HeroPlayer extends DynamicEntity {
     @Override
     public void Update(float stateTime, float delta) {
         this.setRegion(currentAnimation.getKeyFrame(stateTime));    //Updates current Animation or you get slender man running
+
         if (state == State.DEAD) {
         }
         else if (moveTargetVector != null)  {
             state = State.MOVING;
             currentAnimation = runAnimation;
         }
-        else if (isCloseToEnemy()) {
+        else if (getAttackInfo() != null) {
             state = State.ATTACK;
             currentAnimation = attackAnimation;
         }
-        else if (moveTargetVector == null){
+        else {
             state = State.IDLE;    
             currentAnimation = idleAnimation;
         }
@@ -218,7 +216,11 @@ class HeroPlayer extends DynamicEntity {
             break;
 
         case ATTACK:
-            updateAttack(delta);
+            if (!isCloseToEnemy()) {
+                setMove(getAttackInfo().getPosition());
+            } else {
+                updateAttack(delta);
+            }
             break;
 
         default:
