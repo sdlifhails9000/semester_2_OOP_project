@@ -8,6 +8,9 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.TextureData;
 import com.badlogic.gdx.graphics.g2d.Animation;           //Animation imports are these two
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
@@ -40,6 +43,8 @@ abstract class Entity extends Sprite {
     Animation<TextureRegion> deadAnimation;
 
     Animation<TextureRegion> currentAnimation;
+
+    protected Rectangle hitBox; 
     
     Entity(Animation<TextureRegion> attack,
            Animation<TextureRegion> dead,
@@ -124,6 +129,58 @@ abstract class Entity extends Sprite {
 
         stateTime += delta;
     }
+
+
+    // COLLISION WORK AHEAD
+    // HITBOX GENERATIOND AND RELATED METHODS
+        public void updateHitBox(){
+        Animation<TextureRegion> animation = this.currentAnimation;
+        TextureRegion frame = animation.getKeyFrame(stateTime);
+        Texture texture = frame.getTexture(); // the atlas texture containing the frame
+        TextureData textureData = texture.getTextureData(); // raw texture data for pixel access
+        textureData.prepare(); // must prepare before creating a Pixmap
+        Pixmap pixmap = textureData.consumePixmap(); // access pixel values
+
+        // Bounds of the frame in the atlas
+        int startX = frame.getRegionX();
+        int startY = frame.getRegionY();
+        int width = frame.getRegionWidth();
+        int height = frame.getRegionHeight();
+
+        int minX = width, minY = height;
+        int maxX = 0, maxY = 0;
+
+        for (int y = 0; y < height; y++) {  // Pixamp starts from the top left corner
+            for (int x = 0; x < width; x++) {
+                int pixel = pixmap.getPixel(startX + x, startY + y);    // Start from the frame region in the atlas
+                int alpha = pixel >>> 24;   // Alpha shows the transparency
+
+                if (alpha > 0) {    // 0-255
+                    minX = Math.min(minX, x);   // Left Boundary
+                    minY = Math.min(minY, y);   // Bottom Boundary
+                    maxX = Math.max(maxX, x);   // Right Boundary
+                    maxY = Math.max(maxY, y);   // Top Boundary
+                }
+            }
+        }
+
+
+        float scaleX = this.getWidth() / (float) width;    // Widht of the sprite accounting for scale
+        float scaleY = this.getHeight() / (float) height;  // Height of the sprite accounting for scale
+
+        float worldX = this.getX() + minX * scaleX;    // Scale accordingly at the outer most pixel
+        float worldY = this.getY() + (height - maxY - 1) * scaleY; // Invert(Top left to bottom left) then scale
+        float worldWidth = (maxX - minX + 1) * scaleX;
+        float worldHeight = (maxY - minY + 1) * scaleY;
+
+        this.hitBox = new Rectangle(worldX, worldY, worldWidth, worldHeight);
+        pixmap.dispose(); // Clean up the Pixmap to free memory // Temporarily dispose here
+        }
+
+    public Rectangle getHitBox(){
+        return this.hitBox;
+    }
+
 
     abstract public void Update(float stateTime, float delta);
 }
