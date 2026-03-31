@@ -41,8 +41,10 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 // This contain default values for specific hero types
 enum HeroPreset {
     HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12),
-    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 10f, 125f, 0.5f, 10, 10);
-
+    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 10f, 125f, 0.5f, 10, 10),
+    ENEMYLIGHT("HeroAtlas/lightEnemyHero.atlas", 25f, 20f, 10f, 125f, 0.5f, 10, 10),
+    ENEMYHEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12);
+    
     final String assetPath;
 
     final float speed;
@@ -236,7 +238,7 @@ public class MainGame extends ApplicationAdapter {
         stateTime = 0f;
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(HeroPreset.LIGHT, stateTime, 50,50);
+        player = new HeroPlayer(HeroPreset.ENEMYHEAVY, stateTime, 50,50);
         testEnemy = new HeroPlayer(HeroPreset.LIGHT, stateTime, 25, 25);
 
         //Initialize the dynamicSprite array and add the players

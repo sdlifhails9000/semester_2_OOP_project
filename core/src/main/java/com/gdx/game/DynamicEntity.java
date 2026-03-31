@@ -202,7 +202,6 @@ class HeroPlayer extends DynamicEntity {
         }
         else if (getAttackInfo() != null) {
             state = State.ATTACK;
-            currentAnimation = attackAnimation;
         }
         else {
             state = State.IDLE;    
@@ -220,6 +219,7 @@ class HeroPlayer extends DynamicEntity {
                 setMove(getAttackInfo().getPosition());
             } else {
                 updateAttack(delta);
+                currentAnimation = attackAnimation;
             }
             break;
 
