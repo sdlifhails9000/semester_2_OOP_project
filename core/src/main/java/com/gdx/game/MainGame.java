@@ -37,6 +37,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
+
 // This contain default values for specific hero types
 enum HeroPreset {
     HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12),
@@ -90,11 +91,13 @@ class HeroLoader {
         deadAnimation = new HashMap<>();
 
         for (HeroPreset preset : HeroPreset.values()) {
-            heroAtlasses.put(preset, manager.get(preset.assetPath, TextureAtlas.class));
+            TextureAtlas heroAtlas = manager.get(preset.assetPath, TextureAtlas.class);
+
+            heroAtlasses.put(preset, heroAtlas);
 
             Animation<TextureRegion> attack = new Animation<>(
                 0.5f, // this is just a temporary value
-                heroAtlasses.get(preset).findRegions("Attack"), PlayMode.LOOP);
+                heroAtlas.findRegions("Attack"), PlayMode.LOOP);
 
             // Calculate the correct frame duration for the attack speed, OK?
             float attackFrameDuration = preset.attackSpeed / attack.getKeyFrames().length;
@@ -103,10 +106,10 @@ class HeroLoader {
             attack.setFrameDuration(attackFrameDuration);
             
             // Load all the animations into the hash map
-            runAnimation.put(preset, new Animation<>(0.075f, heroAtlasses.get(preset).findRegions("Run"), PlayMode.LOOP));
+            runAnimation.put(preset, new Animation<>(0.075f, heroAtlas.findRegions("Run"), PlayMode.LOOP));
             attackAnimation.put(preset, attack);
-            idleAnimation.put(preset, new Animation<>(0.5f, heroAtlasses.get(preset).findRegions("Idle"), PlayMode.LOOP));
-            deadAnimation.put(preset, new Animation<>(0.5f, heroAtlasses.get(preset).findRegions("Dead"), PlayMode.LOOP));
+            idleAnimation.put(preset, new Animation<>(0.5f, heroAtlas.findRegions("Idle"), PlayMode.LOOP));
+            deadAnimation.put(preset, new Animation<>(0.5f, heroAtlas.findRegions("Dead"), PlayMode.LOOP));
         }
     }
 
@@ -233,7 +236,7 @@ public class MainGame extends ApplicationAdapter {
         stateTime = 0f;
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(HeroPreset.HEAVY, stateTime, 50,50);
+        player = new HeroPlayer(HeroPreset.LIGHT, stateTime, 50,50);
         testEnemy = new HeroPlayer(HeroPreset.LIGHT, stateTime, 25, 25);
 
         //Initialize the dynamicSprite array and add the players
