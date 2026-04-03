@@ -13,10 +13,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 enum HeroPreset {
-    HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 2f, 14, 12, true),
-    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 10f, 125f, 1f, 10, 10, true),
-    ENEMY_LIGHT("HeroAtlas/lightEnemyHero.atlas", 25f, 20f, 10f, 125f, 1f, 10, 10, false),
-    ENEMY_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 30f, 10f, 150f, 2f, 14, 12, false);
+    HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, true),
+    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 10f, 125f, 0.5f, 10, 10, true),
+    ENEMY_LIGHT("HeroAtlas/lightEnemyHero.atlas", 25f, 20f, 10f, 125f, 0.5f, 10, 10, false),
+    ENEMY_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, false);
     
     final String assetPath;
 
