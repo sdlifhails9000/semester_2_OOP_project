@@ -31,6 +31,7 @@ abstract class Entity extends Sprite {
     protected float spriteHeight;
 
     protected boolean isAlly;
+    protected boolean isDead = false;       //Initially character is alive
 
     protected Vector2 currentXY;     //Starting points (game World Coords not screen coords)  //IN CHILD CLASS NOW
 
@@ -38,7 +39,8 @@ abstract class Entity extends Sprite {
 
     Entity attackTarget;     //Stores entity to attack
 
-    State state;
+    protected State state;
+    protected State prevState = null;        //To keep track of previous state and handle stateTime
 
     Animation<TextureRegion> idleAnimation;
     Animation<TextureRegion> attackAnimation;
@@ -52,7 +54,7 @@ abstract class Entity extends Sprite {
     Entity(Animation<TextureRegion> attack,
            Animation<TextureRegion> dead,
            Animation<TextureRegion> idle,
-           float stateTime, float startX, float startY,
+           float startX, float startY,
            float maxHealth,
            float attackRange,
            float attackSpeed,
@@ -61,7 +63,7 @@ abstract class Entity extends Sprite {
            float spriteHeight,
            boolean isAlly) {
 
-        super(idle.getKeyFrame(stateTime));
+        super(idle.getKeyFrame(0));     //Get first idle frame
 
         this.attackAnimation = attack;
         this.idleAnimation = idle;
@@ -69,7 +71,6 @@ abstract class Entity extends Sprite {
 
         this.currentXY = new Vector2(startX, startY);
 
-        this.stateTime = stateTime;
         this.maxHealth = maxHealth;
         this.currentHealth = maxHealth;     //Forgot to initialize this
         this.attackRange = attackRange;
@@ -118,7 +119,7 @@ abstract class Entity extends Sprite {
         currentHealth -= damage;
 
         if (currentHealth <= 0f) {
-            // Set state to dead
+            isDead = true;
         }
     }
 
@@ -126,7 +127,7 @@ abstract class Entity extends Sprite {
         // Check if we have passed the interval of attack and reset the timer
         if (stateTime >= attackSpeed) {
             attackTarget.takeDamage(attackStrength);
-            System.out.printf("Attacker's Current Health... %f\n", attackTarget.currentHealth);
+            System.out.printf("Victim's Current Health... %f\n", attackTarget.currentHealth);
             stateTime = 0;
         }
 
@@ -157,7 +158,7 @@ abstract class Entity extends Sprite {
 
     public void updateBoxes() {
         Animation<TextureRegion> animation = this.idleAnimation;
-        TextureRegion frame = animation.getKeyFrame(stateTime);
+        TextureRegion frame = animation.getKeyFrame(0);     //SWITCH TO STATETIME IF YOU WANT DYNAMIC HITBOX
         Texture texture = frame.getTexture(); // the atlas texture containing the frame
 
         if (pixmap == null || pixmapTexture != texture) {   // If pixmap is not initialized or the texture has changed, create a new pixmap, was casuing crash
@@ -219,5 +220,5 @@ abstract class Entity extends Sprite {
     }
 
 
-    abstract public void Update(float stateTime, float delta);
+    abstract public void Update(float delta);
 }

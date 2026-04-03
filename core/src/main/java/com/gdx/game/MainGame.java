@@ -40,10 +40,10 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 // This contain default values for specific hero types
 enum HeroPreset {
-    HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, true),
-    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 10f, 125f, 0.5f, 10, 10, true),
-    ENEMY_LIGHT("HeroAtlas/lightEnemyHero.atlas", 25f, 20f, 10f, 125f, 0.5f, 10, 10, false),
-    ENEMY_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, false);
+    HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 2f, 14, 12, true),
+    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 10f, 125f, 1f, 10, 10, true),
+    ENEMY_LIGHT("HeroAtlas/lightEnemyHero.atlas", 25f, 20f, 10f, 125f, 1f, 10, 10, false),
+    ENEMY_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 30f, 10f, 150f, 2f, 14, 12, false);
     
     final String assetPath;
 
@@ -67,7 +67,7 @@ enum HeroPreset {
         this.assetPath = path;
         this.speed = speed;
         this.attackStrength = damageStrength;
-        this.attackRange = attackRange;
+        this.attackRange = attackRange;         //Reserved for ranged units like towers or snipers (to be utilized later)
         this.maxHealth = maxHealth;
         this.attackSpeed = attackSpeed;
         this.spriteWidth = spriteWidth;
@@ -114,7 +114,7 @@ class HeroLoader {
             runAnimation.put(preset, new Animation<>(0.075f, heroAtlas.findRegions("Run"), PlayMode.LOOP));
             attackAnimation.put(preset, attack);
             idleAnimation.put(preset, new Animation<>(0.5f, heroAtlas.findRegions("Idle"), PlayMode.LOOP));
-            deadAnimation.put(preset, new Animation<>(0.5f, heroAtlas.findRegions("Dead"), PlayMode.LOOP));
+            deadAnimation.put(preset, new Animation<>(0.25f, heroAtlas.findRegions("Dead"), PlayMode.NORMAL));
         }
     }
 
@@ -190,7 +190,7 @@ public class MainGame extends ApplicationAdapter {
     ArrayList<Entity> entities, heroes, goblins, towers;
 
     //A variable to track elapsed time during animation
-    float stateTime;
+    // float stateTime; //Handled in Entity.java
 
     //Initialize vectors 2d
     Vector2 currentXY;
@@ -238,13 +238,13 @@ public class MainGame extends ApplicationAdapter {
         healthBarSprite = atlas.createSprite("healthBar");
 
         //Initialize stateTime
-        stateTime = 0f;
+        // stateTime = 0f;
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(HeroPreset.HEAVY, stateTime, 50,50);
-        testEnemy = new HeroPlayer(HeroPreset.LIGHT, stateTime, 25, 25);
+        player = new HeroPlayer(HeroPreset.LIGHT, 50, 50);
+        testEnemy = new HeroPlayer(HeroPreset.LIGHT, 25, 25);
 
-        //Initialize the dynamicSprite array and add the players
+        //Initialize the entities array and add the players
         entities = new ArrayList<Entity>();
         entities.add(player);
         entities.add(testEnemy);
@@ -259,11 +259,10 @@ public class MainGame extends ApplicationAdapter {
         //background.setSize(worldWidth, worldHeight);      NO NEED ANYMORE
         //background.setPosition(0,0);
 
-        for(Entity e : entities){   //NO NEED HANDLED IN PRESETS ABOVE
+        for(Entity e : entities){  
             e.setOriginCenter();
             e.setCenter(e.getPosition().x, e.getPosition().y);
         }
-        //Initialize starting vector coords (sprite coords here its lizard)
 
         // Initialize Camera
         float height = Gdx.graphics.getHeight();    //For aspect ration calculation
@@ -291,13 +290,12 @@ public class MainGame extends ApplicationAdapter {
     @Override
     public void render() {
         //delta exists in render because its the amount of time between first and second frame
-        float delta = Gdx.graphics.getDeltaTime();
-        stateTime += delta;     //Update stateTime in render
+        float delta = Gdx.graphics.getDeltaTime();  //StateTime is being handled in Update of entity
         
         clickEvent(delta);    // Check left click movement
 
         for (Entity e : entities) {
-            e.Update(stateTime, delta);
+            e.Update(delta);
         }
 
         cameraRoam(delta);  // Camera Free Roam
@@ -354,7 +352,7 @@ public class MainGame extends ApplicationAdapter {
         //Draw the sprites
         healthBarSprite.draw(batch);    //Draw HealthBar
 
-        //Draw all the dynamicSprites by for loop
+        //Draw all the entities by for loop
         for (Entity e : entities){
             e.draw(batch);
         }

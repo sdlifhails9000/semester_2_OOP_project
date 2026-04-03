@@ -54,7 +54,7 @@ abstract class DynamicEntity extends Entity {
                   Animation<TextureRegion> run,
                   Animation<TextureRegion> dead,
                   Animation<TextureRegion> idle,
-                  float stateTime, float startX, float startY,
+                  float startX, float startY,
                   float maxHealth,
                   float attackRange,
                   float attackSpeed,
@@ -66,7 +66,7 @@ abstract class DynamicEntity extends Entity {
 
         super(
             attack, dead, idle,
-            stateTime, startX, startY,
+            startX, startY,
             maxHealth, attackRange, attackSpeed, attackStrength,
             spriteWidth, spriteHeight, isAlly
         );
@@ -168,13 +168,13 @@ abstract class DynamicEntity extends Entity {
 //Child class number 1
 
 class HeroPlayer extends DynamicEntity {
-    HeroPlayer(HeroPreset preset, float stateTime, int startX, int startY) {
+    HeroPlayer(HeroPreset preset, int startX, int startY) {
         super(
             HeroLoader.attack(preset),
             HeroLoader.run(preset),
             HeroLoader.dead(preset),
             HeroLoader.idle(preset),
-            stateTime, startX, startY,
+            startX, startY,
             
             preset.maxHealth,
             preset.attackRange,
@@ -193,10 +193,20 @@ class HeroPlayer extends DynamicEntity {
     }
 
     @Override
-    public void Update(float stateTime, float delta) {
-        this.setRegion(currentAnimation.getKeyFrame(stateTime));    //Updates current Animation or you get slender man running
+    public void Update(float delta) {
+        if (state != prevState){
+            stateTime = 0;      //Reset stateTime if we have a state CHANGE
+            prevState = state;  //Update the state
+        }
+        else{
+            stateTime += delta;     //Update stateTime if states WEREN'T CHANGED
+        }
 
-        if (state == State.DEAD) {
+        this.setRegion(currentAnimation.getKeyFrame(stateTime));        //Use the locally made stateTime which resets if a state is switched
+
+        if (isDead) {
+            state = State.DEAD;
+            currentAnimation = deadAnimation;
         }
         else if (moveTargetVector != null)  {
             state = State.MOVING;
