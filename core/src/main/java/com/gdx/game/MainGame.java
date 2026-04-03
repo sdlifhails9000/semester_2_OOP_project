@@ -10,9 +10,8 @@ package com.gdx.game;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
@@ -24,13 +23,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.Animation;           //Animation imports are these two
-import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.*;       //Gets all viewport types (FixViewport, StrectViewport, ExtendViewport, etc)
-
-import java.util.HashMap;
-import java.util.Map;
 
 //Tiled Map Loaders
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -39,101 +34,6 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 
 // This contain default values for specific hero types
-enum HeroPreset {
-    HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 2f, 14, 12, true),
-    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 10f, 125f, 1f, 10, 10, true),
-    ENEMY_LIGHT("HeroAtlas/lightEnemyHero.atlas", 25f, 20f, 10f, 125f, 1f, 10, 10, false),
-    ENEMY_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 30f, 10f, 150f, 2f, 14, 12, false);
-    
-    final String assetPath;
-
-    final float speed;
-    final float attackStrength;
-    final float attackRange;    
-    final float maxHealth;
-
-    // This will effect the attack animation
-    float attackSpeed;
-
-    final float spriteWidth;        //Store width and height and set at Entity.java
-    final float spriteHeight;       //This gets rid of manually settings each entity size
-    
-    boolean isAlly;
-
-    HeroPreset(String path, float speed, float damageStrength,
-               float attackRange, float maxHealth, float attackSpeed,
-                float spriteWidth, float spriteHeight, boolean isAlly) {
-        
-        this.assetPath = path;
-        this.speed = speed;
-        this.attackStrength = damageStrength;
-        this.attackRange = attackRange;         //Reserved for ranged units like towers or snipers (to be utilized later)
-        this.maxHealth = maxHealth;
-        this.attackSpeed = attackSpeed;
-        this.spriteWidth = spriteWidth;
-        this.spriteHeight = spriteHeight;
-        this.isAlly = isAlly;
-    }
-}
-
-// This class will never have an instance
-class HeroLoader {
-    // A hash map is like a python dictionary, but instead, we can any type as the key
-    private static Map<HeroPreset, TextureAtlas> heroAtlasses;
-    private static Map<HeroPreset, Animation<TextureRegion>> runAnimation;
-    private static Map<HeroPreset, Animation<TextureRegion>> idleAnimation;
-    private static Map<HeroPreset, Animation<TextureRegion>> attackAnimation;
-    private static Map<HeroPreset, Animation<TextureRegion>> deadAnimation;
-
-    public static void load(AssetManager manager) {
-        // I'm keeping the ANGLED BRACKETS blank because the compiler figures out what should go there for you
-        // In this case we defined above the brackets to contain TextureAtlas
-        heroAtlasses = new HashMap<>();
-
-        runAnimation = new HashMap<>();
-        idleAnimation = new HashMap<>();
-        attackAnimation = new HashMap<>();
-        deadAnimation = new HashMap<>();
-
-        for (HeroPreset preset : HeroPreset.values()) {
-            TextureAtlas heroAtlas = manager.get(preset.assetPath, TextureAtlas.class);
-
-            heroAtlasses.put(preset, heroAtlas);
-
-            Animation<TextureRegion> attack = new Animation<>(
-                0.5f, // this is just a temporary value
-                heroAtlas.findRegions("Attack"), PlayMode.LOOP);
-
-            // Calculate the correct frame duration for the attack speed, OK?
-            float attackFrameDuration = preset.attackSpeed / attack.getKeyFrames().length;
-
-            // this reset the frame duration to the correct amount
-            attack.setFrameDuration(attackFrameDuration);
-            
-            // Load all the animations into the hash map
-            runAnimation.put(preset, new Animation<>(0.075f, heroAtlas.findRegions("Run"), PlayMode.LOOP));
-            attackAnimation.put(preset, attack);
-            idleAnimation.put(preset, new Animation<>(0.5f, heroAtlas.findRegions("Idle"), PlayMode.LOOP));
-            deadAnimation.put(preset, new Animation<>(0.25f, heroAtlas.findRegions("Dead"), PlayMode.NORMAL));
-        }
-    }
-
-    public static Animation<TextureRegion> run(HeroPreset preset) {
-        return runAnimation.get(preset);
-    }
-
-    public static Animation<TextureRegion> attack(HeroPreset preset) {
-        return attackAnimation.get(preset);
-    }
-
-    public static Animation<TextureRegion> idle(HeroPreset preset) {
-        return idleAnimation.get(preset);
-    }
-
-    public static Animation<TextureRegion> dead(HeroPreset preset) {
-        return deadAnimation.get(preset);
-    }
-}
 
 public class MainGame extends ApplicationAdapter {
     public static AssetManager manager = new AssetManager();
@@ -154,50 +54,37 @@ public class MainGame extends ApplicationAdapter {
     //-----MAP WORK DECLARATION END----
 
     //Initializing gameWorld sizing and camera sizing
-    float worldWidth = 200;                // -> Playable Region (Scaled to 1 tile = 1 world units)
-    float worldHeight = 200;               //Equivalent to a pixel in tiled map
+    float worldWidth = 200f;                // -> Playable Region (Scaled to 1 tile = 1 world units)
+    float worldHeight = 200f;               //Equivalent to a pixel in tiled map
 
-    float mapWidth = 50;
-    float mapHeight = 50;       //Map number of tiles i.e 50x50 tiles
-    float tileSize = 16;        //Each tile size in pixels (16x16)
+    float mapWidth = 50f;
+    float mapHeight = 50f;       //Map number of tiles i.e 50x50 tiles
+    float tileSize = 16f;        //Each tile size in pixels (16x16)
 
     float scale = (worldWidth / mapWidth) / tileSize;       //WORKS FOR SQUARE DIMENSION ONLY       Current scale is 1 tile = 4 gameUnits
 
     float aspectRatio = 0.5625f;        //Use to fix scaling (comment out viewport portion and see orthocamera libgdx way)
 
-    private float cameraWidth = 50;                 // -> Visible Region
-    private float cameraHeight = 50;
+    private float cameraWidth = 50f;                 // -> Visible Region
+    private float cameraHeight = 50f;
 
     //Player move speed and camera move speed
     float cameraSpeed = 40f;             // -> Camera Move Speed (Based off above world size)
 
-    //Health bar percent (testing to show dmg taken and if health bar works as intended)
-    float healthPercent = 0.2f;   //(Keep value between 0 and 1)
-
-    //Boolean setup to check if moving or not
-    //boolean playerMovement = false;       //No need i calculate if movement is required based of targetVector
-    boolean movingRight;
+    Vector3 clickCoords;
 
     // Declare Spritbatch and textureAtlas for Images
     SpriteBatch batch;
     Sprite background, healthBarSprite;
 
     //DynamicSprites (self defined)
-    DynamicEntity player;
-    DynamicEntity testEnemy;
-
-    //Declare array for DynamicSprites  (Right now for players later make seperate for goblins etc because their movement logic is different)
-    ArrayList<Entity> entities, heroes, goblins, towers;
+    HeroPlayer player;
+    HeroBot testEnemy;
 
     //A variable to track elapsed time during animation
     // float stateTime; //Handled in Entity.java
 
-    //Initialize vectors 2d
-    Vector2 currentXY;
-
     //Initialize 3D vector (since we have to unproject camera and it takes vector3 not vector 2)
-    Vector3 clickCoords;
-    Vector3 heroPos;
 
     //Declaring a viewport (to handle resizing) (You can use anykind fit extend etc just change name)
     Viewport viewport;      //Viewport is an abstract class so cannot be instantiated and should be downcasted to child (extend, fit, stretchViewport, etc)
@@ -225,7 +112,7 @@ public class MainGame extends ApplicationAdapter {
         manager.setLoader(TiledMap.class, new TmxMapLoader());
         manager.load("practiceMap/MainMap.tmx", TiledMap.class);
         
-        manager.finishLoading();
+        manager.finishLoading(); // We could add a loading screen here if there are enough assets that it becomes slow
 
         // -------------- Make all the necessary thingies --------------
 
@@ -237,32 +124,11 @@ public class MainGame extends ApplicationAdapter {
         //background = atlas.createSprite("Background");        //No need since we made our tiled map
         healthBarSprite = atlas.createSprite("healthBar");
 
-        //Initialize stateTime
-        // stateTime = 0f;
+        clickCoords = new Vector3();
 
         //Initialize the DYNAMIC SPRITES
         player = new HeroPlayer(HeroPreset.LIGHT, 50, 50);
-        testEnemy = new HeroPlayer(HeroPreset.LIGHT, 25, 25);
-
-        //Initialize the entities array and add the players
-        entities = new ArrayList<Entity>();
-        entities.add(player);
-        entities.add(testEnemy);
-
-        // COLLISION WORKS AHEAD
-        ArrayList<Entity> enemyList = new ArrayList<Entity>();
-        enemyList.add(testEnemy);
-        enemyList.add(player);
-        DynamicEntity.enemyList = enemyList;
-
-        //Set background and lizard size+position
-        //background.setSize(worldWidth, worldHeight);      NO NEED ANYMORE
-        //background.setPosition(0,0);
-
-        for(Entity e : entities){  
-            e.setOriginCenter();
-            e.setCenter(e.getPosition().x, e.getPosition().y);
-        }
+        testEnemy = new HeroBot(HeroPreset.ENEMY_HEAVY, 25, 25);
 
         // Initialize Camera
         float height = Gdx.graphics.getHeight();    //For aspect ration calculation
@@ -294,7 +160,7 @@ public class MainGame extends ApplicationAdapter {
         
         clickEvent(delta);    // Check left click movement
 
-        for (Entity e : entities) {
+        for (Entity e : Entity.entityList) {
             e.Update(delta);
         }
 
@@ -303,8 +169,6 @@ public class MainGame extends ApplicationAdapter {
 
         camera.update();    //Update camera
         
-        
-
         viewport.apply();   //Checks every frame if resized occured
         batch.setProjectionMatrix(camera.combined); 
         draw();
@@ -329,9 +193,6 @@ public class MainGame extends ApplicationAdapter {
         manager.dispose();
         shapeRenderer.dispose();   // TODO: Remove DEBUG tool
         mapRenderer.dispose();
-        if (Entity.pixmap != null) {
-            Entity.pixmap.dispose();    // Dispose pixmap used for hitbox generation
-        }
     }
 
 
@@ -339,8 +200,7 @@ public class MainGame extends ApplicationAdapter {
 
     // Main draw function, draws everything that has breath, praise the Lord
     private void draw(){
-        Gdx.gl.glClearColor(0,0,0,1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        ScreenUtils.clear(Color.BLACK);
 
         //Draw map and set camera view (OUTSIDE of batch.begin because it has its own spriteBatch initialized (google for more info))
         mapRenderer.setView(camera);    //This makes our tiled map use our camera we made
@@ -353,27 +213,30 @@ public class MainGame extends ApplicationAdapter {
         healthBarSprite.draw(batch);    //Draw HealthBar
 
         //Draw all the entities by for loop
-        for (Entity e : entities){
+        for (Entity e : Entity.entityList){
             e.draw(batch);
         }
 
         batch.end();
-
                     
-        // TODO: REMOVE START
+        // TODO: REMOVE START {
+
         //DEBUG FOR COLLISION
         shapeRenderer.setProjectionMatrix(camera.combined);
         ArrayList<Rectangle> listOfHitbox = new ArrayList<Rectangle>();
 
-        for (Entity e : entities) {
+        for (Entity e : Entity.entityList) {
             listOfHitbox.add(e.getCollisionBox());
         }
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        for(Rectangle rect : listOfHitbox)
-            shapeRenderer.rect(rect.x,rect.y,rect.width,rect.height);
+        for(Rectangle rect : listOfHitbox) {
+            shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
+        }
+
         shapeRenderer.end();
-        // REMOVE END
+
+        // } REMOVE END
     }
 
     
@@ -383,10 +246,10 @@ public class MainGame extends ApplicationAdapter {
     // }
     
     // Mouse Click Event
-    private void clickEvent(float delta){        //A method specifically for our player
+    private void clickEvent(float delta){
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             // Vector is basically a class with 3 data members, includes methods for magnitude,normalization(unit vector)
-            clickCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0 );
+            clickCoords.set(Gdx.input.getX(), Gdx.input.getY(), 0 );
             camera.unproject(clickCoords);  // Converts screen coords to World coords
             
             //NOTE: Handling an edge case, because camera is only place which needs Vector3
@@ -395,8 +258,8 @@ public class MainGame extends ApplicationAdapter {
             //We use for loop for playerEntities because bots i.e goblins etc will not get leftClick. Their movement call is seperate
             clickCoords2D.x = MathUtils.clamp(clickCoords2D.x, player.getWidth() / 2, worldWidth - player.getWidth() / 2);        //Doing correction because target is centered
             clickCoords2D.y = MathUtils.clamp(clickCoords2D.y, player.getHeight() / 2,worldHeight - player.getHeight() / 2);      //Binding it to world width and height dimensions
-            testEnemy.setMove(clickCoords2D);     //Using the small fix for edge case above
-            // player.setAttackInfo(null);
+            player.setMove(clickCoords2D);     //Using the small fix for edge case above
+            player.setAttackTarget(null);
         }
         else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
             clickCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0 );
@@ -406,38 +269,19 @@ public class MainGame extends ApplicationAdapter {
             clickCoords2D.x = MathUtils.clamp(clickCoords2D.x, player.getWidth() / 2, worldWidth - player.getWidth() / 2);
             clickCoords2D.y = MathUtils.clamp(clickCoords2D.y, player.getHeight() / 2,worldHeight - player.getHeight() / 2);
 
-            for (Entity e : entities) {
+            for (Entity e : Entity.entityList) {
                 if (e == player) {
                     continue;
                 }
 
                 if (e.getCollisionBox().contains(clickCoords2D)) {
                     player.setMove(clickCoords2D);
-                    player.setAttackInfo(e);
+                    player.setAttackTarget(e);
                     break;
                 }
             }
         }
     }
-    // All movement
-    // private void updateAllMovements(float delta){
-    //     // Arraylist, use polymorphism call movements using for loop for all entities
-    //     Vector2 targetVector;
-    //     Vector2 testTargetVector;            //Test case (later on use polymorphism to call movement and loop for all entities)
-
-    //     if (playerMovement){
-    //         targetVector = new Vector2(clickCoords.x,clickCoords.y);
-    //         testTargetVector = new Vector2(clickCoords.x,clickCoords.y);
-    //     }
-    //     else{
-    //         targetVector = new Vector2(player.getPosition().x,player.getPosition().y);
-    //         testTargetVector = new Vector2(testPlayer.getPosition().x, testPlayer.getPosition().y);
-    //     }
-           
-    //     player.updateMovement(targetVector, stateTime, delta);
-    //     testPlayer.updateMovement(testTargetVector, stateTime, delta);
-    // }
-
     // Camera Roam
     private void cameraRoam(float delta){
         //Camera measurements
@@ -495,11 +339,10 @@ public class MainGame extends ApplicationAdapter {
 
     public void updateHealthBar(){
         healthBarSprite.setCenter(player.getPosition().x, player.getPosition().y + 3);        //Setting it just above our hero sprite
-        float healthBarWidth = 5 * healthPercent;
+        float healthBarWidth = 5 * player.currentHealth / player.maxHealth;
         float healthBarHeight = 5;
 
         healthBarSprite.setSize(healthBarWidth, healthBarHeight);
-
 
     }
 

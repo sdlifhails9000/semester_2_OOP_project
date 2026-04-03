@@ -3,36 +3,11 @@
 
 package com.gdx.game;
 
-//import java.util.ArrayList;
-
-// import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-// import com.badlogic.gdx.graphics.GL20;
-// import com.badlogic.gdx.Gdx;
-// import com.badlogic.gdx.Input;
-// import com.badlogic.gdx.Input.Keys;
-//import com.badlogic.gdx.graphics.Texture;
-// import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
-//import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
-import java.util.ArrayList;
-
-//import com.badlogic.gdx.math.Vector3;
-// import com.badlogic.gdx.graphics.OrthographicCamera;
-// import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.Animation;           //Animation imports are these two
-// import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
-//import com.badlogic.gdx.graphics.g2d.Sprite;
-// import com.badlogic.gdx.utils.viewport.*;       //Gets all viewport types (FixViewport, StrectViewport, ExtendViewport, etc)
-
-
-//Tiled Map Loaders
-// import com.badlogic.gdx.maps.tiled.TiledMap;
-// import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-// import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 // DynamicSprite is a subclass of Sprite with movement functonality
 abstract class DynamicEntity extends Entity {
@@ -43,10 +18,6 @@ abstract class DynamicEntity extends Entity {
 
     protected Vector2 moveTargetVector;     //Every subclass will define its own target in Update() method
     protected float speed;
-
-    protected static ArrayList<Entity> enemyList; // All enemies should be present in this list, list should be global,set in main>create()
-    // The list could later be made into two seperate team lists
-
 
     // Creates the Sprite(Parent Class)
     // TODO Pass the animations as a list and the other stuff as a list
@@ -75,11 +46,10 @@ abstract class DynamicEntity extends Entity {
         this.speed = speed;
     }
 
-    //Concrete methods (Getter and setter)
+    // GETTER SETTERS
 
-    // Only used when you click left click
     public void setMove(Vector2 clickCoords){
-        this.moveTargetVector = new Vector2(clickCoords);
+        this.moveTargetVector = clickCoords;
     }
 
     public Vector2 getMove(){
@@ -87,15 +57,11 @@ abstract class DynamicEntity extends Entity {
     }
 
     // Movement Method
-    public void updateMovement(float stateTime , float delta){
+    public void updateMovement(float delta){
         //For angle calculation to rotate sprite
         float angle;
     
-
-
-        Vector2 destVector = new Vector2();
-        
-        destVector.set(moveTargetVector).sub(currentXY);        //Calculate the destination vector
+        Vector2 destVector = moveTargetVector.cpy().sub(currentXY);
 
         //-----ROTATION CALCULATION START-----
         //Sort of skews off at endpoint likeeee just test and see (Works perfectly for bottom edge but skewed for the other 3)
@@ -116,6 +82,7 @@ abstract class DynamicEntity extends Entity {
 
         //-----ROTATION CALCULATION END-----
 
+        
         if (destVector.len() > 0.5) {         //ALERT: Add a check for bounding box aswell so if we click in open area it goes there using 0.5 otherwise by bounding box calculations
             Vector2 oldPosition = new Vector2(currentXY);   // Store old position before updating and checking collision
             destVector.nor().scl(delta * speed);    // Normalize then multiply(scale) by speed and delta time
@@ -124,85 +91,44 @@ abstract class DynamicEntity extends Entity {
             this.setCenter(currentXY.x, currentXY.y);     //Update player position
             updateBoxes();
 
-            if (checkEnemyCollision()) {
+            if (checkEntityCollision()) {
                 currentXY.set(oldPosition);
                 this.setCenter(oldPosition.x, oldPosition.y);   // Move back to old position
-                // updateHitBox(); // Remake hitbox
+                updateBoxes(); // Remake hitbox
                 moveTargetVector = null;
             }
-        } else if (destVector.len() <= 0.5) {
+        } else {
             moveTargetVector = null;
         }
         //No need for updating camera over here as its handled in cameraRoam otherwise it causes conflict between two
 
+        // destVector.nor().scl(delta * speed);    // Normalize then multiply(scale) by speed and delta time
+
+        // currentXY.add(destVector);      //Updates the current vector co-ordiantes
+        // this.setCenter(currentXY.x, currentXY.y);     //Update player position
+        // updateBoxes();
+
+        // if (checkEntityCollision()) {
+        //     currentXY.sub(destVector);
+        //     this.setCenter(currentXY.x, currentXY.y);   // Move back to old position
+        //     updateBoxes();
+        //     moveTargetVector = null;
+        // }
+        // else if (currentXY.epsilonEquals(moveTargetVector, 0.5f)) {         //ALERT: Add a check for bounding box aswell so if we click in open area it goes there using 0.5 otherwise by bounding box calculations
+        //     moveTargetVector = null;
+        // }
     }
 
 
-    // Collision Detection ahead    
-    // The Method is called in updateMovement()
-    public boolean checkEnemyCollision(){
-        if (this.collisionBox == null) {
-            updateBoxes();
-        }
-
-        for (Entity i : enemyList) {
-            if (i == this) {
-                continue;
-            }
-
-            if (i.currentXY.dst(this.currentXY) >= 20) {
-                continue;
-            }
-
-            Rectangle enemyHitBox = i.getCollisionBox();
-            if (enemyHitBox != null && this.collisionBox.overlaps(enemyHitBox)) {
-                System.out.println("Colliding");
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-}
-//Child class number 1
-
-class HeroPlayer extends DynamicEntity {
-    HeroPlayer(HeroPreset preset, int startX, int startY) {
-        super(
-            HeroLoader.attack(preset),
-            HeroLoader.run(preset),
-            HeroLoader.dead(preset),
-            HeroLoader.idle(preset),
-            startX, startY,
-            
-            preset.maxHealth,
-            preset.attackRange,
-            preset.attackSpeed,
-            preset.attackStrength,
-            preset.speed,
-            preset.spriteWidth,
-            preset.spriteHeight,
-            preset.isAlly
-        );
-    }
-
-    @Override
-    public Vector2 getPosition(){
-        return new Vector2(currentXY);
-    }
 
     @Override
     public void Update(float delta) {
         if (state != prevState){
-            stateTime = 0;      //Reset stateTime if we have a state CHANGE
+            animationTimer = 0;      //Reset stateTime if we have a state CHANGE
             prevState = state;  //Update the state
         }
-        else{
-            stateTime += delta;     //Update stateTime if states WEREN'T CHANGED
-        }
 
-        this.setRegion(currentAnimation.getKeyFrame(stateTime));        //Use the locally made stateTime which resets if a state is switched
+        this.setRegion(currentAnimation.getKeyFrame(animationTimer));        //Use the locally made stateTime which resets if a state is switched
 
         if (isDead) {
             state = State.DEAD;
@@ -212,7 +138,7 @@ class HeroPlayer extends DynamicEntity {
             state = State.MOVING;
             currentAnimation = runAnimation;
         }
-        else if (getAttackInfo() != null) {
+        else if (getAttackTarget() != null) {
             state = State.ATTACK;
         }
         else {
@@ -220,15 +146,16 @@ class HeroPlayer extends DynamicEntity {
             currentAnimation = idleAnimation;
         }
         //Modify the else if above to check for range and reuse updateMovement
+        updateBoxes();
 
         switch(state){
         case MOVING:
-            updateMovement(stateTime, delta);
+            updateMovement(delta);
             break;
 
         case ATTACK:
             if (!isCloseToEnemy()) {
-                setMove(getAttackInfo().getPosition());
+                setMove(getAttackTarget().getPosition());
             } else {
                 updateAttack(delta);
                 currentAnimation = attackAnimation;
@@ -237,7 +164,8 @@ class HeroPlayer extends DynamicEntity {
 
         default:
             break;
-        }   
-        updateBoxes();// Currently set here but should be set after some kind of changed boolean check
+        }
+
+        animationTimer += delta;
     }
 }

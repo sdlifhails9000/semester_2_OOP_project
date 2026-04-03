@@ -1,6 +1,8 @@
 package com.gdx.game;
 
 // TODO Add projectiles for towers
+// TODO Add dynamic hitbox whilst keeping collisionbox untouched
+
 // make the tower an Entity and make it's projectiles DynamicEntities that harm enemies
 
 import com.badlogic.gdx.math.MathUtils;
@@ -8,8 +10,10 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+
+import java.util.ArrayList;
+
 import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.TextureData;
 import com.badlogic.gdx.graphics.g2d.Animation;           //Animation imports are these two
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -21,6 +25,8 @@ abstract class Entity extends Sprite {
         ATTACK,
         DEAD,
     }
+
+    public static ArrayList<Entity> entityList = new ArrayList<>();
 
     protected float maxHealth;
     protected float currentHealth;
@@ -35,9 +41,11 @@ abstract class Entity extends Sprite {
 
     protected Vector2 currentXY;     //Starting points (game World Coords not screen coords)  //IN CHILD CLASS NOW
 
-    protected float stateTime = 0; // Time since last attack
+    protected float animationTimer = 0f; // Used for retrieving a certain from from the current animation. THAT'S IT
+    protected float attackTimer = 0f; // Used to keep track of how long it has been since the last attack
 
     Entity attackTarget;     //Stores entity to attack
+    protected static ArrayList<Entity> heroList, goblinList, towerList;
 
     protected State state;
     protected State prevState = null;        //To keep track of previous state and handle stateTime
@@ -65,6 +73,8 @@ abstract class Entity extends Sprite {
 
         super(idle.getKeyFrame(0));     //Get first idle frame
 
+        entityList.add(this);
+
         this.attackAnimation = attack;
         this.idleAnimation = idle;
         this.deadAnimation = dead;
@@ -79,27 +89,16 @@ abstract class Entity extends Sprite {
         this.isAlly = isAlly;
         
         this.setSize(spriteWidth, spriteHeight);        //Set size here
+        this.setOriginCenter();
+        this.setCenter(startX, startY);
 
         state = State.IDLE;
         currentAnimation = idleAnimation;
     
-        updateBoxes();
+        createBoxes();
     }
     
 
-    // Get Postion
-    public Vector2 getPosition() {
-        return new Vector2(currentXY);
-    }
-
-    // Only set when you click right click. Only set it if the position is near an enemy
-    protected void setAttackInfo(Entity entity){
-        attackTarget = entity;
-    }
-
-    public Entity getAttackInfo() {
-        return attackTarget;
-    }
 
     // Is used to determine the state, don't touchy wouchy this or else things will break. TF2 coconut.jpeg moment
     protected boolean isCloseToEnemy() {
@@ -112,10 +111,41 @@ abstract class Entity extends Sprite {
         
         boolean isClose = playerBounds.overlaps(enemyBounds);
 
-        return isClose;
+        Vector2 enemyPos = attackTarget.getPosition();
+
+        // This condition is so that the hits of a light class register on a heavy class while chasing it
+        boolean isInRange = enemyPos.dst(this.getPosition()) <= attackRange;
+
+        return isClose || isInRange;
+    }
+
+    // Collision Detection ahead    
+    // The Method is called in updateMovement()
+    public boolean checkEntityCollision(){
+        for (Entity i : entityList) {
+            if (i == this) {
+                continue;
+            }
+
+            if (i.currentXY.dst(this.currentXY) >= 20) {
+                continue;
+            }
+
+            Rectangle enemyHitBox = i.getCollisionBox();
+            if (this.collisionBox.overlaps(enemyHitBox)) {
+                System.out.println("Colliding");
+                return true;
+            }
+        }
+
+        return false;
     }
 
     protected void takeDamage(float damage) {
+        if (isDead) {
+            return;
+        }
+
         currentHealth -= damage;
 
         if (currentHealth <= 0f) {
@@ -124,11 +154,17 @@ abstract class Entity extends Sprite {
     }
 
     protected void updateAttack(float delta) {                 //Override this for tower entity (If you dont want a rotating tower entity)
+        if (attackTarget.isDead) {
+            state = State.IDLE;
+            attackTarget = null;
+            return;
+        }
+
         // Check if we have passed the interval of attack and reset the timer
-        if (stateTime >= attackSpeed) {
+        if (attackTimer >= attackSpeed) {
             attackTarget.takeDamage(attackStrength);
             System.out.printf("Victim's Current Health... %f\n", attackTarget.currentHealth);
-            stateTime = 0;
+            attackTimer = 0;
         }
 
         // Calculate the angle and flip accordingly
@@ -147,31 +183,22 @@ abstract class Entity extends Sprite {
             setFlip(false, false);
         }
 
-        stateTime += delta;
+        attackTimer += delta;
     }
 
 
     // COLLISION WORK AHEAD
     // HITBOX GENERATION AND RELATED METHODS
-    static Pixmap pixmap;
-    static Texture pixmapTexture;
 
-    public void updateBoxes() {
-        Animation<TextureRegion> animation = this.idleAnimation;
-        TextureRegion frame = animation.getKeyFrame(0);     //SWITCH TO STATETIME IF YOU WANT DYNAMIC HITBOX
-        Texture texture = frame.getTexture(); // the atlas texture containing the frame
+    public void createBoxes() {
+        TextureRegion frame = this.idleAnimation.getKeyFrame(0);     //SWITCH TO STATETIME IF YOU WANT DYNAMIC HITBOX
+        TextureData textureData = frame.getTexture().getTextureData(); // raw texture data for pixel access
+        Pixmap pixmap;
 
-        if (pixmap == null || pixmapTexture != texture) {   // If pixmap is not initialized or the texture has changed, create a new pixmap, was casuing crash
-            if (pixmap != null) {
-                pixmap.dispose();   // If pixmap has changed dispose the previous one
-            }
-            TextureData textureData = texture.getTextureData(); // raw texture data for pixel access
-            if (!textureData.isPrepared()) {
-                textureData.prepare(); // must prepare before creating a Pixmap
-            }
-            pixmap = textureData.consumePixmap(); // access pixel values
-            pixmapTexture = texture;
+        if (!textureData.isPrepared()) {
+            textureData.prepare(); // must prepare before creating a Pixmap
         }
+        pixmap = textureData.consumePixmap(); // access pixel values
 
         // Bounds of the frame in the atlas
         int startX = frame.getRegionX();
@@ -198,6 +225,8 @@ abstract class Entity extends Sprite {
             }
         }
 
+        pixmap.dispose();
+
         float scaleX = this.getWidth() / (float) width;    // Width of the sprite accounting for scale
         float scaleY = this.getHeight() / (float) height;  // Height of the sprite accounting for scale
 
@@ -211,6 +240,17 @@ abstract class Entity extends Sprite {
         this.hitBox = new Rectangle(worldX - 1/2, worldY - 1/2, worldWidth + 1, worldHeight + 1);   //Generating a hitbox which is bigger than collision box
     }
 
+    public void updateBoxes() {
+        this.collisionBox.setCenter(currentXY);
+        this.hitBox.setCenter(currentXY);
+    }
+
+    public void Update(float delta) {
+        // TODO fill this up
+    }
+
+    // ################### GETTERS SETTER ###################
+
     public Rectangle getCollisionBox(){
         return this.collisionBox;
     }
@@ -219,6 +259,20 @@ abstract class Entity extends Sprite {
             return this.hitBox;
     }
 
+    public Vector2 getPosition() {
+        return currentXY;
+    }
 
-    abstract public void Update(float delta);
+    // public void setPosition(Vector2 change) {
+    //     currentXY
+    // }
+
+    // Only set when you click right click. Only set it if the position is near an enemy
+    protected void setAttackTarget(Entity entity){
+        attackTarget = entity;
+    }
+
+    public Entity getAttackTarget() {
+        return attackTarget;
+    }
 }
