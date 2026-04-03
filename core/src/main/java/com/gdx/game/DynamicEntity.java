@@ -61,13 +61,14 @@ abstract class DynamicEntity extends Entity {
                   float attackStrength,
                   float speed,
                   float spriteWidth,
-                  float spriteHeight) {
+                  float spriteHeight,
+                  boolean isAlly) {
 
         super(
             attack, dead, idle,
             stateTime, startX, startY,
             maxHealth, attackRange, attackSpeed, attackStrength,
-            spriteWidth, spriteHeight
+            spriteWidth, spriteHeight, isAlly
         );
         
         this.runAnimation = run;
@@ -105,11 +106,11 @@ abstract class DynamicEntity extends Entity {
         //you can add rotation or not your choice just uncomment the player.setRotation() lines to see it in play
 
         if (angle > 90 && angle < 270) { 
-            //player.setRotation(angle + 180);        //We have to do a 180 degree CORRECTION offset because setFlip offsets the angle by 180 degrees (inverts x axis)            //This range signifies 2 and 3 quadrant 
+            //this.setRotation(angle + 180);        //We have to do a 180 degree CORRECTION offset because setFlip offsets the angle by 180 degrees (inverts x axis)            //This range signifies 2 and 3 quadrant 
             this.setFlip(true, false);       //Flip the x axis
         }
         else {
-            //player.setRotation(angle);         //Same reason as above
+            //this.setRotation(angle);         //Same reason as above
             this.setFlip(false, false);      //If its a click in 1 or 4 quadrant no flip just bring sprite to what it was originally (sprite was originally drawn right facing)
         }
 
@@ -121,7 +122,7 @@ abstract class DynamicEntity extends Entity {
 
             currentXY.add(destVector);      //Updates the current vector co-ordiantes
             this.setCenter(currentXY.x, currentXY.y);     //Update player position
-            updateHitBox();
+            updateBoxes();
 
             if (checkEnemyCollision()) {
                 currentXY.set(oldPosition);
@@ -140,8 +141,8 @@ abstract class DynamicEntity extends Entity {
     // Collision Detection ahead    
     // The Method is called in updateMovement()
     public boolean checkEnemyCollision(){
-        if (this.hitBox == null) {
-            updateHitBox();
+        if (this.collisionBox == null) {
+            updateBoxes();
         }
 
         for (Entity i : enemyList) {
@@ -153,8 +154,8 @@ abstract class DynamicEntity extends Entity {
                 continue;
             }
 
-            Rectangle enemyHitBox = i.getHitBox();
-            if (enemyHitBox != null && this.hitBox.overlaps(enemyHitBox)) {
+            Rectangle enemyHitBox = i.getCollisionBox();
+            if (enemyHitBox != null && this.collisionBox.overlaps(enemyHitBox)) {
                 System.out.println("Colliding");
                 return true;
             }
@@ -181,7 +182,8 @@ class HeroPlayer extends DynamicEntity {
             preset.attackStrength,
             preset.speed,
             preset.spriteWidth,
-            preset.spriteHeight
+            preset.spriteHeight,
+            preset.isAlly
         );
     }
 
@@ -226,6 +228,6 @@ class HeroPlayer extends DynamicEntity {
         default:
             break;
         }   
-        updateHitBox();// Currently set here but should be set after some kind of changed boolean check
+        updateBoxes();// Currently set here but should be set after some kind of changed boolean check
     }
 }

@@ -30,7 +30,7 @@ abstract class Entity extends Sprite {
     protected float spriteWidth;
     protected float spriteHeight;
 
-    protected boolean isEnemy;
+    protected boolean isAlly;
 
     protected Vector2 currentXY;     //Starting points (game World Coords not screen coords)  //IN CHILD CLASS NOW
 
@@ -46,6 +46,7 @@ abstract class Entity extends Sprite {
 
     Animation<TextureRegion> currentAnimation;
 
+    protected Rectangle collisionBox;
     protected Rectangle hitBox; 
     
     Entity(Animation<TextureRegion> attack,
@@ -57,7 +58,8 @@ abstract class Entity extends Sprite {
            float attackSpeed,
            float attackStrength,
            float spriteWidth,
-           float spriteHeight) {
+           float spriteHeight,
+           boolean isAlly) {
 
         super(idle.getKeyFrame(stateTime));
 
@@ -73,13 +75,14 @@ abstract class Entity extends Sprite {
         this.attackRange = attackRange;
         this.attackSpeed = attackSpeed;
         this.attackStrength = attackStrength;
+        this.isAlly = isAlly;
         
         this.setSize(spriteWidth, spriteHeight);        //Set size here
 
         state = State.IDLE;
         currentAnimation = idleAnimation;
     
-        updateHitBox();
+        updateBoxes();
     }
     
 
@@ -104,10 +107,9 @@ abstract class Entity extends Sprite {
         }
 
         Rectangle enemyBounds = attackTarget.getHitBox();
-        Vector2 center = new Vector2();
-        enemyBounds.getCenter(center);
-
-        boolean isClose = center.dst(currentXY) <= attackRange;
+        Rectangle playerBounds = this.getHitBox();
+        
+        boolean isClose = playerBounds.overlaps(enemyBounds);
 
         return isClose;
     }
@@ -137,8 +139,10 @@ abstract class Entity extends Sprite {
         float angle = MathUtils.atan2Deg360(displacement.y, displacement.x);
 
         if (angle > 90f && angle < 270f) {
+            //this.setRotation(angle + 180);
             setFlip(true, false);
         } else {
+            //this.setRotation(angle);
             setFlip(false, false);
         }
 
@@ -151,7 +155,7 @@ abstract class Entity extends Sprite {
     static Pixmap pixmap;
     static Texture pixmapTexture;
 
-    public void updateHitBox() {
+    public void updateBoxes() {
         Animation<TextureRegion> animation = this.idleAnimation;
         TextureRegion frame = animation.getKeyFrame(stateTime);
         Texture texture = frame.getTexture(); // the atlas texture containing the frame
@@ -202,11 +206,16 @@ abstract class Entity extends Sprite {
         float worldWidth = (maxX - minX + 1) * scaleX;
         float worldHeight = (maxY - minY + 1) * scaleY;
 
-        this.hitBox = new Rectangle(worldX, worldY, worldWidth, worldHeight);
+        this.collisionBox = new Rectangle(worldX, worldY, worldWidth, worldHeight);
+        this.hitBox = new Rectangle(worldX - 1/2, worldY - 1/2, worldWidth + 1, worldHeight + 1);   //Generating a hitbox which is bigger than collision box
+    }
+
+    public Rectangle getCollisionBox(){
+        return this.collisionBox;
     }
 
     public Rectangle getHitBox(){
-        return this.hitBox;
+            return this.hitBox;
     }
 
 

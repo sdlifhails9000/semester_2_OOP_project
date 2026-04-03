@@ -40,10 +40,10 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 // This contain default values for specific hero types
 enum HeroPreset {
-    HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12),
-    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 10f, 125f, 0.5f, 10, 10),
-    ENEMYLIGHT("HeroAtlas/lightEnemyHero.atlas", 25f, 20f, 10f, 125f, 0.5f, 10, 10),
-    ENEMYHEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12);
+    HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, true),
+    LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 10f, 125f, 0.5f, 10, 10, true),
+    ENEMY_LIGHT("HeroAtlas/lightEnemyHero.atlas", 25f, 20f, 10f, 125f, 0.5f, 10, 10, false),
+    ENEMY_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, false);
     
     final String assetPath;
 
@@ -56,11 +56,13 @@ enum HeroPreset {
     float attackSpeed;
 
     final float spriteWidth;        //Store width and height and set at Entity.java
-    final float spriteHeight;       //This gets rid of manually settings each entity size 
+    final float spriteHeight;       //This gets rid of manually settings each entity size
+    
+    boolean isAlly;
 
     HeroPreset(String path, float speed, float damageStrength,
                float attackRange, float maxHealth, float attackSpeed,
-                float spriteWidth, float spriteHeight) {
+                float spriteWidth, float spriteHeight, boolean isAlly) {
         
         this.assetPath = path;
         this.speed = speed;
@@ -70,6 +72,7 @@ enum HeroPreset {
         this.attackSpeed = attackSpeed;
         this.spriteWidth = spriteWidth;
         this.spriteHeight = spriteHeight;
+        this.isAlly = isAlly;
     }
 }
 
@@ -238,7 +241,7 @@ public class MainGame extends ApplicationAdapter {
         stateTime = 0f;
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(HeroPreset.ENEMYHEAVY, stateTime, 50,50);
+        player = new HeroPlayer(HeroPreset.HEAVY, stateTime, 50,50);
         testEnemy = new HeroPlayer(HeroPreset.LIGHT, stateTime, 25, 25);
 
         //Initialize the dynamicSprite array and add the players
@@ -365,7 +368,7 @@ public class MainGame extends ApplicationAdapter {
         ArrayList<Rectangle> listOfHitbox = new ArrayList<Rectangle>();
 
         for (Entity e : entities) {
-            listOfHitbox.add(e.getHitBox());
+            listOfHitbox.add(e.getCollisionBox());
         }
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
@@ -410,7 +413,7 @@ public class MainGame extends ApplicationAdapter {
                     continue;
                 }
 
-                if (e.getHitBox().contains(clickCoords2D)) {
+                if (e.getCollisionBox().contains(clickCoords2D)) {
                     player.setMove(clickCoords2D);
                     player.setAttackInfo(e);
                     break;
