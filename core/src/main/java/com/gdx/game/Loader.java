@@ -25,18 +25,20 @@ enum Preset {
     HERO_HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, true,
                 EnumSet.of(AnimState.IDLE, AnimState.RUN, AnimState.ATTACK, AnimState.DEAD)),
 
-    HERO_LIGHT("HeroAtlas/lightHero.atlas", 25f, 20f, 10f, 125f, 0.5f, 10, 10, true,
+    HERO_LIGHT("HeroAtlas/lightHero.atlas", 20f, 20f, 10f, 125f, 0.5f, 10, 10, true,
                 EnumSet.of(AnimState.IDLE, AnimState.RUN, AnimState.ATTACK, AnimState.DEAD)),
 
-    ENEMY_HERO_LIGHT("HeroAtlas/lightEnemyHero.atlas", 25f, 20f, 10f, 125f, 0.5f, 10, 10, false,
+    ENEMY_HERO_LIGHT("HeroAtlas/lightEnemyHero.atlas", 20f, 20f, 10f, 125f, 0.5f, 10, 10, false,
                 EnumSet.of(AnimState.IDLE, AnimState.RUN, AnimState.ATTACK, AnimState.DEAD)),
 
     ENEMY_HERO_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, false,
-                EnumSet.of(AnimState.IDLE, AnimState.RUN, AnimState.ATTACK, AnimState.DEAD));
+                EnumSet.of(AnimState.IDLE, AnimState.RUN, AnimState.ATTACK, AnimState.DEAD)),
 
     // TODO: Shaheer make its atlas :D
-    //GOBLIN()
-    //ENEMY_GOBLIN();
+    GOBLIN("GoblinAtlas/Goblin.atlas", 10, 10, 10, 75, 2, 8, 8, true,
+            EnumSet.of(AnimState.IDLE, AnimState.RUN, AnimState.ATTACK, AnimState.DEAD)),
+    ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 10, 10, 10, 75, 2, 8, 8, false,
+            EnumSet.of(AnimState.IDLE, AnimState.RUN, AnimState.ATTACK, AnimState.DEAD));
     
     final String assetPath;
 

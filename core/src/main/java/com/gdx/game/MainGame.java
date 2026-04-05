@@ -81,6 +81,10 @@ public class MainGame extends ApplicationAdapter {
     HeroPlayer player;
     HeroBot testEnemy;
 
+    //DynamicEntities (Goblins)
+    Goblin g1, g2, g3, g4, g5, g6;
+
+
     //A variable to track elapsed time during animation
     // float stateTime; //Handled in Entity.java
 
@@ -127,9 +131,16 @@ public class MainGame extends ApplicationAdapter {
         clickCoords = new Vector3();
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(Preset.HERO_LIGHT, 50, 50);
-        testEnemy = new HeroBot(Preset.ENEMY_HERO_HEAVY, 25, 25);
+        player = new HeroPlayer(Preset.HERO_LIGHT, 10, 10);
+        testEnemy = new HeroBot(Preset.ENEMY_HERO_HEAVY, 190, 190);
 
+        //Initialize the goblins
+         g1 = new Goblin(Preset.GOBLIN, 10,20);
+        // g2 = new Goblin(Preset.GOBLIN, 20,20);
+        // g3 = new Goblin(Preset.GOBLIN, 20,10);
+         g4 = new Goblin(Preset.ENEMY_GOBLIN, 190,180);
+        // g5 = new Goblin(Preset.ENEMY_GOBLIN, 180,180);
+        // g6 = new Goblin(Preset.ENEMY_GOBLIN, 180,190);
 
         // Initialize Camera
         float height = Gdx.graphics.getHeight();    //For aspect ration calculation
