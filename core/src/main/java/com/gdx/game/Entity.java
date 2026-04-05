@@ -98,8 +98,6 @@ abstract class Entity extends Sprite {
         createBoxes();
     }
     
-
-
     // Is used to determine the state, don't touchy wouchy this or else things will break. TF2 coconut.jpeg moment
     protected boolean isCloseToEnemy() {
         if (attackTarget == null) {
@@ -128,6 +126,11 @@ abstract class Entity extends Sprite {
             }
 
             if (i.currentXY.dst(this.currentXY) >= 20) {
+                continue;
+            }
+
+            //Do not check collision between DEAD entities
+            if (this.isDead || i.isDead){   
                 continue;
             }
 
@@ -241,8 +244,10 @@ abstract class Entity extends Sprite {
     }
 
     public void updateBoxes() {
-        this.collisionBox.setCenter(currentXY);
-        this.hitBox.setCenter(currentXY);
+        if (!this.isDead){
+            this.collisionBox.setCenter(currentXY);
+            this.hitBox.setCenter(currentXY);
+        }
     }
 
     public void Update(float delta) {
@@ -252,9 +257,8 @@ abstract class Entity extends Sprite {
     // ################### GETTERS SETTER ###################
 
     public Rectangle getCollisionBox(){
-        return this.collisionBox;
+            return this.collisionBox;    
     }
-
     public Rectangle getHitBox(){
             return this.hitBox;
     }

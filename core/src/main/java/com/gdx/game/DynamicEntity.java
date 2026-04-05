@@ -146,7 +146,7 @@ abstract class DynamicEntity extends Entity {
             currentAnimation = idleAnimation;
         }
         //Modify the else if above to check for range and reuse updateMovement
-        updateBoxes();
+        //updateBoxes();        //UpdateBoxes in places where boxes needs to be updated like when moving
 
         switch(state){
         case MOVING:
