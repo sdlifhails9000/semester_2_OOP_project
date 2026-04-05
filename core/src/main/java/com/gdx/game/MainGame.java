@@ -105,7 +105,7 @@ public class MainGame extends ApplicationAdapter {
 
         manager.load("atlas\\practiceAtlas.atlas", TextureAtlas.class);
 
-        for (HeroPreset preset : HeroPreset.values()) {
+        for (Preset preset : Preset.values()) {
             manager.load(preset.assetPath, TextureAtlas.class);
         }
 
@@ -116,7 +116,7 @@ public class MainGame extends ApplicationAdapter {
 
         // -------------- Make all the necessary thingies --------------
 
-        HeroLoader.load(manager);
+        Loader.load(manager);
         TextureAtlas atlas = manager.get("atlas\\practiceAtlas.atlas");
         
         // Initialize bg and sprite and health bar from atlas
@@ -127,8 +127,9 @@ public class MainGame extends ApplicationAdapter {
         clickCoords = new Vector3();
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(HeroPreset.LIGHT, 50, 50);
-        testEnemy = new HeroBot(HeroPreset.ENEMY_HEAVY, 25, 25);
+        player = new HeroPlayer(Preset.HERO_LIGHT, 50, 50);
+        testEnemy = new HeroBot(Preset.ENEMY_HERO_HEAVY, 25, 25);
+
 
         // Initialize Camera
         float height = Gdx.graphics.getHeight();    //For aspect ration calculation
