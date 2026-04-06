@@ -5,19 +5,21 @@ package com.gdx.game;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 import com.badlogic.gdx.graphics.g2d.Animation;           //Animation imports are these two
 
-// DynamicSprite is a subclass of Sprite with movement functonality
 abstract class DynamicEntity extends Entity {
     // This will be the state that everything DynamicSprite is in
+    State moveState;
 
     //Declare Animation Variables
     protected Animation<TextureRegion> runAnimation;
 
-    protected Vector2 moveTargetVector;     //Every subclass will define its own target in Update() method
+    protected Vector2 targetPosition;     //Every subclass will define its own target in Update() method
     protected float speed;
+    protected Vector2 velocity;
 
     // Creates the Sprite(Parent Class)
     // TODO Pass the animations as a list and the other stuff as a list
@@ -43,30 +45,26 @@ abstract class DynamicEntity extends Entity {
         );
         
         this.runAnimation = run;
+        this.idleState = new DynamicIdleState();
+        this.moveState = new DynamicMoveState(); // TODO implement a dynamic move state
+        this.currentState = idleState;
+
         this.speed = speed;
+
+        velocity = new Vector2();
+        targetPosition = new Vector2(startX, startY);
     }
 
-    // GETTER SETTERS
-
-    public void setMove(Vector2 clickCoords){
-        this.moveTargetVector = clickCoords;
-    }
-
-    public Vector2 getMove(){
-        return moveTargetVector;
-    }
-
-    // Movement Method
-    public void updateMovement(float delta){
+    void moveTowardsTarget(float delta) {
         //For angle calculation to rotate sprite
         float angle;
-    
-        Vector2 destVector = moveTargetVector.cpy().sub(currentXY);
+        float destinationX = targetPosition.x - currentXY.x;
+        float destinationY = targetPosition.y - currentXY.y;
 
         //-----ROTATION CALCULATION START-----
         //Sort of skews off at endpoint likeeee just test and see (Works perfectly for bottom edge but skewed for the other 3)
 
-        angle = MathUtils.atan2Deg360(destVector.y, destVector.x);      //atan2Deg360 ensures that whatever y and x is we get angle in range of 0 to 360 not from 180 to -180
+        angle = MathUtils.atan2Deg360(destinationY, destinationX);      //atan2Deg360 ensures that whatever y and x is we get angle in range of 0 to 360 not from 180 to -180
         
         //-----NOTE----
         //you can add rotation or not your choice just uncomment the player.setRotation() lines to see it in play
@@ -80,92 +78,53 @@ abstract class DynamicEntity extends Entity {
             this.setFlip(false, false);      //If its a click in 1 or 4 quadrant no flip just bring sprite to what it was originally (sprite was originally drawn right facing)
         }
 
-        //-----ROTATION CALCULATION END-----
-
-        
-        if (destVector.len() > 0.5) {         //ALERT: Add a check for bounding box aswell so if we click in open area it goes there using 0.5 otherwise by bounding box calculations
-            Vector2 oldPosition = new Vector2(currentXY);   // Store old position before updating and checking collision
-            destVector.nor().scl(delta * speed);    // Normalize then multiply(scale) by speed and delta time
-
-            currentXY.add(destVector);      //Updates the current vector co-ordiantes
-            this.setCenter(currentXY.x, currentXY.y);     //Update player position
-            updateBoxes();
-
-            if (checkEntityCollision()) {
-                currentXY.set(oldPosition);
-                this.setCenter(oldPosition.x, oldPosition.y);   // Move back to old position
-                updateBoxes(); // Remake hitbox
-                moveTargetVector = null;
-            }
-        } else {
-            moveTargetVector = null;
-        }
-        //No need for updating camera over here as its handled in cameraRoam otherwise it causes conflict between two
-
-        // destVector.nor().scl(delta * speed);    // Normalize then multiply(scale) by speed and delta time
-
-        // currentXY.add(destVector);      //Updates the current vector co-ordiantes
-        // this.setCenter(currentXY.x, currentXY.y);     //Update player position
-        // updateBoxes();
-
-        // if (checkEntityCollision()) {
-        //     currentXY.sub(destVector);
-        //     this.setCenter(currentXY.x, currentXY.y);   // Move back to old position
-        //     updateBoxes();
-        //     moveTargetVector = null;
-        // }
-        // else if (currentXY.epsilonEquals(moveTargetVector, 0.5f)) {         //ALERT: Add a check for bounding box aswell so if we click in open area it goes there using 0.5 otherwise by bounding box calculations
-        //     moveTargetVector = null;
-        // }
+        velocity.x = destinationX;
+        velocity.y = destinationY;
+        velocity.nor().scl(speed);
     }
 
+    void handleCollision(float delta) {
+        currentXY.sub(velocity.cpy().scl(2f * delta));
+    }
 
-
-    @Override
-    public void Update(float delta) {
-        if (state != prevState){
-            animationTimer = 0;      //Reset stateTime if we have a state CHANGE
-            prevState = state;  //Update the state
-        }
-
-        this.setRegion(currentAnimation.getKeyFrame(animationTimer));        //Use the locally made stateTime which resets if a state is switched
-
-        if (isDead) {
-            state = State.DEAD;
-            currentAnimation = deadAnimation;
-        }
-        else if (moveTargetVector != null)  {
-            state = State.MOVING;
-            currentAnimation = runAnimation;
-        }
-        else if (getAttackTarget() != null) {
-            state = State.ATTACK;
-        }
-        else {
-            state = State.IDLE;    
-            currentAnimation = idleAnimation;
-        }
-        //Modify the else if above to check for range and reuse updateMovement
-        //updateBoxes();        //UpdateBoxes in places where boxes needs to be updated like when moving
-
-        switch(state){
-        case MOVING:
-            updateMovement(delta);
-            break;
-
-        case ATTACK:
-            if (!isCloseToEnemy()) {
-                setMove(getAttackTarget().getPosition());
-            } else {
-                updateAttack(delta);
-                currentAnimation = attackAnimation;
+    boolean isCollidingWithEntity() {
+        for (Entity i : entityList) {
+            if (i == this) {
+                continue;
             }
-            break;
 
-        default:
-            break;
+            if (i.currentXY.dst(this.currentXY) >= 20) {
+                continue;
+            }
+
+            //Do not check collision between DEAD entities
+            if (this.isDead || i.isDead){   
+                continue;
+            }
+
+            Rectangle enemyHitBox = i.getCollisionBox();
+            if (this.collisionBox.overlaps(enemyHitBox)) {
+                System.out.println("Colliding");
+                return true;
+            }
         }
 
-        animationTimer += delta;
+        return false;
+    }
+
+    void updateBoxes() {
+        this.collisionBox.setCenter(currentXY);
+        this.hitBox.setCenter(currentXY);
+    }
+
+    void setTargetPosition(float x, float y) {
+        targetPosition.x = x;
+        targetPosition.y = y;
+    }
+
+    Vector2 getTargetPosition() {
+        return targetPosition;
     }
 }
+
+// DynamicSprite is a subclass of Sprite with movement functonality

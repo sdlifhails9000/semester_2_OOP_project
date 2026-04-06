@@ -79,7 +79,7 @@ public class MainGame extends ApplicationAdapter {
 
     //DynamicSprites (self defined)
     HeroPlayer player;
-    HeroBot testEnemy;
+    HeroPlayer testEnemy;
 
     //DynamicEntities (Goblins)
     Goblin g1, g2, g3, g4, g5, g6;
@@ -132,15 +132,15 @@ public class MainGame extends ApplicationAdapter {
 
         //Initialize the DYNAMIC SPRITES
         player = new HeroPlayer(Preset.HERO_LIGHT, 10, 10);
-        testEnemy = new HeroBot(Preset.ENEMY_HERO_HEAVY, 190, 190);
+        testEnemy = new HeroPlayer(Preset.ENEMY_HERO_HEAVY, 20, 20);
 
-        //Initialize the goblins
-         g1 = new Goblin(Preset.GOBLIN, 10,20);
-        // g2 = new Goblin(Preset.GOBLIN, 20,20);
-        // g3 = new Goblin(Preset.GOBLIN, 20,10);
-         g4 = new Goblin(Preset.ENEMY_GOBLIN, 190,180);
-        // g5 = new Goblin(Preset.ENEMY_GOBLIN, 180,180);
-        // g6 = new Goblin(Preset.ENEMY_GOBLIN, 180,190);
+        // //Initialize the goblins
+        //  g1 = new Goblin(Preset.GOBLIN, 10,20);
+        // // g2 = new Goblin(Preset.GOBLIN, 20,20);
+        // // g3 = new Goblin(Preset.GOBLIN, 20,10);
+        //  g4 = new Goblin(Preset.ENEMY_GOBLIN, 190,180);
+        // // g5 = new Goblin(Preset.ENEMY_GOBLIN, 180,180);
+        // // g6 = new Goblin(Preset.ENEMY_GOBLIN, 180,190);
 
         // Initialize Camera
         float height = Gdx.graphics.getHeight();    //For aspect ration calculation
@@ -270,29 +270,29 @@ public class MainGame extends ApplicationAdapter {
             //We use for loop for playerEntities because bots i.e goblins etc will not get leftClick. Their movement call is seperate
             clickCoords2D.x = MathUtils.clamp(clickCoords2D.x, player.getWidth() / 2, worldWidth - player.getWidth() / 2);        //Doing correction because target is centered
             clickCoords2D.y = MathUtils.clamp(clickCoords2D.y, player.getHeight() / 2,worldHeight - player.getHeight() / 2);      //Binding it to world width and height dimensions
-            player.setMove(clickCoords2D);     //Using the small fix for edge case above
-            player.setAttackTarget(null);
+            player.setTargetPosition(clickCoords2D.x, clickCoords2D.y);     //Using the small fix for edge case above
+            // player.setAttackTarget(null);
         }
-        else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
-            clickCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0 );
-            camera.unproject(clickCoords);  // Converts screen coords to World coords
+        // else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+        //     clickCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0 );
+        //     camera.unproject(clickCoords);  // Converts screen coords to World coords
 
-            Vector2 clickCoords2D = new Vector2(clickCoords.x, clickCoords.y);
-            clickCoords2D.x = MathUtils.clamp(clickCoords2D.x, player.getWidth() / 2, worldWidth - player.getWidth() / 2);
-            clickCoords2D.y = MathUtils.clamp(clickCoords2D.y, player.getHeight() / 2,worldHeight - player.getHeight() / 2);
+        //     Vector2 clickCoords2D = new Vector2(clickCoords.x, clickCoords.y);
+        //     clickCoords2D.x = MathUtils.clamp(clickCoords2D.x, player.getWidth() / 2, worldWidth - player.getWidth() / 2);
+        //     clickCoords2D.y = MathUtils.clamp(clickCoords2D.y, player.getHeight() / 2,worldHeight - player.getHeight() / 2);
 
-            for (Entity e : Entity.entityList) {
-                if (e == player) {
-                    continue;
-                }
+        //     for (Entity e : Entity.entityList) {
+        //         if (e == player) {
+        //             continue;
+        //         }
 
-                if (e.getCollisionBox().contains(clickCoords2D)) {
-                    player.setMove(clickCoords2D);
-                    player.setAttackTarget(e);
-                    break;
-                }
-            }
-        }
+        //         if (e.getCollisionBox().contains(clickCoords2D)) {
+        //             player.setMove(clickCoords2D);
+        //             player.setAttackTarget(e);
+        //             break;
+        //         }
+        //     }
+        // }
     }
     // Camera Roam
     private void cameraRoam(float delta){

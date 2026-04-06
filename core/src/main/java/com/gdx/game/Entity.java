@@ -19,20 +19,22 @@ import com.badlogic.gdx.graphics.g2d.Animation;           //Animation imports ar
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 abstract class Entity extends Sprite {
-    enum State {
-        IDLE,
-        MOVING,
-        ATTACK,
-        DEAD,
-    }
+    State idleState;
+    State deathState;
+
+    State currentState;
 
     public static ArrayList<Entity> entityList = new ArrayList<>();
 
+    // Health info
     protected float maxHealth;
     protected float currentHealth;
+
+    // Attack info
     protected float attackStrength;
     protected float attackRange;
     protected float attackSpeed;
+
     protected float spriteWidth;
     protected float spriteHeight;
 
@@ -46,9 +48,6 @@ abstract class Entity extends Sprite {
 
     Entity attackTarget;     //Stores entity to attack
     protected static ArrayList<Entity> heroList, goblinList, towerList;
-
-    protected State state;
-    protected State prevState = null;        //To keep track of previous state and handle stateTime
 
     Animation<TextureRegion> idleAnimation;
     Animation<TextureRegion> attackAnimation;
@@ -92,7 +91,6 @@ abstract class Entity extends Sprite {
         this.setOriginCenter();
         this.setCenter(startX, startY);
 
-        state = State.IDLE;
         currentAnimation = idleAnimation;
     
         createBoxes();
@@ -156,38 +154,38 @@ abstract class Entity extends Sprite {
         }
     }
 
-    protected void updateAttack(float delta) {                 //Override this for tower entity (If you dont want a rotating tower entity)
-        if (attackTarget.isDead) {
-            state = State.IDLE;
-            attackTarget = null;
-            return;
-        }
+    // protected void updateAttack(float delta) {                 //Override this for tower entity (If you dont want a rotating tower entity)
+    //     if (attackTarget.isDead) {
+    //         state = State.IDLE;
+    //         attackTarget = null;
+    //         return;
+    //     }
 
-        // Check if we have passed the interval of attack and reset the timer
-        if (attackTimer >= attackSpeed) {
-            attackTarget.takeDamage(attackStrength);
-            System.out.printf("Victim's Current Health... %f\n", attackTarget.currentHealth);
-            attackTimer = 0;
-        }
+    //     // Check if we have passed the interval of attack and reset the timer
+    //     if (attackTimer >= attackSpeed) {
+    //         attackTarget.takeDamage(attackStrength);
+    //         System.out.printf("Victim's Current Health... %f\n", attackTarget.currentHealth);
+    //         attackTimer = 0;
+    //     }
 
-        // Calculate the angle and flip accordingly
+    //     // Calculate the angle and flip accordingly
 
-        Vector2 displacement = new Vector2();
-        attackTarget.getBoundingRectangle().getCenter(displacement);
-        displacement.sub(currentXY);
+    //     Vector2 displacement = new Vector2();
+    //     attackTarget.getBoundingRectangle().getCenter(displacement);
+    //     displacement.sub(currentXY);
 
-        float angle = MathUtils.atan2Deg360(displacement.y, displacement.x);
+    //     float angle = MathUtils.atan2Deg360(displacement.y, displacement.x);
 
-        if (angle > 90f && angle < 270f) {
-            //this.setRotation(angle + 180);
-            setFlip(true, false);
-        } else {
-            //this.setRotation(angle);
-            setFlip(false, false);
-        }
+    //     if (angle > 90f && angle < 270f) {
+    //         //this.setRotation(angle + 180);
+    //         setFlip(true, false);
+    //     } else {
+    //         //this.setRotation(angle);
+    //         setFlip(false, false);
+    //     }
 
-        attackTimer += delta;
-    }
+    //     attackTimer += delta;
+    // }
 
 
     // COLLISION WORK AHEAD
@@ -243,28 +241,29 @@ abstract class Entity extends Sprite {
         this.hitBox = new Rectangle(worldX - 1/2, worldY - 1/2, worldWidth + 1, worldHeight + 1);   //Generating a hitbox which is bigger than collision box
     }
 
-    public void updateBoxes() {
-        if (!this.isDead){
-            this.collisionBox.setCenter(currentXY);
-            this.hitBox.setCenter(currentXY);
-        }
-    }
-
     public void Update(float delta) {
-        // TODO fill this up
+        setRegion(currentAnimation.getKeyFrame(animationTimer));
+        animationTimer += delta;
+        currentState.update(this, delta);
     }
 
     // ################### GETTERS SETTER ###################
 
     public Rectangle getCollisionBox(){
-            return this.collisionBox;    
+        return this.collisionBox;    
     }
     public Rectangle getHitBox(){
-            return this.hitBox;
+        return this.hitBox;
     }
 
     public Vector2 getPosition() {
         return currentXY;
+    }
+
+    public void setState(State state) {
+        currentState.exit(this);
+        currentState = state;
+        currentState.enter(this);
     }
 
     // public void setPosition(Vector2 change) {
