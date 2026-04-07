@@ -109,7 +109,13 @@ public class MainGame extends ApplicationAdapter {
 
         manager.load("atlas\\practiceAtlas.atlas", TextureAtlas.class);
 
-        for (Preset preset : Preset.values()) {
+        //Loads HeroPreset which is made in Loader.java
+        for (HeroPreset preset : HeroPreset.values()) {
+            manager.load(preset.assetPath, TextureAtlas.class);
+        }
+
+        //Loads GoblinPreset which is made in Loader.java
+        for (GoblinPreset preset: GoblinPreset.values()){
             manager.load(preset.assetPath, TextureAtlas.class);
         }
 
@@ -131,11 +137,11 @@ public class MainGame extends ApplicationAdapter {
         clickCoords = new Vector3();
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(Preset.HERO_LIGHT, 10, 10);
-        testEnemy = new HeroPlayer(Preset.ENEMY_HERO_HEAVY, 20, 20);
+        player = new HeroPlayer(HeroPreset.HERO_LIGHT, 10, 10);
+        testEnemy = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 20, 20);
 
         // //Initialize the goblins
-        //  g1 = new Goblin(Preset.GOBLIN, 10,20);
+          g1 = new Goblin(GoblinPreset.GOBLIN, 10,20);
         // // g2 = new Goblin(Preset.GOBLIN, 20,20);
         // // g3 = new Goblin(Preset.GOBLIN, 20,10);
         //  g4 = new Goblin(Preset.ENEMY_GOBLIN, 190,180);

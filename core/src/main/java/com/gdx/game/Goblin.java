@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 class Goblin extends DynamicEntity{
     public static ArrayList<Goblin> goblinList = new ArrayList<>(); 
 
-    Goblin (Preset preset, int startX, int startY){
+    Goblin (GoblinPreset preset, int startX, int startY){
         super(
             Loader.attack(preset),
             Loader.run(preset),

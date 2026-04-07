@@ -13,33 +13,16 @@ import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import java.util.HashMap;
 import java.util.Map;
 
-//To define which animation states the preset contains
-enum AnimState {
-    IDLE,
-    RUN,
-    ATTACK,
-    DEAD
-}
 
-enum Preset {
-    HERO_HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, true,
-                EnumSet.of(AnimState.IDLE, AnimState.RUN, AnimState.ATTACK, AnimState.DEAD)),
+enum HeroPreset {
+    HERO_HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, true),
 
-    HERO_LIGHT("HeroAtlas/lightHero.atlas", 20f, 20f, 10f, 125f, 0.5f, 10, 10, true,
-                EnumSet.of(AnimState.IDLE, AnimState.RUN, AnimState.ATTACK, AnimState.DEAD)),
+    HERO_LIGHT("HeroAtlas/lightHero.atlas", 20f, 20f, 10f, 125f, 0.5f, 10, 10, true),
 
-    ENEMY_HERO_LIGHT("HeroAtlas/lightEnemyHero.atlas", 20f, 20f, 10f, 125f, 0.5f, 10, 10, false,
-                EnumSet.of(AnimState.IDLE, AnimState.RUN, AnimState.ATTACK, AnimState.DEAD)),
+    ENEMY_HERO_LIGHT("HeroAtlas/lightEnemyHero.atlas", 20f, 20f, 10f, 125f, 0.5f, 10, 10, false),
 
-    ENEMY_HERO_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, false,
-                EnumSet.of(AnimState.IDLE, AnimState.RUN, AnimState.ATTACK, AnimState.DEAD)),
+    ENEMY_HERO_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, false);
 
-    // TODO: Shaheer make its atlas :D
-    GOBLIN("GoblinAtlas/Goblin.atlas", 10, 10, 10, 75, 2, 8, 8, true,
-            EnumSet.of(AnimState.IDLE, AnimState.RUN, AnimState.ATTACK, AnimState.DEAD)),
-    ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 10, 10, 10, 75, 2, 8, 8, false,
-            EnumSet.of(AnimState.IDLE, AnimState.RUN, AnimState.ATTACK, AnimState.DEAD));
-    
     final String assetPath;
 
     final float speed;
@@ -54,11 +37,10 @@ enum Preset {
     final float spriteHeight;       //This gets rid of manually settings each entity size
     
     boolean isAlly;
-    EnumSet<AnimState> animationStates;     //AnimStates for each preset 
 
-    Preset(String path, float speed, float attackStrength,
+    HeroPreset(String path, float speed, float attackStrength,
                float attackRange, float maxHealth, float attackSpeed,
-                float spriteWidth, float spriteHeight, boolean isAlly, EnumSet<AnimState> animationStates) {
+                float spriteWidth, float spriteHeight, boolean isAlly) {
         
         this.assetPath = path;
         this.speed = speed;
@@ -69,76 +51,161 @@ enum Preset {
         this.spriteWidth = spriteWidth;
         this.spriteHeight = spriteHeight;
         this.isAlly = isAlly;
-        this.animationStates = animationStates;
+    }
+}
+
+enum GoblinPreset{
+    GOBLIN("GoblinAtlas/Goblin.atlas", 10, 10, 10, 75, 2, 8, 8, true),
+    ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 10, 10, 10, 75, 2, 8, 8, false);
+    
+    final String assetPath;
+
+    final float speed;
+    final float attackStrength;
+    final float attackRange;    
+    final float maxHealth;
+
+    // This will effect the attack animation
+    float attackSpeed;
+
+    final float spriteWidth;        //Store width and height and set at Entity.java
+    final float spriteHeight;       //This gets rid of manually settings each entity size
+    
+    boolean isAlly; 
+
+    GoblinPreset(String path, float speed, float attackStrength,
+               float attackRange, float maxHealth, float attackSpeed,
+                float spriteWidth, float spriteHeight, boolean isAlly) {
+        
+        this.assetPath = path;
+        this.speed = speed;
+        this.attackStrength = attackStrength;
+        this.attackRange = attackRange;         
+        this.maxHealth = maxHealth;
+        this.attackSpeed = attackSpeed;
+        this.spriteWidth = spriteWidth;
+        this.spriteHeight = spriteHeight;
+        this.isAlly = isAlly;
     }
 }
 
 //General loader which will NOT be instantiated just USED
 final class Loader {
     // A hash map is like a python dictionary, but instead, we can any type as the key
-    private static Map<Preset, TextureAtlas> atlasses;
+    private static Map<HeroPreset, TextureAtlas> heroAtlass;
 
-    private static Map<Preset, Animation<TextureRegion>> runAnimation;
-    private static Map<Preset, Animation<TextureRegion>> idleAnimation;
-    private static Map<Preset, Animation<TextureRegion>> attackAnimation;
-    private static Map<Preset, Animation<TextureRegion>> deadAnimation;
+    private static Map<HeroPreset, Animation<TextureRegion>> heroRunAnimation;
+    private static Map<HeroPreset, Animation<TextureRegion>> heroIdleAnimation;
+    private static Map<HeroPreset, Animation<TextureRegion>> heroAttackAnimation;
+    private static Map<HeroPreset, Animation<TextureRegion>> heroDeadAnimation;
+
+    //Declare hash map to store assets for GoblinPreset
+    private static Map<GoblinPreset, TextureAtlas> goblinAtlass;
+
+    private static Map<GoblinPreset, Animation<TextureRegion>> goblinRunAnimation;
+    private static Map<GoblinPreset, Animation<TextureRegion>> goblinIdleAnimation;
+    private static Map<GoblinPreset, Animation<TextureRegion>> goblinAttackAnimation;
+    private static Map<GoblinPreset, Animation<TextureRegion>> goblinDeadAnimation;
+    
 
     public static void load(AssetManager manager) {
         // I'm keeping the ANGLED BRACKETS blank because the compiler figures out what should go there for you
-        // In this case we defined above the brackets to contain TextureAtlas
-        atlasses = new HashMap<>();
+        // Hash maps for hero animations to be recieved from HeroPreset
+        heroAtlass = new HashMap<>();
+        heroRunAnimation = new HashMap<>();
+        heroIdleAnimation = new HashMap<>();
+        heroAttackAnimation = new HashMap<>();
+        heroDeadAnimation = new HashMap<>();
 
-        runAnimation = new HashMap<>();
-        idleAnimation = new HashMap<>();
-        attackAnimation = new HashMap<>();
-        deadAnimation = new HashMap<>();
+        //Hash maps for goblin animations to be recieved from GoblinPreset
+        goblinAtlass = new HashMap<>();
+        goblinRunAnimation = new HashMap<>();
+        goblinIdleAnimation = new HashMap<>();
+        goblinAttackAnimation = new HashMap<>();
+        goblinDeadAnimation = new HashMap<>();
         
-        for (Preset preset : Preset.values()) {
+        for (HeroPreset preset : HeroPreset.values()) {
             TextureAtlas atlas = manager.get(preset.assetPath, TextureAtlas.class);
-            atlasses.put(preset, atlas);
+            heroAtlass.put(preset, atlas);
 
-            if (preset.animationStates.contains(AnimState.RUN)){
-                runAnimation.put(preset, new Animation<>(0.075f, atlas.findRegions("Run"), PlayMode.LOOP));
-            }
+            heroRunAnimation.put(preset, new Animation<>(0.075f, atlas.findRegions("Run"), PlayMode.LOOP));
 
-            if (preset.animationStates.contains(AnimState.IDLE)){
-                idleAnimation.put(preset, new Animation<>(0.5f, atlas.findRegions("Idle"), PlayMode.LOOP));
-            }
+            heroIdleAnimation.put(preset, new Animation<>(0.5f, atlas.findRegions("Idle"), PlayMode.LOOP));
 
-            if (preset.animationStates.contains(AnimState.DEAD)){
-                deadAnimation.put(preset, new Animation<>(0.25f, atlas.findRegions("Dead"), PlayMode.NORMAL));
-            }
+            heroDeadAnimation.put(preset, new Animation<>(0.25f, atlas.findRegions("Dead"), PlayMode.NORMAL));
 
-            if (preset.animationStates.contains(AnimState.ATTACK)){
-                Animation<TextureRegion> attack = new Animation<>(
-                0.5f, // this is just a temporary value
-                atlas.findRegions("Attack"), PlayMode.LOOP);
+            Animation<TextureRegion> attack = new Animation<>(
+            0.5f, // this is just a temporary value
+            atlas.findRegions("Attack"), PlayMode.LOOP);
 
-                // Calculate the correct frame duration for the attack speed, OK?
-                float attackFrameDuration = preset.attackSpeed / attack.getKeyFrames().length;
+            // Calculate the correct frame duration for the attack speed, OK?
+            float attackFrameDuration = preset.attackSpeed / attack.getKeyFrames().length;
 
-                // this reset the frame duration to the correct amount
-                attack.setFrameDuration(attackFrameDuration);
-                
-                // Load all the animations into the hash map
-                attackAnimation.put(preset, attack);
-            }
+            // this reset the frame duration to the correct amount
+            attack.setFrameDuration(attackFrameDuration);
+            
+            // Load all the animations into the hash map
+            heroAttackAnimation.put(preset, attack);
+        }
+
+        //Store animation of GoblinPreset in its destined hashmap
+        for (GoblinPreset preset : GoblinPreset.values()) {
+            TextureAtlas gobAtlas = manager.get(preset.assetPath, TextureAtlas.class);
+            goblinAtlass.put(preset, gobAtlas);
+
+            goblinRunAnimation.put(preset, new Animation<>(0.075f, gobAtlas.findRegions("Run"), PlayMode.LOOP));
+
+            goblinIdleAnimation.put(preset, new Animation<>(0.5f, gobAtlas.findRegions("Idle"), PlayMode.LOOP));
+
+            goblinDeadAnimation.put(preset, new Animation<>(0.25f, gobAtlas.findRegions("Dead"), PlayMode.NORMAL));
+
+            Animation<TextureRegion> attack = new Animation<>(
+            0.5f,     // this is just a temporary value
+            gobAtlas.findRegions("Attack"), PlayMode.LOOP);
+
+            // Calculate the correct frame duration for the attack speed, OK?
+            float attackFrameDuration = preset.attackSpeed / attack.getKeyFrames().length;
+
+            // this reset the frame duration to the correct amount
+            attack.setFrameDuration(attackFrameDuration);
+            
+            // Load all the animations into the hash map
+            goblinAttackAnimation.put(preset, attack);
         }
     }
 
-    public static Animation<TextureRegion> run(Preset preset) {
-        return runAnimation.get(preset);
+    //Getter methods in accordance to each preset
+    //HeroPreset getters
+    public static Animation<TextureRegion> run(HeroPreset preset) {
+        return heroRunAnimation.get(preset);
     }
 
-    public static Animation<TextureRegion> attack(Preset preset) {
-        return attackAnimation.get(preset);
+    public static Animation<TextureRegion> attack(HeroPreset preset) {
+        return heroAttackAnimation.get(preset);
     }
 
-    public static Animation<TextureRegion> idle(Preset preset) {
-        return idleAnimation.get(preset);
+    public static Animation<TextureRegion> idle(HeroPreset preset) {
+        return heroIdleAnimation.get(preset);
     }
 
-    public static Animation<TextureRegion> dead(Preset preset) {
-        return deadAnimation.get(preset);
+    public static Animation<TextureRegion> dead(HeroPreset preset) {
+        return heroDeadAnimation.get(preset);
+    }
+
+    //GoblinPreset getters
+    public static Animation<TextureRegion> run(GoblinPreset preset) {
+        return goblinRunAnimation.get(preset);
+    }
+
+    public static Animation<TextureRegion> attack(GoblinPreset preset) {
+        return goblinAttackAnimation.get(preset);
+    }
+
+    public static Animation<TextureRegion> idle(GoblinPreset preset) {
+        return goblinIdleAnimation.get(preset);
+    }
+
+    public static Animation<TextureRegion> dead(GoblinPreset preset) {
+        return goblinDeadAnimation.get(preset);
     }
 }

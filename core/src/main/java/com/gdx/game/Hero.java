@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 abstract class Hero extends DynamicEntity {
     public static ArrayList<Hero> heroList = new ArrayList<>();
 
-    Hero(Preset preset, int startX, int startY) {
+    Hero(HeroPreset preset, int startX, int startY) {
         super(
             Loader.attack(preset),
             Loader.run(preset),
@@ -30,7 +30,7 @@ abstract class Hero extends DynamicEntity {
 
 // Child class number 1
 class HeroPlayer extends Hero {
-    HeroPlayer(Preset preset, int startX, int startY) {
+    HeroPlayer(HeroPreset preset, int startX, int startY) {
         super(preset, startX, startY);
     }
 }
@@ -38,7 +38,7 @@ class HeroPlayer extends Hero {
 class HeroBot extends Hero {
     private static final float HERO_ALERT_RADIUS = 10f;
 
-    HeroBot(Preset preset, int startX, int startY) {
+    HeroBot(HeroPreset preset, int startX, int startY) {
         super(preset, startX, startY);
     }
 
