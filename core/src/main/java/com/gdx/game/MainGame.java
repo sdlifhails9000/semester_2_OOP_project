@@ -82,7 +82,7 @@ public class MainGame extends ApplicationAdapter {
     HeroPlayer testEnemy;
 
     //DynamicEntities (Goblins)
-    Goblin g1, g2, g3, g4, g5, g6;
+    //Goblin g1, g2, g3, g4, g5, g6;
 
 
     //A variable to track elapsed time during animation
@@ -137,11 +137,11 @@ public class MainGame extends ApplicationAdapter {
         clickCoords = new Vector3();
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(HeroPreset.HERO_LIGHT, 10, 10);
+        player = new HeroPlayer(HeroPreset.HERO_LIGHT, 50, 50);
         testEnemy = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 20, 20);
 
         // //Initialize the goblins
-          g1 = new Goblin(GoblinPreset.GOBLIN, 10,20);
+        // g1 = new Goblin(GoblinPreset.GOBLIN, 10,20);
         // // g2 = new Goblin(Preset.GOBLIN, 20,20);
         // // g3 = new Goblin(Preset.GOBLIN, 20,10);
         //  g4 = new Goblin(Preset.ENEMY_GOBLIN, 190,180);

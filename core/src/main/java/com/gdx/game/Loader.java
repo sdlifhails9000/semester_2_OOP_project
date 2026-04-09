@@ -1,7 +1,6 @@
 package com.gdx.game;
 
 //import java.util.ArrayList;
-import java.util.EnumSet;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 //import com.badlogic.gdx.math.Vector2;

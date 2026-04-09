@@ -5,7 +5,6 @@ package com.gdx.game;
 
 // make the tower an Entity and make it's projectiles DynamicEntities that harm enemies
 
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -19,8 +18,6 @@ import com.badlogic.gdx.graphics.g2d.Animation;           //Animation imports ar
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 abstract class Entity extends Sprite {
-    State idleState;
-    State deathState;
 
     State currentState;
 
@@ -154,38 +151,7 @@ abstract class Entity extends Sprite {
         }
     }
 
-    // protected void updateAttack(float delta) {                 //Override this for tower entity (If you dont want a rotating tower entity)
-    //     if (attackTarget.isDead) {
-    //         state = State.IDLE;
-    //         attackTarget = null;
-    //         return;
-    //     }
-
-    //     // Check if we have passed the interval of attack and reset the timer
-    //     if (attackTimer >= attackSpeed) {
-    //         attackTarget.takeDamage(attackStrength);
-    //         System.out.printf("Victim's Current Health... %f\n", attackTarget.currentHealth);
-    //         attackTimer = 0;
-    //     }
-
-    //     // Calculate the angle and flip accordingly
-
-    //     Vector2 displacement = new Vector2();
-    //     attackTarget.getBoundingRectangle().getCenter(displacement);
-    //     displacement.sub(currentXY);
-
-    //     float angle = MathUtils.atan2Deg360(displacement.y, displacement.x);
-
-    //     if (angle > 90f && angle < 270f) {
-    //         //this.setRotation(angle + 180);
-    //         setFlip(true, false);
-    //     } else {
-    //         //this.setRotation(angle);
-    //         setFlip(false, false);
-    //     }
-
-    //     attackTimer += delta;
-    // }
+    
 
 
     // COLLISION WORK AHEAD
@@ -245,6 +211,8 @@ abstract class Entity extends Sprite {
         setRegion(currentAnimation.getKeyFrame(animationTimer));
         animationTimer += delta;
         currentState.update(this, delta);
+
+        System.out.println("Position: " + currentXY.x + currentXY.y + "  State is: " + currentState.getClass().getName());
     }
 
     // ################### GETTERS SETTER ###################
@@ -259,23 +227,16 @@ abstract class Entity extends Sprite {
     public Vector2 getPosition() {
         return currentXY;
     }
+    
+    public void setPosition(float newX, float newY) {
+        currentXY.x = newX;
+        currentXY.y = newY;
+    }
 
     public void setState(State state) {
         currentState.exit(this);
         currentState = state;
         currentState.enter(this);
-    }
-
-    // public void setPosition(Vector2 change) {
-    //     currentXY
-    // }
-
-    // Only set when you click right click. Only set it if the position is near an enemy
-    protected void setAttackTarget(Entity entity){
-        attackTarget = entity;
-    }
-
-    public Entity getAttackTarget() {
-        return attackTarget;
-    }
+    }    
 }
+

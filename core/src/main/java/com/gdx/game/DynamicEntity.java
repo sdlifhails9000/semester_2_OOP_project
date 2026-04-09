@@ -45,9 +45,6 @@ abstract class DynamicEntity extends Entity {
         );
         
         this.runAnimation = run;
-        this.idleState = new DynamicIdleState();
-        this.moveState = new DynamicMoveState(); // TODO implement a dynamic move state
-        this.currentState = idleState;
 
         this.speed = speed;
 
@@ -80,7 +77,42 @@ abstract class DynamicEntity extends Entity {
 
         velocity.x = destinationX;
         velocity.y = destinationY;
-        velocity.nor().scl(speed);
+        
+        //Prevents division by zero
+        if(!velocity.isZero()){
+            velocity.nor().scl(speed);
+        }
+    }
+
+    void moveTowardsEnemy(Vector2 EnemyPos, float delta){
+        float angle;
+        float destinationX = EnemyPos.x - currentXY.x;
+        float destinationY = EnemyPos.y - currentXY.y;
+
+        //-----ROTATION CALCULATION START-----
+        //Sort of skews off at endpoint likeeee just test and see (Works perfectly for bottom edge but skewed for the other 3)
+
+        angle = MathUtils.atan2Deg360(destinationY, destinationX);      //atan2Deg360 ensures that whatever y and x is we get angle in range of 0 to 360 not from 180 to -180
+        
+        //-----NOTE----
+        //you can add rotation or not your choice just uncomment the player.setRotation() lines to see it in play
+
+        if (angle > 90 && angle < 270) { 
+            //this.setRotation(angle + 180);        //We have to do a 180 degree CORRECTION offset because setFlip offsets the angle by 180 degrees (inverts x axis)            //This range signifies 2 and 3 quadrant 
+            this.setFlip(true, false);       //Flip the x axis
+        }
+        else {
+            //this.setRotation(angle);         //Same reason as above
+            this.setFlip(false, false);      //If its a click in 1 or 4 quadrant no flip just bring sprite to what it was originally (sprite was originally drawn right facing)
+        }
+
+        velocity.x = destinationX;
+        velocity.y = destinationY;
+        
+        //Prevents division by zero
+        if(!velocity.isZero()){
+            velocity.nor().scl(speed);
+        }
     }
 
     void handleCollision(float delta) {

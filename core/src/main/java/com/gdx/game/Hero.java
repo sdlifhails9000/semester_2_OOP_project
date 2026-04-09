@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 
 abstract class Hero extends DynamicEntity {
     public static ArrayList<Hero> heroList = new ArrayList<>();
+    Entity attackTarget;
 
     Hero(HeroPreset preset, int startX, int startY) {
         super(
@@ -26,13 +27,41 @@ abstract class Hero extends DynamicEntity {
 
         heroList.add(this);
     }
+
+    //Setters and Getters
+    public void setAttackTarget(Entity e){
+        this.attackTarget = e;
+    }
+
+    public Entity getAttackTarget(){
+        return attackTarget;
+    }
+    
 }
 
-// Child class number 1
-class HeroPlayer extends Hero {
+//Keeping it a seperate class if we want some seperate capabilities other than HeroBot
+class HeroPlayer extends Hero{
+    State heroIdleState;
+    State heroMoveState;
+    State heroChaseState;
+    State heroAttackState;
+
     HeroPlayer(HeroPreset preset, int startX, int startY) {
         super(preset, startX, startY);
+
+        //Selecting required states from the factory State.java
+        heroIdleState = new HeroIdleState();
+        heroMoveState = new HeroMoveState();
+        heroChaseState = new HeroChaseState();
+        heroAttackState = new HeroAttackState();
+
+        //Set the currentState defined in Entity.java (Its null initially)
+        currentState = heroIdleState;
     }
+
+    
+
+    
 }
 
 class HeroBot extends Hero {

@@ -27,7 +27,6 @@ class Goblin extends DynamicEntity{
         goblinList.add(this);
     }
 
-    @Override
     public Entity getAttackTarget() {
         Entity nearestEntity = null;
         float nearestEnemyDistance = Float.MAX_VALUE;
@@ -59,13 +58,6 @@ class Goblin extends DynamicEntity{
 
         return nearestEntity;
     }
-
-    @Override
-    public void Update(float delta){
-        setAttackTarget(getAttackTarget());
-        super.Update(delta);
-    }
-
     
 }
 
