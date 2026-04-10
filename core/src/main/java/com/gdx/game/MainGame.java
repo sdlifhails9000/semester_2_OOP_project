@@ -277,7 +277,6 @@ public class MainGame extends ApplicationAdapter {
             clickCoords2D.x = MathUtils.clamp(clickCoords2D.x, player.getWidth() / 2, worldWidth - player.getWidth() / 2);        //Doing correction because target is centered
             clickCoords2D.y = MathUtils.clamp(clickCoords2D.y, player.getHeight() / 2,worldHeight - player.getHeight() / 2);      //Binding it to world width and height dimensions
             player.setTargetPosition(clickCoords2D.x, clickCoords2D.y);     //Using the small fix for edge case above
-            player.attackTarget = null;     //So we can override the HeroAttackState and HeroChaseState
         }
         else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
             clickCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0 );

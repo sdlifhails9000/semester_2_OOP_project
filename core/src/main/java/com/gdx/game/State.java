@@ -135,17 +135,21 @@ class HeroAttackState implements State{
         //If the entity itself dies
         if (_e.isDead){
             _e.setState(_e.heroDeadState);
+            _e.attackTarget = null;
             return;
         }
 
-        //if our hero is supposed to move i.e leftclick
-        if(_e.getAttackTarget() == null){
+        //In case hero leftClicks a targetPosition is set and currentXY will obv not match it
+        if (!_e.currentXY.epsilonEquals(_e.targetPosition, 0.5f)) {
             _e.setState(_e.heroMoveState);
+            _e.attackTarget = null;
             return;
         }
+
         //If the target is dead
         if (_e.getAttackTarget().isDead) {
             _e.setState(_e.heroIdleState);
+            _e.attackTarget = null;
             return;
         }
 
@@ -184,7 +188,6 @@ class HeroAttackState implements State{
     @Override
     public void exit(Entity e) {
         HeroPlayer _e = (HeroPlayer)e;
-        _e.attackTarget = null;
         _e.animationTimer = 0;
     }
 }
@@ -202,17 +205,21 @@ class HeroChaseState implements State {
         //If the entity itself dies
         if (_e.isDead){
             _e.setState(_e.heroDeadState);
+            _e.attackTarget = null;
             return;
         }
 
-        //if our hero is supposed to move i.e leftclick (As in this specific case attackTarget becomes null only if leftClick in MainGame.java clickEvents)
-        if(_e.getAttackTarget() == null){
+        //In case hero leftClicks a targetPosition is set and currentXY will obv not match it
+        if (!_e.currentXY.epsilonEquals(_e.targetPosition, 0.5f)) {
             _e.setState(_e.heroMoveState);
+            _e.attackTarget = null;
             return;
         }
+
         //If the target is dead
         if (_e.getAttackTarget().isDead) {
             _e.setState(_e.heroIdleState);
+            _e.attackTarget = null;
             return;
         }
 
@@ -228,22 +235,26 @@ class HeroChaseState implements State {
 
         // Change x
         _e.currentXY.x += _e.velocity.x * delta;
+        _e.targetPosition.x += _e.velocity.x * delta;
         _e.updateBoxes();
         
         // Handle collision
         if (_e.isCollidingWithEntity()) {
             _e.currentXY.x -= _e.velocity.x * delta;
+            _e.targetPosition.x -= _e.velocity.x * delta;
             _e.velocity.x = 0;
             _e.updateBoxes();
         }
 
         // Change y
         _e.currentXY.y += _e.velocity.y * delta;
+        _e.targetPosition.y += _e.velocity.y * delta;
         _e.updateBoxes();
         
         // Handle collision
         if (_e.isCollidingWithEntity()) {
             _e.currentXY.y -= _e.velocity.y * delta;
+            _e.targetPosition.y -= _e.velocity.y * delta;
             _e.velocity.y = 0;
             _e.updateBoxes();
         }
@@ -259,7 +270,6 @@ class HeroChaseState implements State {
     public void exit(Entity e){
         HeroPlayer _e = (HeroPlayer)e;
         _e.velocity.setZero();
-        _e.targetPosition.set(_e.currentXY);
         _e.animationTimer = 0;
     }
 }
