@@ -288,6 +288,7 @@ public class MainGame extends ApplicationAdapter {
             clickCoords2D.y = MathUtils.clamp(clickCoords2D.y, player.getHeight() / 2,worldHeight - player.getHeight() / 2);
 
             for (Entity e : Entity.entityList) {
+                //Do not set yourself as a target
                 if (e == player) {
                     continue;
                 }

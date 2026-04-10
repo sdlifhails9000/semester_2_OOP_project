@@ -91,6 +91,7 @@ class HeroPlayer extends Hero{
     State heroMoveState;
     State heroChaseState;
     State heroAttackState;
+    State heroDeadState;
 
     HeroPlayer(HeroPreset preset, int startX, int startY) {
         super(preset, startX, startY);
@@ -100,8 +101,9 @@ class HeroPlayer extends Hero{
         heroMoveState = new HeroMoveState();
         heroChaseState = new HeroChaseState();
         heroAttackState = new HeroAttackState();
+        heroDeadState = new HeroDeadState();
 
-        //Set the currentState defined in Entity.java (Its null initially)
+        //Set the currentState (its idle initially)
         currentState = heroIdleState;
     }
 

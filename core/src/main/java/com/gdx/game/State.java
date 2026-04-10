@@ -20,6 +20,12 @@ class HeroIdleState implements State {
     public void update(Entity e, float delta) {
         HeroPlayer _e = (HeroPlayer)e;
 
+        //If the entity itself dies
+        if (_e.isDead){
+            _e.setState(_e.heroDeadState);
+            return;
+        }
+
         // if the target position and current position don't match, start moving to that target position
         if (!_e.currentXY.epsilonEquals(_e.targetPosition, 0.5f)) {
             _e.setState(_e.heroMoveState);
@@ -52,6 +58,13 @@ class HeroMoveState implements State {
 
         System.out.println("Target Position is: " + _e.getTargetPosition());
 
+        //If the entity itself dies
+        if (_e.isDead){
+            _e.setState(_e.heroDeadState);
+            return;
+        }
+
+        //In case of rightClickEvent an attackTarget is generated
         if(_e.getAttackTarget() != null){
             _e.setState(_e.heroAttackState);
             return;
@@ -119,6 +132,12 @@ class HeroAttackState implements State{
     public void update(Entity e, float delta){
         HeroPlayer _e = (HeroPlayer) e;
 
+        //If the entity itself dies
+        if (_e.isDead){
+            _e.setState(_e.heroDeadState);
+            return;
+        }
+
         //if our hero is supposed to move i.e leftclick
         if(_e.getAttackTarget() == null){
             _e.setState(_e.heroMoveState);
@@ -180,7 +199,13 @@ class HeroChaseState implements State {
     public void update(Entity e, float delta){
         HeroPlayer _e = (HeroPlayer) e;
 
-        //if our hero is supposed to move i.e leftclick
+        //If the entity itself dies
+        if (_e.isDead){
+            _e.setState(_e.heroDeadState);
+            return;
+        }
+
+        //if our hero is supposed to move i.e leftclick (As in this specific case attackTarget becomes null only if leftClick in MainGame.java clickEvents)
         if(_e.getAttackTarget() == null){
             _e.setState(_e.heroMoveState);
             return;
@@ -235,6 +260,22 @@ class HeroChaseState implements State {
         HeroPlayer _e = (HeroPlayer)e;
         _e.velocity.setZero();
         _e.targetPosition.set(_e.currentXY);
+        _e.animationTimer = 0;
+    }
+}
+
+class HeroDeadState implements State {
+    public void enter (Entity e){
+        HeroPlayer _e = (HeroPlayer) e;
+        _e.currentAnimation = _e.deadAnimation;
+    }
+
+    public void update (Entity e, float delta){
+        // TODO: Add functionality aka respawn mechanism checks     
+    }
+
+    public void exit (Entity e){
+        HeroPlayer _e = (HeroPlayer) e;
         _e.animationTimer = 0;
     }
 }
