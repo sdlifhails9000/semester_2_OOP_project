@@ -119,10 +119,18 @@ class HeroAttackState implements State{
     public void update(Entity e, float delta){
         HeroPlayer _e = (HeroPlayer) e;
 
-        if (_e.isDead) {
+        //if our hero is supposed to move i.e leftclick
+        if(_e.getAttackTarget() == null){
+            _e.setState(_e.heroMoveState);
+            return;
+        }
+        //If the target is dead
+        if (_e.getAttackTarget().isDead) {
             _e.setState(_e.heroIdleState);
             return;
         }
+
+        //If our hero is far from the enemy
         if (!_e.isCloseToEnemy()){
             _e.setState(_e.heroChaseState);
             return;
@@ -172,7 +180,13 @@ class HeroChaseState implements State {
     public void update(Entity e, float delta){
         HeroPlayer _e = (HeroPlayer) e;
 
-        if (_e.attackTarget.isDead){
+        //if our hero is supposed to move i.e leftclick
+        if(_e.getAttackTarget() == null){
+            _e.setState(_e.heroMoveState);
+            return;
+        }
+        //If the target is dead
+        if (_e.getAttackTarget().isDead) {
             _e.setState(_e.heroIdleState);
             return;
         }

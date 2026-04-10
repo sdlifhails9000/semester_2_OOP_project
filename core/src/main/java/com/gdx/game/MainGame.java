@@ -82,7 +82,7 @@ public class MainGame extends ApplicationAdapter {
     HeroPlayer testEnemy;
 
     //DynamicEntities (Goblins)
-    //Goblin g1, g2, g3, g4, g5, g6;
+    Goblin g1, g2, g3, g4, g5, g6;
 
 
     //A variable to track elapsed time during animation
@@ -141,10 +141,10 @@ public class MainGame extends ApplicationAdapter {
         testEnemy = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 20, 20);
 
         // //Initialize the goblins
-        // g1 = new Goblin(GoblinPreset.GOBLIN, 10,20);
+         g1 = new Goblin(GoblinPreset.GOBLIN, 10,20);
         // // g2 = new Goblin(Preset.GOBLIN, 20,20);
         // // g3 = new Goblin(Preset.GOBLIN, 20,10);
-        //  g4 = new Goblin(Preset.ENEMY_GOBLIN, 190,180);
+          g4 = new Goblin(GoblinPreset.ENEMY_GOBLIN, 30,30);
         // // g5 = new Goblin(Preset.ENEMY_GOBLIN, 180,180);
         // // g6 = new Goblin(Preset.ENEMY_GOBLIN, 180,190);
 
@@ -277,7 +277,7 @@ public class MainGame extends ApplicationAdapter {
             clickCoords2D.x = MathUtils.clamp(clickCoords2D.x, player.getWidth() / 2, worldWidth - player.getWidth() / 2);        //Doing correction because target is centered
             clickCoords2D.y = MathUtils.clamp(clickCoords2D.y, player.getHeight() / 2,worldHeight - player.getHeight() / 2);      //Binding it to world width and height dimensions
             player.setTargetPosition(clickCoords2D.x, clickCoords2D.y);     //Using the small fix for edge case above
-            // player.setAttackTarget(null);
+            player.attackTarget = null;     //So we can override the HeroAttackState and HeroChaseState
         }
         else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
             clickCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0 );
@@ -289,6 +289,11 @@ public class MainGame extends ApplicationAdapter {
 
             for (Entity e : Entity.entityList) {
                 if (e == player) {
+                    continue;
+                }
+
+                //Do not set ally as targets
+                if(e.isAlly == player.isAlly){
                     continue;
                 }
 

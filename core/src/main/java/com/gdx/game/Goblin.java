@@ -27,8 +27,8 @@ class Goblin extends DynamicEntity{
 
     Goblin (GoblinPreset preset, int startX, int startY){
         super(
-            Loader.dead(preset),
             Loader.idle(preset),
+            Loader.dead(preset),
             startX, startY,
             
             preset.maxHealth,
@@ -47,7 +47,7 @@ class Goblin extends DynamicEntity{
         this.attackSpeed = preset.attackSpeed;
         this.attackStrength = preset.attackStrength;
     }
-    
+
     @Override
     public void setState(State state){
         this.currentState.exit(this);
