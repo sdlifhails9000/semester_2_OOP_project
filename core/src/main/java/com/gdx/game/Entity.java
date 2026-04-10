@@ -18,19 +18,18 @@ import com.badlogic.gdx.graphics.g2d.Animation;           //Animation imports ar
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 abstract class Entity extends Sprite {
-
-    State currentState;
-
     public static ArrayList<Entity> entityList = new ArrayList<>();
 
-    // Health info
-    protected float maxHealth;
-    protected float currentHealth;
+    //Animations
+    protected Animation<TextureRegion> idleAnimation;
+    protected Animation<TextureRegion> deadAnimation;
+    protected Animation<TextureRegion> currentAnimation;
 
-    // Attack info
-    protected float attackStrength;
-    protected float attackRange;
-    protected float attackSpeed;
+    protected float animationTimer = 0;
+
+    // Health info
+    protected final float maxHealth;
+    protected float currentHealth;
 
     protected float spriteWidth;
     protected float spriteHeight;
@@ -40,105 +39,38 @@ abstract class Entity extends Sprite {
 
     protected Vector2 currentXY;     //Starting points (game World Coords not screen coords)  //IN CHILD CLASS NOW
 
-    protected float animationTimer = 0f; // Used for retrieving a certain from from the current animation. THAT'S IT
-    protected float attackTimer = 0f; // Used to keep track of how long it has been since the last attack
-
-    Entity attackTarget;     //Stores entity to attack
-    protected static ArrayList<Entity> heroList, goblinList, towerList;
-
-    Animation<TextureRegion> idleAnimation;
-    Animation<TextureRegion> attackAnimation;
-    Animation<TextureRegion> deadAnimation;
-
-    Animation<TextureRegion> currentAnimation;
-
     protected Rectangle collisionBox;
     protected Rectangle hitBox; 
     
-    Entity(Animation<TextureRegion> attack,
-           Animation<TextureRegion> dead,
-           Animation<TextureRegion> idle,
+    Entity(Animation<TextureRegion> idleAnimation,
+        Animation<TextureRegion> deadAnimation,
            float startX, float startY,
            float maxHealth,
-           float attackRange,
-           float attackSpeed,
-           float attackStrength,
            float spriteWidth,
            float spriteHeight,
            boolean isAlly) {
 
-        super(idle.getKeyFrame(0));     //Get first idle frame
-
-        entityList.add(this);
-
-        this.attackAnimation = attack;
-        this.idleAnimation = idle;
-        this.deadAnimation = dead;
+        super(idleAnimation.getKeyFrame(0));     //Get first idle frame
+        
+        this.idleAnimation = idleAnimation;
+        this.deadAnimation = deadAnimation;
+        this.currentAnimation = idleAnimation;  //Initially your character is idle
 
         this.currentXY = new Vector2(startX, startY);
 
         this.maxHealth = maxHealth;
         this.currentHealth = maxHealth;     //Forgot to initialize this
-        this.attackRange = attackRange;
-        this.attackSpeed = attackSpeed;
-        this.attackStrength = attackStrength;
         this.isAlly = isAlly;
         
         this.setSize(spriteWidth, spriteHeight);        //Set size here
         this.setOriginCenter();
         this.setCenter(startX, startY);
-
-        currentAnimation = idleAnimation;
-    
+        
+        //Please DONT REMOVE THIS MFER
+        entityList.add(this);
         createBoxes();
     }
     
-    // Is used to determine the state, don't touchy wouchy this or else things will break. TF2 coconut.jpeg moment
-    protected boolean isCloseToEnemy() {
-        if (attackTarget == null) {
-            return false;
-        }
-
-        Rectangle enemyBounds = attackTarget.getHitBox();
-        Rectangle playerBounds = this.getHitBox();
-        
-        boolean isClose = playerBounds.overlaps(enemyBounds);
-
-        Vector2 enemyPos = attackTarget.getPosition();
-
-        // This condition is so that the hits of a light class register on a heavy class while chasing it
-        boolean isInRange = enemyPos.dst(this.getPosition()) <= attackRange;
-
-        return isClose || isInRange;
-    }
-
-    // Collision Detection ahead    
-    // The Method is called in updateMovement()
-    public boolean checkEntityCollision(){
-        for (Entity i : entityList) {
-            if (i == this) {
-                continue;
-            }
-
-            if (i.currentXY.dst(this.currentXY) >= 20) {
-                continue;
-            }
-
-            //Do not check collision between DEAD entities
-            if (this.isDead || i.isDead){   
-                continue;
-            }
-
-            Rectangle enemyHitBox = i.getCollisionBox();
-            if (this.collisionBox.overlaps(enemyHitBox)) {
-                System.out.println("Colliding");
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     protected void takeDamage(float damage) {
         if (isDead) {
             return;
@@ -150,9 +82,6 @@ abstract class Entity extends Sprite {
             isDead = true;
         }
     }
-
-    
-
 
     // COLLISION WORK AHEAD
     // HITBOX GENERATION AND RELATED METHODS
@@ -207,13 +136,15 @@ abstract class Entity extends Sprite {
         this.hitBox = new Rectangle(worldX - 1/2, worldY - 1/2, worldWidth + 1, worldHeight + 1);   //Generating a hitbox which is bigger than collision box
     }
 
-    public void Update(float delta) {
-        setRegion(currentAnimation.getKeyFrame(animationTimer));
-        animationTimer += delta;
-        currentState.update(this, delta);
+    // ################### METHODS (override where required) ###################
 
-        System.out.println("Position: " + currentXY.x + currentXY.y + "  State is: " + currentState.getClass().getName());
+    public void Update(float delta){
+        animationTimer += delta;
+        this.setRegion(currentAnimation.getKeyFrame(animationTimer));
     }
+
+    //Abstract method
+    public abstract void setState(State state);
 
     // ################### GETTERS SETTER ###################
 
@@ -224,19 +155,13 @@ abstract class Entity extends Sprite {
         return this.hitBox;
     }
 
-    public Vector2 getPosition() {
+    public Vector2 getCurrentPosition() {
         return currentXY;
     }
     
-    public void setPosition(float newX, float newY) {
+    public void setCurrentPosition(float newX, float newY) {
         currentXY.x = newX;
         currentXY.y = newY;
     }
-
-    public void setState(State state) {
-        currentState.exit(this);
-        currentState = state;
-        currentState.enter(this);
-    }    
 }
 

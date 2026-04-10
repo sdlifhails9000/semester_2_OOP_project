@@ -153,7 +153,7 @@ public class MainGame extends ApplicationAdapter {
         float width = Gdx.graphics.getWidth();
 
         camera = new OrthographicCamera(cameraWidth, cameraHeight * (height / width));        //Visible region (multiplied height by aspect ratio)
-        camera.position.set(player.getPosition(), 0);         //Takes vector3 so pass in the whole method made in DynamicSprite class
+        camera.position.set(player.getCurrentPosition(), 0);         //Takes vector3 so pass in the whole method made in DynamicSprite class
         camera.update();
 
         //Initialize Viewport (for scaling and resizing)
@@ -279,26 +279,25 @@ public class MainGame extends ApplicationAdapter {
             player.setTargetPosition(clickCoords2D.x, clickCoords2D.y);     //Using the small fix for edge case above
             // player.setAttackTarget(null);
         }
-        // else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
-        //     clickCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0 );
-        //     camera.unproject(clickCoords);  // Converts screen coords to World coords
+        else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+            clickCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0 );
+            camera.unproject(clickCoords);  // Converts screen coords to World coords
 
-        //     Vector2 clickCoords2D = new Vector2(clickCoords.x, clickCoords.y);
-        //     clickCoords2D.x = MathUtils.clamp(clickCoords2D.x, player.getWidth() / 2, worldWidth - player.getWidth() / 2);
-        //     clickCoords2D.y = MathUtils.clamp(clickCoords2D.y, player.getHeight() / 2,worldHeight - player.getHeight() / 2);
+            Vector2 clickCoords2D = new Vector2(clickCoords.x, clickCoords.y);
+            clickCoords2D.x = MathUtils.clamp(clickCoords2D.x, player.getWidth() / 2, worldWidth - player.getWidth() / 2);
+            clickCoords2D.y = MathUtils.clamp(clickCoords2D.y, player.getHeight() / 2,worldHeight - player.getHeight() / 2);
 
-        //     for (Entity e : Entity.entityList) {
-        //         if (e == player) {
-        //             continue;
-        //         }
+            for (Entity e : Entity.entityList) {
+                if (e == player) {
+                    continue;
+                }
 
-        //         if (e.getCollisionBox().contains(clickCoords2D)) {
-        //             player.setMove(clickCoords2D);
-        //             player.setAttackTarget(e);
-        //             break;
-        //         }
-        //     }
-        // }
+                if (e.getCollisionBox().contains(clickCoords2D)) {
+                    player.setAttackTarget(e);
+                    break;
+                }
+            }
+        }
     }
     // Camera Roam
     private void cameraRoam(float delta){
@@ -321,7 +320,7 @@ public class MainGame extends ApplicationAdapter {
         if(!moving){
             // Set camera position to lizard, ALERT change to hero
             //Camera movement
-            Vector3 playerPosition3D = new Vector3(player.getPosition(), 0);
+            Vector3 playerPosition3D = new Vector3(player.getCurrentPosition(), 0);
 
             camera.position.lerp(playerPosition3D, 0.1f);            //THIS IS WHERE heroPos IS BEING USED (this brings smoothness for camera following)
 
@@ -356,7 +355,7 @@ public class MainGame extends ApplicationAdapter {
     }
 
     public void updateHealthBar(){
-        healthBarSprite.setCenter(player.getPosition().x, player.getPosition().y + 3);        //Setting it just above our hero sprite
+        healthBarSprite.setCenter(player.getCurrentPosition().x, player.getCurrentPosition().y + 3);        //Setting it just above our hero sprite
         float healthBarWidth = 5 * player.currentHealth / player.maxHealth;
         float healthBarHeight = 5;
 

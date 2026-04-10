@@ -6,10 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 interface State {
     void enter(Entity e);
     void update(Entity e, float delta);
-
-    default void exit(Entity e) {
-        e.animationTimer = 0;
-    }
+    void exit(Entity e);
 }
 //---------REAL HERO PLAYER STATES-----------
 class HeroIdleState implements State {
@@ -33,6 +30,12 @@ class HeroIdleState implements State {
             _e.setState(_e.heroAttackState);
             return;
         }
+    }
+
+    @Override
+    public void exit (Entity e){
+        HeroPlayer _e = (HeroPlayer)e;
+        _e.animationTimer = 0;
     }
 }
 
@@ -61,7 +64,8 @@ class HeroMoveState implements State {
         } 
 
         // calculate speed and turn towards the target
-        _e.moveTowardsTarget(delta);
+        // Takes leftClick as input
+        _e.moveTowards(_e.getTargetPosition(), delta);
 
         // Change position based on velocity
 
@@ -133,8 +137,8 @@ class HeroAttackState implements State{
 
         // Calculate the angle and flip accordingly
 
-        Vector2 displacement =  _e.attackTarget.getPosition().cpy();
-        displacement.sub(_e.getPosition());
+        Vector2 displacement =  _e.attackTarget.getCurrentPosition().cpy();
+        displacement.sub(_e.getCurrentPosition());
 
         float angle = MathUtils.atan2Deg360(displacement.y, displacement.x);
 
@@ -179,7 +183,7 @@ class HeroChaseState implements State {
         }
         
         // calculate speed and turn towards the target
-        _e.moveTowardsEnemy(_e.attackTarget.getPosition(), delta);
+        _e.moveTowards(_e.attackTarget.getCurrentPosition(), delta);
 
         // Change position based on velocity
 

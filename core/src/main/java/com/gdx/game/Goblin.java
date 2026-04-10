@@ -1,23 +1,37 @@
 package com.gdx.game;
 
 import java.util.ArrayList;
+
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 class Goblin extends DynamicEntity{
-    public static ArrayList<Goblin> goblinList = new ArrayList<>(); 
+    public static ArrayList<Goblin> goblinList = new ArrayList<>();
+
+    //Entities Declaration
+    Entity attackTarget;
+
+    //State declaration (for setState)
+    State currentState;
+    
+    //Animation Declaration (Idle and dead is handled in Entity.java)   (Current animation is in entity.java because idle and dead is handled there)
+    protected Animation<TextureRegion> runAnimation;
+    protected Animation<TextureRegion> attackAnimation;
+
+    //Stats declaration
+    protected float attackRange;
+    protected float attackSpeed;
+    protected float attackStrength;
+    protected float attackTimer;
 
     Goblin (GoblinPreset preset, int startX, int startY){
         super(
-            Loader.attack(preset),
-            Loader.run(preset),
             Loader.dead(preset),
             Loader.idle(preset),
             startX, startY,
             
             preset.maxHealth,
-            preset.attackRange,
-            preset.attackSpeed,
-            preset.attackStrength,
             preset.speed,
             preset.spriteWidth,
             preset.spriteHeight,
@@ -25,6 +39,20 @@ class Goblin extends DynamicEntity{
         );
 
         goblinList.add(this);
+
+        this.attackAnimation = Loader.attack(preset);
+        this.runAnimation = Loader.run(preset);
+
+        this.attackRange = preset.attackRange;
+        this.attackSpeed = preset.attackSpeed;
+        this.attackStrength = preset.attackStrength;
+    }
+    
+    @Override
+    public void setState(State state){
+        this.currentState.exit(this);
+        this.currentState = state;
+        this.currentState.enter(this);
     }
 
     public Entity getAttackTarget() {
@@ -39,8 +67,8 @@ class Goblin extends DynamicEntity{
             }
 
             // Calculate distance
-            Vector2 entityPos = entity.getPosition();
-            float distance = entityPos.dst(getPosition());
+            Vector2 entityPos = entity.getCurrentPosition();
+            float distance = entityPos.dst(getCurrentPosition());
 
             // Check if distance is smaller than the current nearestEnemyDistance
             if (nearestEnemyDistance > distance) {
