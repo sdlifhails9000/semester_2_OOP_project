@@ -30,7 +30,7 @@ abstract class Hero extends DynamicEntity {
         super(Loader.idle(preset),
               Loader.dead(preset),
               startX, startY,
-              
+
               preset.maxHealth,
               preset.speed,
               preset.spriteWidth,
@@ -65,7 +65,7 @@ abstract class Hero extends DynamicEntity {
 
         Rectangle enemyBounds = attackTarget.getHitBox();
         Rectangle playerBounds = this.getHitBox();
-        
+
         boolean isClose = playerBounds.overlaps(enemyBounds);
 
         Vector2 enemyPos = attackTarget.getCurrentPosition();
@@ -75,14 +75,14 @@ abstract class Hero extends DynamicEntity {
 
         return isClose || isInRange;
     }
-    
+
     @Override
     public void setState(State state){
         this.currentState.exit(this);
         this.currentState = state;
         this.currentState.enter(this);
     }
-    
+
 }
 
 //Keeping it a seperate class if we want some seperate capabilities other than HeroBot
@@ -110,10 +110,10 @@ class HeroPlayer extends Hero{
     @Override
     public void Update(float delta){
         super.Update(delta);
-        currentState.update(this, delta);    
+        currentState.update(this, delta);
     }
 
-    
+
 }
 
 class HeroBot extends Hero {

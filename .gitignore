@@ -86,6 +86,9 @@ www-test/
 .externalToolBuilders/
 *.launch
 
+## VS Code:
+
+.vscode/
 
 ## NetBeans:
 

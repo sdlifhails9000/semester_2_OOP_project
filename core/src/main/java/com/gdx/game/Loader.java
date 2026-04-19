@@ -26,7 +26,7 @@ enum HeroPreset {
 
     final float speed;
     final float attackStrength;
-    final float attackRange;    
+    final float attackRange;
     final float maxHealth;
 
     // This will effect the attack animation
@@ -34,17 +34,17 @@ enum HeroPreset {
 
     final float spriteWidth;        //Store width and height and set at Entity.java
     final float spriteHeight;       //This gets rid of manually settings each entity size
-    
+
     boolean isAlly;
 
     HeroPreset(String path, float speed, float attackStrength,
                float attackRange, float maxHealth, float attackSpeed,
                 float spriteWidth, float spriteHeight, boolean isAlly) {
-        
+
         this.assetPath = path;
         this.speed = speed;
         this.attackStrength = attackStrength;
-        this.attackRange = attackRange;         
+        this.attackRange = attackRange;
         this.maxHealth = maxHealth;
         this.attackSpeed = attackSpeed;
         this.spriteWidth = spriteWidth;
@@ -53,15 +53,15 @@ enum HeroPreset {
     }
 }
 
-enum GoblinPreset{
+enum GoblinPreset {
     GOBLIN("GoblinAtlas/Goblin.atlas", 10, 10, 10, 75, 2, 8, 8, true),
     ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 10, 10, 10, 75, 2, 8, 8, false);
-    
+
     final String assetPath;
 
     final float speed;
     final float attackStrength;
-    final float attackRange;    
+    final float attackRange;
     final float maxHealth;
 
     // This will effect the attack animation
@@ -69,17 +69,17 @@ enum GoblinPreset{
 
     final float spriteWidth;        //Store width and height and set at Entity.java
     final float spriteHeight;       //This gets rid of manually settings each entity size
-    
-    boolean isAlly; 
+
+    boolean isAlly;
 
     GoblinPreset(String path, float speed, float attackStrength,
                float attackRange, float maxHealth, float attackSpeed,
                 float spriteWidth, float spriteHeight, boolean isAlly) {
-        
+
         this.assetPath = path;
         this.speed = speed;
         this.attackStrength = attackStrength;
-        this.attackRange = attackRange;         
+        this.attackRange = attackRange;
         this.maxHealth = maxHealth;
         this.attackSpeed = attackSpeed;
         this.spriteWidth = spriteWidth;
@@ -105,7 +105,6 @@ final class Loader {
     private static Map<GoblinPreset, Animation<TextureRegion>> goblinIdleAnimation;
     private static Map<GoblinPreset, Animation<TextureRegion>> goblinAttackAnimation;
     private static Map<GoblinPreset, Animation<TextureRegion>> goblinDeadAnimation;
-    
 
     public static void load(AssetManager manager) {
         // I'm keeping the ANGLED BRACKETS blank because the compiler figures out what should go there for you
@@ -122,7 +121,7 @@ final class Loader {
         goblinIdleAnimation = new HashMap<>();
         goblinAttackAnimation = new HashMap<>();
         goblinDeadAnimation = new HashMap<>();
-        
+
         for (HeroPreset preset : HeroPreset.values()) {
             TextureAtlas atlas = manager.get(preset.assetPath, TextureAtlas.class);
             heroAtlass.put(preset, atlas);
@@ -142,7 +141,7 @@ final class Loader {
 
             // this reset the frame duration to the correct amount
             attack.setFrameDuration(attackFrameDuration);
-            
+
             // Load all the animations into the hash map
             heroAttackAnimation.put(preset, attack);
         }
@@ -167,7 +166,7 @@ final class Loader {
 
             // this reset the frame duration to the correct amount
             attack.setFrameDuration(attackFrameDuration);
-            
+
             // Load all the animations into the hash map
             goblinAttackAnimation.put(preset, attack);
         }

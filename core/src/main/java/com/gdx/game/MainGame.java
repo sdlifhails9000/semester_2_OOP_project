@@ -47,15 +47,15 @@ public class MainGame extends ApplicationAdapter {
     //Declare Map var using TiledMpa
     TiledMap map;
 
-    //Declare mapRendered by OrthogonalTiledMapRenderer 
-    
+    //Declare mapRendered by OrthogonalTiledMapRenderer
+
     OrthogonalTiledMapRenderer mapRenderer;
 
     //-----MAP WORK DECLARATION END----
 
     //Initializing gameWorld sizing and camera sizing
-    float worldWidth = 200f;                // -> Playable Region (Scaled to 1 tile = 1 world units)
-    float worldHeight = 200f;               //Equivalent to a pixel in tiled map
+    final float worldWidth = 200f;                // -> Playable Region (Scaled to 1 tile = 1 world units)
+    final float worldHeight = 200f;               //Equivalent to a pixel in tiled map
 
     float mapWidth = 50f;
     float mapHeight = 50f;       //Map number of tiles i.e 50x50 tiles
@@ -121,24 +121,23 @@ public class MainGame extends ApplicationAdapter {
 
         manager.setLoader(TiledMap.class, new TmxMapLoader());
         manager.load("practiceMap/MainMap.tmx", TiledMap.class);
-        
+
         manager.finishLoading(); // We could add a loading screen here if there are enough assets that it becomes slow
 
         // -------------- Make all the necessary thingies --------------
 
         Loader.load(manager);
         TextureAtlas atlas = manager.get("atlas\\practiceAtlas.atlas");
-        
-        // Initialize bg and sprite and health bar from atlas
-        
-        //background = atlas.createSprite("Background");        //No need since we made our tiled map
+
+        // Initialize health bar from atlas
+
         healthBarSprite = atlas.createSprite("healthBar");
 
         clickCoords = new Vector3();
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(HeroPreset.HERO_LIGHT, 50, 50);
-        testEnemy = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 20, 20);
+        player = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 50, 50);
+        testEnemy = new HeroPlayer(HeroPreset.HERO_HEAVY, 20, 20);
 
         // //Initialize the goblins
          g1 = new Goblin(GoblinPreset.GOBLIN, 10,20);
@@ -149,7 +148,7 @@ public class MainGame extends ApplicationAdapter {
         // // g6 = new Goblin(Preset.ENEMY_GOBLIN, 180,190);
 
         // Initialize Camera
-        float height = Gdx.graphics.getHeight();    //For aspect ration calculation
+        float height = Gdx.graphics.getHeight();    //For aspect ratio calculation
         float width = Gdx.graphics.getWidth();
 
         camera = new OrthographicCamera(cameraWidth, cameraHeight * (height / width));        //Visible region (multiplied height by aspect ratio)
@@ -158,7 +157,7 @@ public class MainGame extends ApplicationAdapter {
 
         //Initialize Viewport (for scaling and resizing)
         viewport = new ExtendViewport(cameraWidth, cameraHeight, camera);  //Same sizing as camera as we want to scale camera coords if resized (for extend no need for aspect ratio google reason)
-        
+
         //----MAPWORK INITIALIZATION----
 
         //Initialize the tiledMap
@@ -175,7 +174,7 @@ public class MainGame extends ApplicationAdapter {
     public void render() {
         //delta exists in render because its the amount of time between first and second frame
         float delta = Gdx.graphics.getDeltaTime();  //StateTime is being handled in Update of entity
-        
+
         clickEvent(delta);    // Check left click movement
 
         for (Entity e : Entity.entityList) {
@@ -186,13 +185,13 @@ public class MainGame extends ApplicationAdapter {
         updateHealthBar();  //Updates position and size of health bar
 
         camera.update();    //Update camera
-        
+
         viewport.apply();   //Checks every frame if resized occured
-        batch.setProjectionMatrix(camera.combined); 
+        batch.setProjectionMatrix(camera.combined);
         draw();
 
     }
-    
+
 
     @Override
     public void resize(int width, int height){
@@ -214,7 +213,7 @@ public class MainGame extends ApplicationAdapter {
     }
 
 
-    //METHODS USED IN CREATE, RENDER, ETC OVER HERE 
+    //METHODS USED IN CREATE, RENDER, ETC OVER HERE
 
     // Main draw function, draws everything that has breath, praise the Lord
     private void draw(){
@@ -236,7 +235,7 @@ public class MainGame extends ApplicationAdapter {
         }
 
         batch.end();
-                    
+
         // TODO: REMOVE START {
 
         //DEBUG FOR COLLISION
@@ -257,19 +256,19 @@ public class MainGame extends ApplicationAdapter {
         // } REMOVE END
     }
 
-    
+
     // Implement later for handling keyboard events
     // private void keyEvent(float delta) {
 
     // }
-    
+
     // Mouse Click Event
     private void clickEvent(float delta){
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             // Vector is basically a class with 3 data members, includes methods for magnitude,normalization(unit vector)
             clickCoords.set(Gdx.input.getX(), Gdx.input.getY(), 0 );
             camera.unproject(clickCoords);  // Converts screen coords to World coords
-            
+
             //NOTE: Handling an edge case, because camera is only place which needs Vector3
             Vector2 clickCoords2D = new Vector2(clickCoords.x, clickCoords.y);     //We do this because clickCoords is only place where we need a 3d Vector. Everywhere else a 2d
 
@@ -304,6 +303,9 @@ public class MainGame extends ApplicationAdapter {
             }
         }
     }
+
+    boolean detachedState = false;
+
     // Camera Roam
     private void cameraRoam(float delta){
         //Camera measurements
@@ -318,23 +320,27 @@ public class MainGame extends ApplicationAdapter {
         boolean down =  Gdx.input.isKeyPressed(Keys.S);
         boolean right =  Gdx.input.isKeyPressed(Keys.D);
         boolean left =  Gdx.input.isKeyPressed(Keys.A);
-        
+
         // Check if any movement
         boolean moving = up || down || right || left ;
 
-        if(!moving){
+        if (Gdx.input.isKeyJustPressed(Keys.Q)) {
+            detachedState = !detachedState;
+        }
+
+        if(!moving && !detachedState){
             // Set camera position to lizard, ALERT change to hero
             //Camera movement
             Vector3 playerPosition3D = new Vector3(player.getCurrentPosition(), 0);
 
             camera.position.lerp(playerPosition3D, 0.1f);            //THIS IS WHERE heroPos IS BEING USED (this brings smoothness for camera following)
 
-            //No need for the camera clamp commented below because hero is already clamped 
+            //No need for the camera clamp commented below because hero is already clamped
             //and in free roam camera is clamped (it doesnt break you can test)
 
-            //camera.position.x = MathUtils.clamp(heroPos.x, halfWidth - 1, (worldWidth - halfWidth) + 1);      
-            //camera.position.y = MathUtils.clamp(heroPos.y, halfHeight - 1, (worldHeight - halfHeight) + 1);  
-            }
+            //camera.position.x = MathUtils.clamp(heroPos.x, halfWidth - 1, (worldWidth - halfWidth) + 1);
+            //camera.position.y = MathUtils.clamp(heroPos.y, halfHeight - 1, (worldHeight - halfHeight) + 1);
+        }
 
         // Movement
         if(right){
@@ -356,7 +362,7 @@ public class MainGame extends ApplicationAdapter {
         //Restricts camera borders to the map
         camera.position.x = MathUtils.clamp(camera.position.x, halfWidth -1, worldWidth - halfWidth +1);
         camera.position.y = MathUtils.clamp(camera.position.y, halfHeight -1, worldHeight - halfHeight +1);
-        
+
     }
 
     public void updateHealthBar(){
