@@ -54,19 +54,19 @@ public class MainGame extends ApplicationAdapter {
     //-----MAP WORK DECLARATION END----
 
     //Initializing gameWorld sizing and camera sizing
-    final float worldWidth = 200f;                // -> Playable Region (Scaled to 1 tile = 1 world units)
-    final float worldHeight = 200f;               //Equivalent to a pixel in tiled map
+    final float worldWidth = 800f;                // -> Playable Region (Scaled to 1 tile = 1 world units)
+    final float worldHeight = 108f;               //Equivalent to a pixel in tiled map
 
-    float mapWidth = 50f;
-    float mapHeight = 50f;       //Map number of tiles i.e 50x50 tiles
+    float mapWidth = 200f;
+    float mapHeight = 27f;       //Map number of tiles i.e 50x50 tiles
     float tileSize = 16f;        //Each tile size in pixels (16x16)
 
-    float scale = (worldWidth / mapWidth) / tileSize;       //WORKS FOR SQUARE DIMENSION ONLY       Current scale is 1 tile = 4 gameUnits
+    float scale = (worldWidth/mapWidth)/tileSize;       // Current scale is 1 tile = 4 gameUnits
 
     float aspectRatio = 0.5625f;        //Use to fix scaling (comment out viewport portion and see orthocamera libgdx way)
 
-    private float cameraWidth = 50f;                 // -> Visible Region
-    private float cameraHeight = 50f;
+    private float cameraWidth = 80f;                 // -> Visible Region
+    private float cameraHeight = 80f;
 
     //Player move speed and camera move speed
     float cameraSpeed = 40f;             // -> Camera Move Speed (Based off above world size)
@@ -120,7 +120,7 @@ public class MainGame extends ApplicationAdapter {
         }
 
         manager.setLoader(TiledMap.class, new TmxMapLoader());
-        manager.load("practiceMap/MainMap.tmx", TiledMap.class);
+        manager.load("practiceMap/projectmap.tmx", TiledMap.class);
 
         manager.finishLoading(); // We could add a loading screen here if there are enough assets that it becomes slow
 
@@ -161,7 +161,7 @@ public class MainGame extends ApplicationAdapter {
         //----MAPWORK INITIALIZATION----
 
         //Initialize the tiledMap
-        map = manager.get("practiceMap/MainMap.tmx");
+        map = manager.get("practiceMap/projectmap.tmx");
 
         //Initialize the mapRenderer (this is the main working unit here which scales the tiledMap with our current game units)
         mapRenderer = new OrthogonalTiledMapRenderer(map, scale);       //We can pass our own spritebatch for optimization but will have to change some internal methods so jst let it use its own spritebatch for map

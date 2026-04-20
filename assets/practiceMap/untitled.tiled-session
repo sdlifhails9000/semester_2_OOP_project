@@ -1,0 +1,85 @@
+{
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+        "church_altar.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "church_building.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "church_walls.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "custom_map.tmx": {
+            "scale": 1.5,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 361.33333333333326,
+                "y": 910.9999999999999
+            }
+        },
+        "cute_fantasy1.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1.8,
+            "scaleInEditor": 1
+        },
+        "cute_fantasy_objects.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1.8,
+            "scaleInEditor": 1
+        },
+        "cute_fantasy_props.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1.8,
+            "scaleInEditor": 1
+        },
+        "cute_fantasy_tiles.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1.8,
+            "scaleInEditor": 4
+        },
+        "player.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "player_cute.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1.8,
+            "scaleInEditor": 1
+        }
+    },
+    "frame.defaultDuration": 140,
+    "last.externalTilesetPath": "D:/NUST/2nd Semester/OOP/LibGDX2/assets/map",
+    "last.imagePath": "D:/NUST/2nd Semester/OOP/LibGDX2/assets/map/tilesets/church/Tiled_files",
+    "openFiles": [
+    ],
+    "project": "untitled.tiled-project",
+    "recentFiles": [
+        "church_altar.tsx",
+        "church_walls.tsx",
+        "church_building.tsx",
+        "custom_map.tmx",
+        "cute_fantasy_props.tsx",
+        "cute_fantasy1.tsx",
+        "player_cute.tsx",
+        "cute_fantasy_objects.tsx",
+        "cute_fantasy_tiles.tsx",
+        "player.tsx"
+    ],
+    "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)",
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    },
+    "tileset.type": 0
+}
