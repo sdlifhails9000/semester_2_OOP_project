@@ -1,15 +1,13 @@
 package com.gdx.game;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.viewport.Viewport;
 
 interface State<T extends Entity> {
-    void enter(T e);
-    void update(T e, float delta);
-    void exit(T e);
+    void enter(T e);    // Called when entering this state
+    void update(T e, float delta);  // Called every frame while in this stat
+    void exit(T e); // Called when exiting the state
 }
 //---------REAL HERO PLAYER STATES-----------
 class HeroIdleState implements State<HeroPlayer> {

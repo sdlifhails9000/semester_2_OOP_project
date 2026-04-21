@@ -96,7 +96,7 @@ class HeroPlayer extends Hero{
     HeroPlayer(HeroPreset preset, int startX, int startY) {
         super(preset, startX, startY);
 
-        //Selecting required states from the factory State.java
+        // Selecting required states from the factory State.java
         heroIdleState = new HeroIdleState();
         heroMoveState = new HeroMoveState();
         heroChaseState = new HeroChaseState();
