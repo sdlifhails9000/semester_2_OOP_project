@@ -83,9 +83,8 @@ class HeroMoveState implements State<HeroPlayer> {
         e.currentXY.x += e.velocity.x * delta;
         e.updateBoxes();
 
-        // Handle collision
-        e.isCollidingWithBoundry();
-        if (e.isCollidingWithEntity()) {
+        // Handle collision;
+        if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()) {
             e.currentXY.x -= e.velocity.x * delta;
             e.velocity.x = 0;
             e.updateBoxes();
@@ -96,8 +95,7 @@ class HeroMoveState implements State<HeroPlayer> {
         e.updateBoxes();
 
         // Handle collision
-        e.isCollidingWithBoundry();
-        if (e.isCollidingWithEntity()) {
+        if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()) {
             e.currentXY.y -= e.velocity.y * delta;
             e.velocity.y = 0;
             e.updateBoxes();
@@ -228,8 +226,7 @@ class HeroChaseState implements State<HeroPlayer> {
         e.updateBoxes();
 
         // Handle collision
-        e.isCollidingWithBoundry();
-        if (e.isCollidingWithEntity()) {
+        if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()) {
             e.currentXY.x -= e.velocity.x * delta;
             e.targetPosition.x -= e.velocity.x * delta;
             e.velocity.x = 0;
@@ -242,8 +239,7 @@ class HeroChaseState implements State<HeroPlayer> {
         e.updateBoxes();
 
         // Handle collision
-        e.isCollidingWithBoundry();
-        if (e.isCollidingWithEntity()) {
+        if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()) {
             e.currentXY.y -= e.velocity.y * delta;
             e.targetPosition.y -= e.velocity.y * delta;
             e.velocity.y = 0;
@@ -308,8 +304,7 @@ class HeroDeadState implements State<HeroPlayer> {
         e.setCurrentPosition(respawnPositionX, respawnPositionY);
         e.updateBoxes();
 
-        e.isCollidingWithBoundry();
-        if (e.isCollidingWithEntity()) {
+        if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()) {
             float respawnOffsetX = MathUtils.random(-100, 100);
             float respawnOffsetY = MathUtils.random(-100, 100);
 
@@ -321,8 +316,7 @@ class HeroDeadState implements State<HeroPlayer> {
             e.setCurrentPosition(respawnPositionX, respawnPositionY);
             e.updateBoxes();
             
-            e.isCollidingWithBoundry();
-            if (e.isCollidingWithEntity()) {
+            if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()) {
                 return;
             }
         }
