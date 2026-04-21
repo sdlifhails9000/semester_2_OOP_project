@@ -26,9 +26,14 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.*;       //Gets all viewport types (FixViewport, StrectViewport, ExtendViewport, etc)
-
+import com.badlogic.gdx.maps.MapLayer;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
 //Tiled Map Loaders
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTile;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
@@ -44,14 +49,14 @@ public class MainGame extends ApplicationAdapter {
     //Declare Maploader using TmxMapLoader
     TmxMapLoader mapLoader;
 
-    //Declare Map var using TiledMpa
+    //Declare Map var using TiledMap
     TiledMap map;
 
     //Declare mapRendered by OrthogonalTiledMapRenderer
 
     OrthogonalTiledMapRenderer mapRenderer;
 
-    //-----MAP WORK DECLARATION END----
+    // ----MAP WORK DECLARATION END----
 
     //Initializing gameWorld sizing and camera sizing
     final float worldWidth = 800f;                // -> Playable Region (Scaled to 1 tile = 1 world units)
@@ -104,6 +109,7 @@ public class MainGame extends ApplicationAdapter {
     public void create() {
         // Initialize SpriteBatch
         batch = new SpriteBatch();
+
 
         // -------------- Queue all the assets in `manager` --------------
 
@@ -166,8 +172,12 @@ public class MainGame extends ApplicationAdapter {
         //Initialize the mapRenderer (this is the main working unit here which scales the tiledMap with our current game units)
         mapRenderer = new OrthogonalTiledMapRenderer(map, scale);       //We can pass our own spritebatch for optimization but will have to change some internal methods so jst let it use its own spritebatch for map
 
-        // TODO: REMOVE
+        // TO DO: REMOVE
         shapeRenderer = new ShapeRenderer();  // DEBUG tool
+
+        // store all the map collisions
+        ArrayList<Rectangle> boundaryCollisions = getMapCollisions();
+        DynamicEntity.boundaryCollisions = boundaryCollisions;
     }
 
     @Override
@@ -208,7 +218,7 @@ public class MainGame extends ApplicationAdapter {
     public void dispose() {
         batch.dispose();
         manager.dispose();
-        shapeRenderer.dispose();   // TODO: Remove DEBUG tool
+        shapeRenderer.dispose();   // TO DO: Remove DEBUG tool
         mapRenderer.dispose();
     }
 
@@ -236,7 +246,7 @@ public class MainGame extends ApplicationAdapter {
 
         batch.end();
 
-        // TODO: REMOVE START {
+        // TO DO: REMOVE START {
 
         //DEBUG FOR COLLISION
         shapeRenderer.setProjectionMatrix(camera.combined);
@@ -244,6 +254,10 @@ public class MainGame extends ApplicationAdapter {
 
         for (Entity e : Entity.entityList) {
             listOfHitbox.add(e.getCollisionBox());
+        }
+
+        for (Rectangle rect : getMapCollisions()) {
+            listOfHitbox.add(rect);
         }
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
@@ -373,5 +387,47 @@ public class MainGame extends ApplicationAdapter {
         healthBarSprite.setSize(healthBarWidth, healthBarHeight);
 
     }
+
+    // this method return an arraylist with all static collision boxes (environment)
+    public ArrayList<Rectangle> getMapCollisions() {
+
+        ArrayList<Rectangle> mapCollisions = new ArrayList<Rectangle>();
+
+        for (MapLayer mapLayer : map.getLayers()){
+            if(mapLayer instanceof TiledMapTileLayer){   // gives us only tiles layers not object or image
+                TiledMapTileLayer layer = (TiledMapTileLayer) mapLayer; // downcast 
+
+                for (int x = 0; x < layer.getWidth(); x++){    // loop through horizontal tiles
+                    for(int y = 0; y < layer.getHeight(); y++){    // loop through vertical tiles
+                        TiledMapTileLayer.Cell cell = layer.getCell(x, y);
+
+                        if (cell == null) continue;     // skip cell if its empty
+                        TiledMapTile tile = cell.getTile();         // gets the actual tile in the map
+
+                        if (tile == null) continue;     // skip if tile is empty
+                        MapObjects objects = tile.getObjects();     // return collision data of tile
+                        
+                        for (MapObject obj : objects){          // loop through 
+                            if (obj instanceof RectangleMapObject){     // check if collision is rectangular collision
+                                Rectangle rect = ((RectangleMapObject) obj).getRectangle(); // gives us the collision shape of tile 
+                                Rectangle worldRect = new Rectangle(        // Convert from tile coordinates to world coordinates
+                                    (rect.x + x * layer.getTileWidth()) * scale,
+                                    (y * layer.getTileHeight() + rect.y) * scale,
+                                    rect.width * scale,
+                                    rect.height * scale
+                                );
+                            mapCollisions.add(worldRect);       // store it in our array list of collisions
+                            }
+                        }
+                    }
+                }
+            }    
+        }
+        return mapCollisions;
+    }
+
+
+
+
 
 }

@@ -11,6 +11,7 @@ interface State<T extends Entity> {
     void update(T e, float delta);
     void exit(T e);
 }
+
 //---------REAL HERO PLAYER STATES-----------
 class HeroIdleState implements State<HeroPlayer> {
     @Override
@@ -83,6 +84,7 @@ class HeroMoveState implements State<HeroPlayer> {
         e.updateBoxes();
 
         // Handle collision
+        e.isCollidingWithBoundry();
         if (e.isCollidingWithEntity()) {
             e.currentXY.x -= e.velocity.x * delta;
             e.velocity.x = 0;
@@ -94,6 +96,7 @@ class HeroMoveState implements State<HeroPlayer> {
         e.updateBoxes();
 
         // Handle collision
+        e.isCollidingWithBoundry();
         if (e.isCollidingWithEntity()) {
             e.currentXY.y -= e.velocity.y * delta;
             e.velocity.y = 0;
@@ -225,6 +228,7 @@ class HeroChaseState implements State<HeroPlayer> {
         e.updateBoxes();
 
         // Handle collision
+        e.isCollidingWithBoundry();
         if (e.isCollidingWithEntity()) {
             e.currentXY.x -= e.velocity.x * delta;
             e.targetPosition.x -= e.velocity.x * delta;
@@ -238,6 +242,7 @@ class HeroChaseState implements State<HeroPlayer> {
         e.updateBoxes();
 
         // Handle collision
+        e.isCollidingWithBoundry();
         if (e.isCollidingWithEntity()) {
             e.currentXY.y -= e.velocity.y * delta;
             e.targetPosition.y -= e.velocity.y * delta;
@@ -303,6 +308,7 @@ class HeroDeadState implements State<HeroPlayer> {
         e.setCurrentPosition(respawnPositionX, respawnPositionY);
         e.updateBoxes();
 
+        e.isCollidingWithBoundry();
         if (e.isCollidingWithEntity()) {
             float respawnOffsetX = MathUtils.random(-100, 100);
             float respawnOffsetY = MathUtils.random(-100, 100);
@@ -314,7 +320,8 @@ class HeroDeadState implements State<HeroPlayer> {
 
             e.setCurrentPosition(respawnPositionX, respawnPositionY);
             e.updateBoxes();
-
+            
+            e.isCollidingWithBoundry();
             if (e.isCollidingWithEntity()) {
                 return;
             }
