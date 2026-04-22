@@ -119,6 +119,12 @@ public class MainGame extends ApplicationAdapter {
             manager.load(preset.assetPath, TextureAtlas.class);
         }
 
+        //Loads TowerPreset which is made in Loader.java
+        for (TowerPreset preset: TowerPreset.values()){
+            manager.load(preset.towerAssetPath, TextureAtlas.class);
+            manager.load(preset.projectileAssetPath, TextureAtlas.class);
+        }
+
         manager.setLoader(TiledMap.class, new TmxMapLoader());
         manager.load("practiceMap/projectmap.tmx", TiledMap.class);
 
