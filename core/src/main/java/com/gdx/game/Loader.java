@@ -89,16 +89,16 @@ enum GoblinPreset {
 }
 
 enum TowerPreset {
-    MAIN("TowerAtlas/MainTower.atlas", "TowerAtlas/MainProjectile.Atlas",
+    MAIN("TowerAtlas/MainTower.atlas", "TowerAtlas/MainProjectile.atlas",
         40, 30, 200, 20, 20, true),
 
-    MINI("TowerAtlas/MiniTower.atlas", "TowerAtlas/MiniProjectile.Atlas",
+    MINI("TowerAtlas/MiniTower.atlas", "TowerAtlas/MiniProjectile.atlas",
         40, 30, 200, 20, 20, true),
 
-    ENEMY_MAIN("TowerAtlas/EnemyMainTower.atlas", "TowerAtlas/EnemyMainProjectile.Atlas",
+    ENEMY_MAIN("TowerAtlas/EnemyMainTower.atlas", "TowerAtlas/EnemyMainProjectile.atlas",
         40, 30, 200, 20, 20, true),
 
-    ENEMY_MINI("TowerAtlas/EnemyMiniTower.atlas", "TowerAtlas/EnemyMiniProjectile.Atlas",
+    ENEMY_MINI("TowerAtlas/EnemyMiniTower.atlas", "TowerAtlas/EnemyMiniProjectile.atlas",
         40, 30, 200, 20, 20, true);
 
     final String towerAssetPath;
@@ -268,12 +268,12 @@ final class Loader {
 
             weaponAttackAnimation.put(preset, attack);
 
-            weaponIdleAnimation.put(preset, new Animation<>(0.075f, towerAtlas.findRegions("Idle"), PlayMode.LOOP));
+            weaponIdleAnimation.put(preset, new Animation<>(0.075f, towerAtlas.findRegions("weaponIdle"), PlayMode.LOOP));
 
             // ---- Loading projectile animations ----
-            projectileFlyingAnimation.put(preset, new Animation<>(0.075f, towerAtlas.findRegions("Flying"), PlayMode.LOOP));
+            projectileFlyingAnimation.put(preset, new Animation<>(0.075f, projectileAtlas.findRegions("Flying"), PlayMode.LOOP));
 
-            projectileImpactAnimation.put(preset, new Animation<>(0.25f, towerAtlas.findRegions("Impact"), PlayMode.NORMAL));
+            projectileImpactAnimation.put(preset, new Animation<>(0.25f, projectileAtlas.findRegions("Impact"), PlayMode.NORMAL));
         }
 
     }
