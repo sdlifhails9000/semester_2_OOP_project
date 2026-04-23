@@ -89,27 +89,21 @@ enum GoblinPreset {
 }
 
 enum TowerPreset {
-    MAIN("TowerAtlas/MainTower.atlas", "TowerAtlas/MainProjectile.atlas",
-        40, 30, 200, 20, 20, true),
+    MAIN("TowerAtlas/MainTower.atlas",
+        200, 20, 20, true),
 
-    MINI("TowerAtlas/MiniTower.atlas", "TowerAtlas/MiniProjectile.atlas",
-        40, 30, 200, 20, 20, true),
+    MINI("TowerAtlas/MiniTower.atlas", 
+         200, 20, 20, true),
 
-    ENEMY_MAIN("TowerAtlas/EnemyMainTower.atlas", "TowerAtlas/EnemyMainProjectile.atlas",
-        40, 30, 200, 20, 20, true),
+    ENEMY_MAIN("TowerAtlas/EnemyMainTower.atlas", 
+         200, 20, 20, true),
 
-    ENEMY_MINI("TowerAtlas/EnemyMiniTower.atlas", "TowerAtlas/EnemyMiniProjectile.atlas",
-        40, 30, 200, 20, 20, true);
+    ENEMY_MINI("TowerAtlas/EnemyMiniTower.atlas",
+         200, 20, 20, true);
 
-    final String towerAssetPath;
-    final String projectileAssetPath;
-
-    final float projectileAttackStrength;
-    final float attackRange;
+    final String assetPath;
+    
     final float maxHealth;
-
-    // This will effect the attack animation
-    float attackSpeed;
 
     final float spriteWidth;        //Store width and height and set at Entity.java
     final float spriteHeight;       //This gets rid of manually settings each entity size
@@ -117,22 +111,77 @@ enum TowerPreset {
     boolean isAlly;
 
     TowerPreset(String towerAssetPath,
-                       String projectileAssetPath,
-                       float strength,
-                       float attackRange,
                        float maxHealth,
                        float spriteWidth,
                        float spriteHeight,
                        boolean isAlly) {
 
-        this.towerAssetPath = towerAssetPath;
-        this.projectileAssetPath = projectileAssetPath;
-        this.projectileAttackStrength = strength;
-        this.attackRange = attackRange;
+        this.assetPath = towerAssetPath;
         this.spriteHeight = spriteHeight;
         this.spriteWidth = spriteWidth;
         this.isAlly = isAlly;
         this.maxHealth = maxHealth;
+    }
+}
+
+enum WeaponPreset {
+    MainTower("TowerAtlas/MainTowerWeapon.atlas", true, 2, 40,  5, 5),
+    MiniTower("TowerAtlas/MiniTowerWeapon.atlas",true, 2, 40, 3, 3),
+    EnemyMainTower("TowerAtlas/EnemyMainTowerWeapon.atlas", false, 2, 40, 5, 5),
+    EnemyMiniTower("TowerAtlas/EnemyMiniTowerWeapon.atlas", false, 2, 40, 3, 3);
+
+    final String assetPath;
+
+    final boolean isAlly;       //To decide who to play attackAnimation on
+
+    final float attackInterval;
+    final float attackRange;
+
+    final float spriteWidth;        //Store width and height and set at Entity.java
+    final float spriteHeight;       //This gets rid of manually settings each entity size
+
+    WeaponPreset(String assetPath,
+                        boolean isAlly,
+                        float attackInterval,
+                        float attackRange,
+                        float spriteWidth,
+                        float spriteHeight){
+
+            this.assetPath = assetPath;
+            this.isAlly = isAlly;
+            this.attackInterval = attackInterval;
+            this.attackRange = attackRange;
+            this.spriteWidth = spriteWidth;
+            this.spriteHeight = spriteHeight;
+    }
+}
+
+enum ProjectilePreset {
+    MainTower("TowerAtlas/MainProjectile.atlas", true, 20, 2, 1),
+    MiniTower("TowerAtlas/MiniProjectile.atlas",true, 20, 2, 1),
+    EnemyMainTower("TowerAtlas/EnemyMainProjectile.atlas", false, 20, 2, 1),
+    EnemyMiniTower("TowerAtlas/EnemyMiniProjectile.atlas", false, 20, 2, 1);
+
+    final String assetPath;
+
+    final boolean isAlly;       //To decide who to play attackAnimation on
+
+    final float projectileSpeed;
+
+    final float spriteWidth;        //Store width and height and set at Entity.java
+    final float spriteHeight;       //This gets rid of manually settings each entity size
+
+    ProjectilePreset(String assetPath,
+                            boolean isAlly,
+                            float projectileSpeed,
+                            float spriteWidth,
+                            float spriteHeight){
+
+            this.assetPath = assetPath;
+            this.isAlly = isAlly;
+            this.projectileSpeed = projectileSpeed;
+            this.spriteWidth = spriteWidth;
+            this.spriteHeight = spriteHeight;
     }
 }
 
@@ -154,17 +203,23 @@ final class Loader {
     private static Map<GoblinPreset, Animation<TextureRegion>> goblinAttackAnimation;
     private static Map<GoblinPreset, Animation<TextureRegion>> goblinDeadAnimation;
 
-    // Declaring hash map to store assets related to TowerPreset
+    // Declaring hash map to store assets related to Tower, Weapon, Projectile (All three related in Tower.java)
     private static Map<TowerPreset, TextureAtlas> towerAtlass;
-    private static Map<TowerPreset, TextureAtlas> projectileAtlass;
+    private static Map<WeaponPreset, TextureAtlas> weaponAtlass;
+    private static Map<ProjectilePreset, TextureAtlas> projectileAtlass;
+    
 
+    //Tower Animations
     private static Map<TowerPreset, Animation<TextureRegion>> towerIdleAnimation;
-    private static Map<TowerPreset, Animation<TextureRegion>> weaponAttackAnimation;
-    private static Map<TowerPreset, Animation<TextureRegion>> weaponIdleAnimation;
     private static Map<TowerPreset, Animation<TextureRegion>> towerDeadAnimation;
 
-    private static Map<TowerPreset, Animation<TextureRegion>> projectileFlyingAnimation;
-    private static Map<TowerPreset, Animation<TextureRegion>> projectileImpactAnimation;
+    //Weapon Animations
+    private static Map<WeaponPreset, Animation<TextureRegion>> weaponAttackAnimation;
+    private static Map<WeaponPreset, Animation<TextureRegion>> weaponIdleAnimation;
+
+    //Projectile Animations
+    private static Map<ProjectilePreset, Animation<TextureRegion>> projectileFlyingAnimation;
+    private static Map<ProjectilePreset, Animation<TextureRegion>> projectileImpactAnimation;
 
     public static void load(AssetManager manager) {
         // I'm keeping the ANGLED BRACKETS blank because the compiler figures out what should go there for you
@@ -184,12 +239,14 @@ final class Loader {
 
         // Hash maps for tower and projectile presets
         towerAtlass = new HashMap<>();
+        weaponAtlass = new HashMap<>();
         projectileAtlass = new HashMap<>();
 
         towerIdleAnimation = new HashMap<>();
+        towerDeadAnimation = new HashMap<>();
+
         weaponAttackAnimation = new HashMap<>();
         weaponIdleAnimation = new HashMap<>();
-        towerDeadAnimation = new HashMap<>();
 
         projectileFlyingAnimation = new HashMap<>();
         projectileImpactAnimation = new HashMap<>();
@@ -247,34 +304,47 @@ final class Loader {
 
         // Tower loop
         for (TowerPreset preset : TowerPreset.values()) {
-            TextureAtlas towerAtlas = manager.get(preset.towerAssetPath, TextureAtlas.class);
-            TextureAtlas projectileAtlas = manager.get(preset.projectileAssetPath, TextureAtlas.class);
+            TextureAtlas towerAtlas = manager.get(preset.assetPath, TextureAtlas.class);
+            towerAtlass.put(preset, towerAtlas);
 
             // ---- Loading tower animations ----
             towerIdleAnimation.put(preset, new Animation<>(0.075f, towerAtlas.findRegions("Idle"), PlayMode.LOOP));
 
 
             towerDeadAnimation.put(preset, new Animation<>(0.25f, towerAtlas.findRegions("Dead"), PlayMode.NORMAL));
+        }
+
+        for (WeaponPreset preset: WeaponPreset.values()){
+            TextureAtlas weaponAtlas = manager.get(preset.assetPath, TextureAtlas.class);
+            weaponAtlass.put(preset, weaponAtlas);
+
+            // ---- Loading Weapon animations ----
+            weaponIdleAnimation.put(preset, new Animation<>(0.075f, weaponAtlas.findRegions("weaponIdle"), PlayMode.NORMAL));
 
             Animation<TextureRegion> attack = new Animation<>(
                 0.5f,     // this is just a temporary value
-                towerAtlas.findRegions("Attack"), PlayMode.LOOP);
+                weaponAtlas.findRegions("Attack"), PlayMode.LOOP);
 
             // Calculate the correct frame duration for the attack speed, OK?
-            float attackFrameDuration = preset.attackSpeed / attack.getKeyFrames().length;
+            float attackFrameDuration = preset.attackInterval / attack.getKeyFrames().length;
 
             // this reset the frame duration to the correct amount
             attack.setFrameDuration(attackFrameDuration);
 
             weaponAttackAnimation.put(preset, attack);
+        }
 
-            weaponIdleAnimation.put(preset, new Animation<>(0.075f, towerAtlas.findRegions("weaponIdle"), PlayMode.LOOP));
+        for (ProjectilePreset preset: ProjectilePreset.values()){
+            TextureAtlas projectileAtlas = manager.get(preset.assetPath, TextureAtlas.class);
+            projectileAtlass.put(preset, projectileAtlas);
 
             // ---- Loading projectile animations ----
             projectileFlyingAnimation.put(preset, new Animation<>(0.075f, projectileAtlas.findRegions("Flying"), PlayMode.LOOP));
 
-            projectileImpactAnimation.put(preset, new Animation<>(0.25f, projectileAtlas.findRegions("Impact"), PlayMode.NORMAL));
+            projectileImpactAnimation.put(preset, new Animation<>(0.145f, projectileAtlas.findRegions("Impact"), PlayMode.NORMAL));
         }
+
+
 
     }
 
@@ -296,6 +366,8 @@ final class Loader {
         return heroDeadAnimation.get(preset);
     }
 
+//------------------------------------------------------------------------
+
     //GoblinPreset getters
     public static Animation<TextureRegion> run(GoblinPreset preset) {
         return goblinRunAnimation.get(preset);
@@ -313,29 +385,36 @@ final class Loader {
         return goblinDeadAnimation.get(preset);
     }
 
+//------------------------------------------------------------------------
+
     // TowerPreset getters
     public static Animation<TextureRegion> idle(TowerPreset preset) {
         return towerIdleAnimation.get(preset);
-    }
-
-
-    public static Animation<TextureRegion> weaponIdle(TowerPreset preset) {
-        return weaponIdleAnimation.get(preset);
-    }
-
-    public static Animation<TextureRegion> weaponAttack(TowerPreset preset) {
-        return weaponAttackAnimation.get(preset);
     }
 
     public static Animation<TextureRegion> dead(TowerPreset preset) {
         return towerDeadAnimation.get(preset);
     }
 
-    public static Animation<TextureRegion> flying(TowerPreset preset) {
+//------------------------------------------------------------------------
+
+    // WeaponPreset getters
+    public static Animation<TextureRegion> weaponIdle(WeaponPreset preset) {
+        return weaponIdleAnimation.get(preset);
+    }
+
+    public static Animation<TextureRegion> weaponAttack(WeaponPreset preset) {
+        return weaponAttackAnimation.get(preset);
+    }
+
+//------------------------------------------------------------------------
+
+    // Projectile Getters
+    public static Animation<TextureRegion> flying(ProjectilePreset preset) {
         return projectileFlyingAnimation.get(preset);
     }
 
-    public static Animation<TextureRegion> impact(TowerPreset preset) {
+    public static Animation<TextureRegion> impact(ProjectilePreset preset) {
         return projectileImpactAnimation.get(preset);
     }
 }
