@@ -1,4 +1,4 @@
-//TODO:
+//TO DO:
 //Add Attack range when constructing DynamicSprite and rewrite updateMovement to be resued in the updateAttack accordingly 
 
 package com.gdx.game;
@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+
+import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.g2d.Animation;           //Animation imports are these two
 
@@ -17,8 +19,10 @@ abstract class DynamicEntity extends Entity {
     protected float speed;
     protected Vector2 velocity;
 
+    protected static ArrayList<Rectangle> boundaryCollisions;
+
     // Creates the Sprite(Parent Class)
-    // TODO Pass the animations as a list and the other stuff as a list
+    // TO DO Pass the animations as a list and the other stuff as a list
     DynamicEntity(Animation<TextureRegion> dead,
                   Animation<TextureRegion> idle,
                   float startX, float startY,
@@ -91,6 +95,25 @@ abstract class DynamicEntity extends Entity {
             Rectangle enemyHitBox = i.getCollisionBox();
             if (this.collisionBox.overlaps(enemyHitBox)) {
                 System.out.println("Colliding");
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    boolean isCollidingWithBoundry() {
+        for (Rectangle rect : boundaryCollisions) {
+            float dx = currentXY.x - rect.x;        // change in x axis
+            float dy = currentXY.y - rect.y;        // change in y axis
+            float distance = (float) Math.sqrt((dx*dx) + (dy*dy));      // distance to centre
+
+            if (distance >= 10) {
+                continue;
+            }
+
+            if (this.collisionBox.overlaps(rect)) {
+                System.out.println("Colliding with boundary");
                 return true;
             }
         }
