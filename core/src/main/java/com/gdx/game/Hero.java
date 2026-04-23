@@ -113,7 +113,6 @@ class HeroPlayer extends Hero{
         currentState.update(this, delta);
     }
 
-
 }
 
 class HeroBot extends Hero {

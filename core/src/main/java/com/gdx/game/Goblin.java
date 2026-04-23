@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 class Goblin extends DynamicEntity{
@@ -12,8 +13,16 @@ class Goblin extends DynamicEntity{
     //Entities Declaration
     Entity attackTarget;
 
+    // Goblin States
+    GoblinState goblinIdleState;
+    GoblinState goblinMoveState;
+    GoblinState goblinChaseState;
+    GoblinState goblinAttackState;
+    GoblinState goblinDeadState;
+
     //State declaration (for setState)
-    State currentState;
+    GoblinState currentState;
+
     
     //Animation Declaration (Idle and dead is handled in Entity.java)   (Current animation is in entity.java because idle and dead is handled there)
     protected Animation<TextureRegion> runAnimation;
@@ -48,11 +57,28 @@ class Goblin extends DynamicEntity{
         this.attackStrength = preset.attackStrength;
     }
 
-    @Override
-    public void setState(State state){
-        this.currentState.exit(this);
-        this.currentState = state;
-        this.currentState.enter(this);
+    //Setters and Getters
+    public void setAttackTarget(Entity e){
+        this.attackTarget = e;
+    }
+
+    // Is used to determine the state, sybau shaheer :wilting_rose:
+    protected boolean isCloseToEnemy() {
+        if (attackTarget == null) {
+            return false;
+        }
+
+        Rectangle enemyBounds = attackTarget.getHitBox();
+        Rectangle playerBounds = this.getHitBox();
+
+        boolean isClose = playerBounds.overlaps(enemyBounds);
+
+        Vector2 enemyPos = attackTarget.getCurrentPosition();
+
+        // This condition is so that the hits of a light class register on a heavy class while chasing it
+        boolean isInRange = enemyPos.dst(this.getCurrentPosition()) <= attackRange;
+
+        return isClose || isInRange;
     }
 
     public Entity getAttackTarget() {
@@ -78,7 +104,6 @@ class Goblin extends DynamicEntity{
         }
 
         // Handle the scenario when no entities were found
-
         if (nearestEnemyDistance == Float.MAX_VALUE) {
             System.out.println("None found");
             return null;
@@ -86,5 +111,19 @@ class Goblin extends DynamicEntity{
 
         return nearestEntity;
     }
+
+    // @Override setState not functional at the moment needs to be further looked at...
+    public void setState(State state){}
+    //     this.currentState.exit(this);
+    //     this.currentState = state;
+    //     this.currentState.enter(this);
     
+    public void setState(GoblinState state){
+        this.currentState.exit(this);
+        this.currentState = state;
+        this.currentState.enter(this);
+    }
+
+
+
 }

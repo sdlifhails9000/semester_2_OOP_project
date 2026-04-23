@@ -425,9 +425,4 @@ public class MainGame extends ApplicationAdapter {
         }
         return mapCollisions;
     }
-
-
-
-
-
 }
