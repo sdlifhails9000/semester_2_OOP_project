@@ -112,8 +112,6 @@ class HeroPlayer extends Hero{
         super.Update(delta);
         currentState.update(this, delta);
     }
-
-
 }
 
 class HeroBot extends Hero {

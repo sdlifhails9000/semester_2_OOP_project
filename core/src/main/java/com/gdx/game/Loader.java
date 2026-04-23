@@ -88,6 +88,103 @@ enum GoblinPreset {
     }
 }
 
+enum TowerPreset {
+    MAIN("TowerAtlas/MainTower.atlas",
+        200, 20, 20, true),
+
+    MINI("TowerAtlas/MiniTower.atlas", 
+         200, 20, 20, true),
+
+    ENEMY_MAIN("TowerAtlas/EnemyMainTower.atlas", 
+         200, 20, 20, true),
+
+    ENEMY_MINI("TowerAtlas/EnemyMiniTower.atlas",
+         200, 20, 20, true);
+
+    final String assetPath;
+    
+    final float maxHealth;
+
+    final float spriteWidth;        //Store width and height and set at Entity.java
+    final float spriteHeight;       //This gets rid of manually settings each entity size
+
+    boolean isAlly;
+
+    TowerPreset(String towerAssetPath,
+                       float maxHealth,
+                       float spriteWidth,
+                       float spriteHeight,
+                       boolean isAlly) {
+
+        this.assetPath = towerAssetPath;
+        this.spriteHeight = spriteHeight;
+        this.spriteWidth = spriteWidth;
+        this.isAlly = isAlly;
+        this.maxHealth = maxHealth;
+    }
+}
+
+enum WeaponPreset {
+    MainTower("TowerAtlas/MainTowerWeapon.atlas", true, 2, 40,  5, 5),
+    MiniTower("TowerAtlas/MiniTowerWeapon.atlas",true, 2, 40, 3, 3),
+    EnemyMainTower("TowerAtlas/EnemyMainTowerWeapon.atlas", false, 2, 40, 5, 5),
+    EnemyMiniTower("TowerAtlas/EnemyMiniTowerWeapon.atlas", false, 2, 40, 3, 3);
+
+    final String assetPath;
+
+    final boolean isAlly;       //To decide who to play attackAnimation on
+
+    final float attackInterval;
+    final float attackRange;
+
+    final float spriteWidth;        //Store width and height and set at Entity.java
+    final float spriteHeight;       //This gets rid of manually settings each entity size
+
+    WeaponPreset(String assetPath,
+                        boolean isAlly,
+                        float attackInterval,
+                        float attackRange,
+                        float spriteWidth,
+                        float spriteHeight){
+
+            this.assetPath = assetPath;
+            this.isAlly = isAlly;
+            this.attackInterval = attackInterval;
+            this.attackRange = attackRange;
+            this.spriteWidth = spriteWidth;
+            this.spriteHeight = spriteHeight;
+    }
+}
+
+enum ProjectilePreset {
+    MainTower("TowerAtlas/MainProjectile.atlas", true, 20, 2, 1),
+    MiniTower("TowerAtlas/MiniProjectile.atlas",true, 20, 2, 1),
+    EnemyMainTower("TowerAtlas/EnemyMainProjectile.atlas", false, 20, 2, 1),
+    EnemyMiniTower("TowerAtlas/EnemyMiniProjectile.atlas", false, 20, 2, 1);
+
+    final String assetPath;
+
+    final boolean isAlly;       //To decide who to play attackAnimation on
+
+    final float projectileSpeed;
+
+    final float spriteWidth;        //Store width and height and set at Entity.java
+    final float spriteHeight;       //This gets rid of manually settings each entity size
+
+    ProjectilePreset(String assetPath,
+                            boolean isAlly,
+                            float projectileSpeed,
+                            float spriteWidth,
+                            float spriteHeight){
+
+            this.assetPath = assetPath;
+            this.isAlly = isAlly;
+            this.projectileSpeed = projectileSpeed;
+            this.spriteWidth = spriteWidth;
+            this.spriteHeight = spriteHeight;
+    }
+}
+
 //General loader which will NOT be instantiated just USED
 final class Loader {
     // A hash map is like a python dictionary, but instead, we can any type as the key
@@ -98,13 +195,31 @@ final class Loader {
     private static Map<HeroPreset, Animation<TextureRegion>> heroAttackAnimation;
     private static Map<HeroPreset, Animation<TextureRegion>> heroDeadAnimation;
 
-    //Declare hash map to store assets for GoblinPreset
+    // Declare hash map to store assets for GoblinPreset
     private static Map<GoblinPreset, TextureAtlas> goblinAtlass;
 
     private static Map<GoblinPreset, Animation<TextureRegion>> goblinRunAnimation;
     private static Map<GoblinPreset, Animation<TextureRegion>> goblinIdleAnimation;
     private static Map<GoblinPreset, Animation<TextureRegion>> goblinAttackAnimation;
     private static Map<GoblinPreset, Animation<TextureRegion>> goblinDeadAnimation;
+
+    // Declaring hash map to store assets related to Tower, Weapon, Projectile (All three related in Tower.java)
+    private static Map<TowerPreset, TextureAtlas> towerAtlass;
+    private static Map<WeaponPreset, TextureAtlas> weaponAtlass;
+    private static Map<ProjectilePreset, TextureAtlas> projectileAtlass;
+    
+
+    //Tower Animations
+    private static Map<TowerPreset, Animation<TextureRegion>> towerIdleAnimation;
+    private static Map<TowerPreset, Animation<TextureRegion>> towerDeadAnimation;
+
+    //Weapon Animations
+    private static Map<WeaponPreset, Animation<TextureRegion>> weaponAttackAnimation;
+    private static Map<WeaponPreset, Animation<TextureRegion>> weaponIdleAnimation;
+
+    //Projectile Animations
+    private static Map<ProjectilePreset, Animation<TextureRegion>> projectileFlyingAnimation;
+    private static Map<ProjectilePreset, Animation<TextureRegion>> projectileImpactAnimation;
 
     public static void load(AssetManager manager) {
         // I'm keeping the ANGLED BRACKETS blank because the compiler figures out what should go there for you
@@ -121,6 +236,20 @@ final class Loader {
         goblinIdleAnimation = new HashMap<>();
         goblinAttackAnimation = new HashMap<>();
         goblinDeadAnimation = new HashMap<>();
+
+        // Hash maps for tower and projectile presets
+        towerAtlass = new HashMap<>();
+        weaponAtlass = new HashMap<>();
+        projectileAtlass = new HashMap<>();
+
+        towerIdleAnimation = new HashMap<>();
+        towerDeadAnimation = new HashMap<>();
+
+        weaponAttackAnimation = new HashMap<>();
+        weaponIdleAnimation = new HashMap<>();
+
+        projectileFlyingAnimation = new HashMap<>();
+        projectileImpactAnimation = new HashMap<>();
 
         for (HeroPreset preset : HeroPreset.values()) {
             TextureAtlas atlas = manager.get(preset.assetPath, TextureAtlas.class);
@@ -170,6 +299,53 @@ final class Loader {
             // Load all the animations into the hash map
             goblinAttackAnimation.put(preset, attack);
         }
+
+        //Store animation of TowerPreset in its destined hashmap
+
+        // Tower loop
+        for (TowerPreset preset : TowerPreset.values()) {
+            TextureAtlas towerAtlas = manager.get(preset.assetPath, TextureAtlas.class);
+            towerAtlass.put(preset, towerAtlas);
+
+            // ---- Loading tower animations ----
+            towerIdleAnimation.put(preset, new Animation<>(0.075f, towerAtlas.findRegions("Idle"), PlayMode.LOOP));
+
+
+            towerDeadAnimation.put(preset, new Animation<>(0.25f, towerAtlas.findRegions("Dead"), PlayMode.NORMAL));
+        }
+
+        for (WeaponPreset preset: WeaponPreset.values()){
+            TextureAtlas weaponAtlas = manager.get(preset.assetPath, TextureAtlas.class);
+            weaponAtlass.put(preset, weaponAtlas);
+
+            // ---- Loading Weapon animations ----
+            weaponIdleAnimation.put(preset, new Animation<>(0.075f, weaponAtlas.findRegions("weaponIdle"), PlayMode.NORMAL));
+
+            Animation<TextureRegion> attack = new Animation<>(
+                0.5f,     // this is just a temporary value
+                weaponAtlas.findRegions("Attack"), PlayMode.LOOP);
+
+            // Calculate the correct frame duration for the attack speed, OK?
+            float attackFrameDuration = preset.attackInterval / attack.getKeyFrames().length;
+
+            // this reset the frame duration to the correct amount
+            attack.setFrameDuration(attackFrameDuration);
+
+            weaponAttackAnimation.put(preset, attack);
+        }
+
+        for (ProjectilePreset preset: ProjectilePreset.values()){
+            TextureAtlas projectileAtlas = manager.get(preset.assetPath, TextureAtlas.class);
+            projectileAtlass.put(preset, projectileAtlas);
+
+            // ---- Loading projectile animations ----
+            projectileFlyingAnimation.put(preset, new Animation<>(0.075f, projectileAtlas.findRegions("Flying"), PlayMode.LOOP));
+
+            projectileImpactAnimation.put(preset, new Animation<>(0.145f, projectileAtlas.findRegions("Impact"), PlayMode.NORMAL));
+        }
+
+
+
     }
 
     //Getter methods in accordance to each preset
@@ -190,6 +366,8 @@ final class Loader {
         return heroDeadAnimation.get(preset);
     }
 
+//------------------------------------------------------------------------
+
     //GoblinPreset getters
     public static Animation<TextureRegion> run(GoblinPreset preset) {
         return goblinRunAnimation.get(preset);
@@ -205,5 +383,38 @@ final class Loader {
 
     public static Animation<TextureRegion> dead(GoblinPreset preset) {
         return goblinDeadAnimation.get(preset);
+    }
+
+//------------------------------------------------------------------------
+
+    // TowerPreset getters
+    public static Animation<TextureRegion> idle(TowerPreset preset) {
+        return towerIdleAnimation.get(preset);
+    }
+
+    public static Animation<TextureRegion> dead(TowerPreset preset) {
+        return towerDeadAnimation.get(preset);
+    }
+
+//------------------------------------------------------------------------
+
+    // WeaponPreset getters
+    public static Animation<TextureRegion> weaponIdle(WeaponPreset preset) {
+        return weaponIdleAnimation.get(preset);
+    }
+
+    public static Animation<TextureRegion> weaponAttack(WeaponPreset preset) {
+        return weaponAttackAnimation.get(preset);
+    }
+
+//------------------------------------------------------------------------
+
+    // Projectile Getters
+    public static Animation<TextureRegion> flying(ProjectilePreset preset) {
+        return projectileFlyingAnimation.get(preset);
+    }
+
+    public static Animation<TextureRegion> impact(ProjectilePreset preset) {
+        return projectileImpactAnimation.get(preset);
     }
 }
