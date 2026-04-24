@@ -1,5 +1,5 @@
 //TO DO:
-//Add Attack range when constructing DynamicSprite and rewrite updateMovement to be resued in the updateAttack accordingly 
+//Add Attack range when constructing DynamicSprite and rewrite updateMovement to be resued in the updateAttack accordingly
 
 package com.gdx.game;
 
@@ -23,8 +23,7 @@ abstract class DynamicEntity extends Entity {
 
     // Creates the Sprite(Parent Class)
     // TO DO Pass the animations as a list and the other stuff as a list
-    DynamicEntity(Animation<TextureRegion> dead,
-                  Animation<TextureRegion> idle,
+    DynamicEntity(Animation<TextureRegion> idle,
                   float startX, float startY,
                   float maxHealth,
                   float speed,
@@ -33,12 +32,12 @@ abstract class DynamicEntity extends Entity {
                   boolean isAlly) {
 
         super(
-            dead, idle,
+            idle,
             startX, startY,
             maxHealth, spriteWidth,
             spriteHeight, isAlly
         );
-        
+
         this.speed = speed;
 
         velocity = new Vector2();
@@ -55,12 +54,12 @@ abstract class DynamicEntity extends Entity {
         //Sort of skews off at endpoint likeeee just test and see (Works perfectly for bottom edge but skewed for the other 3)
 
         angle = MathUtils.atan2Deg360(destinationY, destinationX);      //atan2Deg360 ensures that whatever y and x is we get angle in range of 0 to 360 not from 180 to -180
-        
+
         //-----NOTE----
         //you can add rotation or not your choice just uncomment the player.setRotation() lines to see it in play
 
-        if (angle > 90 && angle < 270) { 
-            //this.setRotation(angle + 180);        //We have to do a 180 degree CORRECTION offset because setFlip offsets the angle by 180 degrees (inverts x axis)            //This range signifies 2 and 3 quadrant 
+        if (angle > 90 && angle < 270) {
+            //this.setRotation(angle + 180);        //We have to do a 180 degree CORRECTION offset because setFlip offsets the angle by 180 degrees (inverts x axis)            //This range signifies 2 and 3 quadrant
             this.setFlip(true, false);       //Flip the x axis
         }
         else {
@@ -70,7 +69,7 @@ abstract class DynamicEntity extends Entity {
 
         velocity.x = destinationX;
         velocity.y = destinationY;
-        
+
         //Prevents division by zero
         if(!velocity.isZero()){
             velocity.nor().scl(speed);
@@ -88,7 +87,7 @@ abstract class DynamicEntity extends Entity {
             }
 
             //Do not check collision between DEAD entities
-            if (this.isDead || i.isDead){   
+            if (this.isDead || i.isDead){
                 continue;
             }
 

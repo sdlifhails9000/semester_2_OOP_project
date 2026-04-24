@@ -92,23 +92,23 @@ enum TowerPreset {
     MAIN("TowerAtlas/MainTower.atlas",
         200, 20, 20, true),
 
-    MINI("TowerAtlas/MiniTower.atlas", 
+    MINI("TowerAtlas/MiniTower.atlas",
          200, 20, 20, true),
 
-    ENEMY_MAIN("TowerAtlas/EnemyMainTower.atlas", 
+    ENEMY_MAIN("TowerAtlas/EnemyMainTower.atlas",
          200, 20, 20, true),
 
     ENEMY_MINI("TowerAtlas/EnemyMiniTower.atlas",
          200, 20, 20, true);
 
     final String assetPath;
-    
+
     final float maxHealth;
 
     final float spriteWidth;        //Store width and height and set at Entity.java
     final float spriteHeight;       //This gets rid of manually settings each entity size
 
-    boolean isAlly;
+    final boolean isAlly;
 
     TowerPreset(String towerAssetPath,
                        float maxHealth,
@@ -125,14 +125,16 @@ enum TowerPreset {
 }
 
 enum WeaponPreset {
-    MainTower("TowerAtlas/MainTowerWeapon.atlas", true, 2, 40,  5, 5),
-    MiniTower("TowerAtlas/MiniTowerWeapon.atlas",true, 2, 40, 3, 3),
-    EnemyMainTower("TowerAtlas/EnemyMainTowerWeapon.atlas", false, 2, 40, 5, 5),
-    EnemyMiniTower("TowerAtlas/EnemyMiniTowerWeapon.atlas", false, 2, 40, 3, 3);
+    MAIN_TOWER("TowerAtlas/MainTowerWeapon.atlas", true, 2, 40,  5, 5),
+    MINI_TOWER("TowerAtlas/MiniTowerWeapon.atlas",true, 2, 40, 3, 3),
+    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainTowerWeapon.atlas", false, 2, 40, 5, 5),
+    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniTowerWeapon.atlas", false, 2, 40, 3, 3);
 
     final String assetPath;
 
     final boolean isAlly;       //To decide who to play attackAnimation on
+
+    final float maxHealth;
 
     final float attackInterval;
     final float attackRange;
@@ -147,26 +149,29 @@ enum WeaponPreset {
                         float spriteWidth,
                         float spriteHeight){
 
-            this.assetPath = assetPath;
-            this.isAlly = isAlly;
-            this.attackInterval = attackInterval;
-            this.attackRange = attackRange;
-            this.spriteWidth = spriteWidth;
-            this.spriteHeight = spriteHeight;
+        this.assetPath = assetPath;
+        this.isAlly = isAlly;
+        this.attackInterval = attackInterval;
+        this.attackRange = attackRange;
+        this.spriteWidth = spriteWidth;
+        this.spriteHeight = spriteHeight;
+
+        this.maxHealth = 1000000f; // Later, we could use ranged attacks to take down just the bow
     }
 }
 
 enum ProjectilePreset {
-    MainTower("TowerAtlas/MainProjectile.atlas", true, 20, 2, 1),
-    MiniTower("TowerAtlas/MiniProjectile.atlas",true, 20, 2, 1),
-    EnemyMainTower("TowerAtlas/EnemyMainProjectile.atlas", false, 20, 2, 1),
-    EnemyMiniTower("TowerAtlas/EnemyMiniProjectile.atlas", false, 20, 2, 1);
+    MAIN_TOWER("TowerAtlas/MainProjectile.atlas", true, 20, 30,2, 1),
+    MINI_TOWER("TowerAtlas/MiniProjectile.atlas",true, 20, 30, 2, 1),
+    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainProjectile.atlas", false, 20, 30, 2, 1),
+    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniProjectile.atlas", false, 20, 30, 2, 1);
 
     final String assetPath;
 
     final boolean isAlly;       //To decide who to play attackAnimation on
 
     final float projectileSpeed;
+    final float attackStrength;
 
     final float spriteWidth;        //Store width and height and set at Entity.java
     final float spriteHeight;       //This gets rid of manually settings each entity size
@@ -174,12 +179,14 @@ enum ProjectilePreset {
     ProjectilePreset(String assetPath,
                             boolean isAlly,
                             float projectileSpeed,
+                            float attackStrength,
                             float spriteWidth,
                             float spriteHeight){
 
             this.assetPath = assetPath;
             this.isAlly = isAlly;
             this.projectileSpeed = projectileSpeed;
+            this.attackStrength = attackStrength;
             this.spriteWidth = spriteWidth;
             this.spriteHeight = spriteHeight;
     }
@@ -207,7 +214,7 @@ final class Loader {
     private static Map<TowerPreset, TextureAtlas> towerAtlass;
     private static Map<WeaponPreset, TextureAtlas> weaponAtlass;
     private static Map<ProjectilePreset, TextureAtlas> projectileAtlass;
-    
+
 
     //Tower Animations
     private static Map<TowerPreset, Animation<TextureRegion>> towerIdleAnimation;

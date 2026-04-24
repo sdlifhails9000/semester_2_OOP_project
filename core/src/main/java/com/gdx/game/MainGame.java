@@ -87,8 +87,9 @@ public class MainGame extends ApplicationAdapter {
     HeroPlayer testEnemy;
 
     //DynamicEntities (Goblins)
-    Goblin g1, g2, g3, g4, g5, g6;
+//    Goblin g1, g2, g3, g4, g5, g6;
 
+    Tower mainTower; // for testing
 
     //A variable to track elapsed time during animation
     // float stateTime; //Handled in Entity.java
@@ -157,14 +158,17 @@ public class MainGame extends ApplicationAdapter {
         clickCoords = new Vector3();
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 50, 50);
+        player = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 350, 50);
         testEnemy = new HeroPlayer(HeroPreset.HERO_HEAVY, 20, 20);
 
+        mainTower = new Tower(TowerPreset.MAIN, 400, 54);
+
+
         // //Initialize the goblins
-         g1 = new Goblin(GoblinPreset.GOBLIN, 10,20);
-        // // g2 = new Goblin(Preset.GOBLIN, 20,20);
-        // // g3 = new Goblin(Preset.GOBLIN, 20,10);
-          g4 = new Goblin(GoblinPreset.ENEMY_GOBLIN, 30,30);
+//         g1 = new Goblin(GoblinPreset.GOBLIN, 10,20);
+//        // // g2 = new Goblin(Preset.GOBLIN, 20,20);
+//        // // g3 = new Goblin(Preset.GOBLIN, 20,10);
+//          g4 = new Goblin(GoblinPreset.ENEMY_GOBLIN, 30,30);
         // // g5 = new Goblin(Preset.ENEMY_GOBLIN, 180,180);
         // // g6 = new Goblin(Preset.ENEMY_GOBLIN, 180,190);
 
@@ -410,7 +414,7 @@ public class MainGame extends ApplicationAdapter {
 
         for (MapLayer mapLayer : map.getLayers()){
             if(mapLayer instanceof TiledMapTileLayer){   // gives us only tiles layers not object or image
-                TiledMapTileLayer layer = (TiledMapTileLayer) mapLayer; // downcast 
+                TiledMapTileLayer layer = (TiledMapTileLayer) mapLayer; // downcast
 
                 for (int x = 0; x < layer.getWidth(); x++){    // loop through horizontal tiles
                     for(int y = 0; y < layer.getHeight(); y++){    // loop through vertical tiles
@@ -421,10 +425,10 @@ public class MainGame extends ApplicationAdapter {
 
                         if (tile == null) continue;     // skip if tile is empty
                         MapObjects objects = tile.getObjects();     // return collision data of tile
-                        
-                        for (MapObject obj : objects){          // loop through 
+
+                        for (MapObject obj : objects){          // loop through
                             if (obj instanceof RectangleMapObject){     // check if collision is rectangular collision
-                                Rectangle rect = ((RectangleMapObject) obj).getRectangle(); // gives us the collision shape of tile 
+                                Rectangle rect = ((RectangleMapObject) obj).getRectangle(); // gives us the collision shape of tile
                                 Rectangle worldRect = new Rectangle(        // Convert from tile coordinates to world coordinates
                                     (rect.x + x * layer.getTileWidth()) * scale,
                                     (y * layer.getTileHeight() + rect.y) * scale,
@@ -436,7 +440,7 @@ public class MainGame extends ApplicationAdapter {
                         }
                     }
                 }
-            }    
+            }
         }
         return mapCollisions;
     }
