@@ -14,14 +14,14 @@ class Goblin extends DynamicEntity{
     Entity attackTarget;
 
     // Goblin States
-    GoblinState goblinIdleState;
-    GoblinState goblinMoveState;
-    GoblinState goblinChaseState;
-    GoblinState goblinAttackState;
-    GoblinState goblinDeadState;
+    State goblinIdleState;
+    State goblinMoveState;
+    State goblinChaseState;
+    State goblinAttackState;
+    State goblinDeadState;
 
     //State declaration (for setState)
-    GoblinState currentState;
+    State currentState;
 
     
     //Animation Declaration (Idle and dead is handled in Entity.java)   (Current animation is in entity.java because idle and dead is handled there)
@@ -105,25 +105,22 @@ class Goblin extends DynamicEntity{
 
         // Handle the scenario when no entities were found
         if (nearestEnemyDistance == Float.MAX_VALUE) {
-            System.out.println("None found");
             return null;
         }
 
         return nearestEntity;
     }
-
-    // @Override setState not functional at the moment needs to be further looked at...
-    public void setState(State state){}
-    //     this.currentState.exit(this);
-    //     this.currentState = state;
-    //     this.currentState.enter(this);
     
-    public void setState(GoblinState state){
+    public void setState(State state){
         this.currentState.exit(this);
         this.currentState = state;
         this.currentState.enter(this);
     }
 
-
+    @Override
+    public void Update(float delta) {
+        setAttackTarget(getAttackTarget());
+        super.Update(delta);
+    }
 
 }

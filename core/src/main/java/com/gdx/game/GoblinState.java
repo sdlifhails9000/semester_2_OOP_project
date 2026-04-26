@@ -4,13 +4,8 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
-interface GoblinState<T extends Entity> {
-    void enter(T e);    // Called when entering this state
-    void update(T e, float delta);  // Called every frame while in this stat
-    void exit(T e); // Called when exiting the state
-}
 
-class GoblinIdleState implements GoblinState<Goblin> {
+class GoblinIdleState implements State<Goblin> {
     @Override
     public void enter(Goblin e) {
         e.currentAnimation = e.idleAnimation;       // starting animation as idle 
@@ -18,7 +13,7 @@ class GoblinIdleState implements GoblinState<Goblin> {
 
     @Override
     public void update(Goblin e, float delta) {
-        //If the entity itself dies
+        // If the entity itself dies
         if (e.isDead){
             e.setState(e.goblinDeadState);
             return;
@@ -43,7 +38,7 @@ class GoblinIdleState implements GoblinState<Goblin> {
 }
 
 
-class GoblinMoveState implements GoblinState<Goblin> {
+class GoblinMoveState implements State<Goblin> {
     @Override
     public void enter(Goblin e) {       // set current starting animation to idle
         e.currentAnimation = e.runAnimation;
@@ -53,13 +48,13 @@ class GoblinMoveState implements GoblinState<Goblin> {
     public void update(Goblin e, float delta) {
         System.out.println("Target Position is: " + e.getTargetPosition());
 
-        //If the entity itself dies
+        // If the entity itself dies
         if (e.isDead){
             e.setState(e.goblinDeadState);
             return;
         }
 
-        //In case of an attackTarget being found goblin attacks
+        // In case of an attackTarget being found goblin attacks
         if(e.getAttackTarget() != null){
             e.setState(e.goblinAttackState);
             return;
@@ -116,14 +111,14 @@ class GoblinMoveState implements GoblinState<Goblin> {
 
 
 
-class GoblinAttackState implements GoblinState<Goblin> {
+class GoblinAttackState implements State<Goblin> {
     public void enter(Goblin e){
         e.currentAnimation = e.attackAnimation;         // set current starting animation to idle
     }
 
     @Override
     public void update(Goblin e, float delta){
-        //If the entity itself dies
+        // If the entity itself dies
         if (e.isDead){
             e.setState(e.goblinDeadState);
             e.attackTarget = null;
@@ -179,7 +174,7 @@ class GoblinAttackState implements GoblinState<Goblin> {
     }
 }
 
-class GoblinChaseState implements GoblinState<Goblin> {
+class GoblinChaseState implements State<Goblin> {
 
     public void enter(Goblin e){
         e.currentAnimation = e.runAnimation;
@@ -259,7 +254,7 @@ class GoblinChaseState implements GoblinState<Goblin> {
 }
 
 
-class GoblinDeadState implements GoblinState<Goblin> {
+class GoblinDeadState implements State<Goblin> {
     private float timer = 0f;
     private static final float MAX_RESPAWN_TIME = 5f; // In seconds btw
     private boolean isDying;
