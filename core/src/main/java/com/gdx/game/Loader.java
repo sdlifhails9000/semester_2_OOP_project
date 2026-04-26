@@ -125,10 +125,10 @@ enum TowerPreset {
 }
 
 enum WeaponPreset {
-    MAIN_TOWER("TowerAtlas/MainTowerWeapon.atlas", true, 2, 40,  5, 5),
-    MINI_TOWER("TowerAtlas/MiniTowerWeapon.atlas",true, 2, 40, 3, 3),
-    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainTowerWeapon.atlas", false, 2, 40, 5, 5),
-    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniTowerWeapon.atlas", false, 2, 40, 3, 3);
+    MAIN_TOWER("TowerAtlas/MainTowerWeapon.atlas", true, 2, 40,  10, 10),
+    MINI_TOWER("TowerAtlas/MiniTowerWeapon.atlas",true, 2, 40, 6, 6),
+    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainTowerWeapon.atlas", false, 2, 40, 10, 10),
+    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniTowerWeapon.atlas", false, 2, 40, 6, 6);
 
     final String assetPath;
 
@@ -161,10 +161,10 @@ enum WeaponPreset {
 }
 
 enum ProjectilePreset {
-    MAIN_TOWER("TowerAtlas/MainProjectile.atlas", true, 20, 30,2, 1),
-    MINI_TOWER("TowerAtlas/MiniProjectile.atlas",true, 20, 30, 2, 1),
-    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainProjectile.atlas", false, 20, 30, 2, 1),
-    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniProjectile.atlas", false, 20, 30, 2, 1);
+    MAIN_TOWER("TowerAtlas/MainProjectile.atlas", true, 20, 30,4, 2),
+    MINI_TOWER("TowerAtlas/MiniProjectile.atlas",true, 20, 30, 4, 2),
+    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainProjectile.atlas", false, 20, 30, 4, 2),
+    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniProjectile.atlas", false, 20, 30, 4, 2);
 
     final String assetPath;
 
@@ -223,10 +223,12 @@ final class Loader {
     //Weapon Animations
     private static Map<WeaponPreset, Animation<TextureRegion>> weaponAttackAnimation;
     private static Map<WeaponPreset, Animation<TextureRegion>> weaponIdleAnimation;
+    private static Map<WeaponPreset, Animation<TextureRegion>> weaponDeadAnimation;
 
     //Projectile Animations
     private static Map<ProjectilePreset, Animation<TextureRegion>> projectileFlyingAnimation;
     private static Map<ProjectilePreset, Animation<TextureRegion>> projectileImpactAnimation;
+    private static Map<ProjectilePreset, Animation<TextureRegion>> projectileIdleAnimation;
 
     public static void load(AssetManager manager) {
         // I'm keeping the ANGLED BRACKETS blank because the compiler figures out what should go there for you
@@ -254,9 +256,11 @@ final class Loader {
 
         weaponAttackAnimation = new HashMap<>();
         weaponIdleAnimation = new HashMap<>();
+        weaponDeadAnimation = new HashMap<>();
 
         projectileFlyingAnimation = new HashMap<>();
         projectileImpactAnimation = new HashMap<>();
+        projectileIdleAnimation = new HashMap<>();
 
         for (HeroPreset preset : HeroPreset.values()) {
             TextureAtlas atlas = manager.get(preset.assetPath, TextureAtlas.class);
@@ -328,6 +332,8 @@ final class Loader {
             // ---- Loading Weapon animations ----
             weaponIdleAnimation.put(preset, new Animation<>(0.075f, weaponAtlas.findRegions("weaponIdle"), PlayMode.NORMAL));
 
+            weaponDeadAnimation.put(preset, new Animation<>(0.075f, weaponAtlas.findRegions("Dead"), PlayMode.NORMAL));
+
             Animation<TextureRegion> attack = new Animation<>(
                 0.5f,     // this is just a temporary value
                 weaponAtlas.findRegions("Attack"), PlayMode.LOOP);
@@ -349,6 +355,8 @@ final class Loader {
             projectileFlyingAnimation.put(preset, new Animation<>(0.075f, projectileAtlas.findRegions("Flying"), PlayMode.LOOP));
 
             projectileImpactAnimation.put(preset, new Animation<>(0.145f, projectileAtlas.findRegions("Impact"), PlayMode.NORMAL));
+
+            projectileIdleAnimation.put(preset, new Animation<>(0.145f, projectileAtlas.findRegions("Idle"), PlayMode.NORMAL));
         }
 
 
@@ -410,6 +418,10 @@ final class Loader {
         return weaponIdleAnimation.get(preset);
     }
 
+    public static Animation<TextureRegion> weaponDead(WeaponPreset preset) {
+        return weaponDeadAnimation.get(preset);
+    }
+
     public static Animation<TextureRegion> weaponAttack(WeaponPreset preset) {
         return weaponAttackAnimation.get(preset);
     }
@@ -419,6 +431,10 @@ final class Loader {
     // Projectile Getters
     public static Animation<TextureRegion> flying(ProjectilePreset preset) {
         return projectileFlyingAnimation.get(preset);
+    }
+
+    public static Animation<TextureRegion> idle(ProjectilePreset preset) {
+        return projectileIdleAnimation.get(preset);
     }
 
     public static Animation<TextureRegion> impact(ProjectilePreset preset) {

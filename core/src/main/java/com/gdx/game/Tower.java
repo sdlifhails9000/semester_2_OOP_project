@@ -3,7 +3,6 @@ package com.gdx.game;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-import java.sql.Array;
 import java.util.ArrayList;
 
 class Tower extends Entity {
@@ -35,7 +34,8 @@ class Tower extends Entity {
         WeaponPreset weaponPreset = mapWeaponPreset(preset);
         float offset = spriteHeight / 2 + 5;
 
-        towerWeapon = new Weapon(this, weaponPreset, startX, startY + offset);
+        towerWeapon = new Weapon(weaponPreset, startX, startY + offset);
+
         towerList.add(this);
     }
 
@@ -73,19 +73,20 @@ class Tower extends Entity {
 
 class Weapon extends Entity {
     Projectile arrow;
-    private Tower parent;
     private Entity attackTarget;
 
     State weaponIdleState;
     State weaponAttackState;
+    State weaponDeadState;
     State currentState;
 
     float attackInterval;
     float attackRange;
 
     Animation<TextureRegion> attackAnimation;
+    Animation<TextureRegion> deadAnimation;
 
-    public Weapon(Tower parent, WeaponPreset preset, float startX, float startY) {
+    public Weapon(WeaponPreset preset, float startX, float startY) {
         super(Loader.weaponIdle(preset),
             startX, startY,
             preset.maxHealth,
@@ -96,13 +97,16 @@ class Weapon extends Entity {
 
         weaponIdleState = new WeaponIdleState();
         weaponAttackState = new WeaponAttackState();
+        weaponDeadState = new WeaponDeadState();
         currentState = weaponIdleState;
+
+        attackAnimation = Loader.weaponAttack(preset);
+        deadAnimation = Loader.weaponDead(preset);
+        attackRange = preset.attackRange;
+        attackInterval = preset.attackInterval;
 
         ProjectilePreset projectilePreset = mapProjectilePreset(preset);
         arrow = new Projectile(this, projectilePreset, startX, startY);
-        attackAnimation = Loader.weaponAttack(preset);
-        attackRange = preset.attackRange;
-        attackInterval = preset.attackInterval;
     }
 
     //Setters and Getters
@@ -150,6 +154,8 @@ class Projectile extends DynamicEntity {
     Weapon parent;
 
     Animation<TextureRegion> impactAnimation;
+    Animation<TextureRegion> idleAnimation;
+    Animation<TextureRegion> flyingAnimation;
 
     State projectileFlyingState;
     State projectileImpactState;
@@ -161,7 +167,7 @@ class Projectile extends DynamicEntity {
     Entity attackTarget;
 
     public Projectile(Weapon parent, ProjectilePreset preset, float startX, float startY) {
-        super(Loader.flying(preset),
+        super(Loader.flying(preset),    //Passing in flying so that we generate correct sized hitbox (idle animation is not upto scale and is transparent) 
             startX, startY,
             1000000, // placeholder
             preset.projectileSpeed,
@@ -173,10 +179,16 @@ class Projectile extends DynamicEntity {
         projectileIdleState = new ProjectileIdleState();
         projectileFlyingState = new ProjectileFlyingState();
         projectileImpactState = new ProjectileImpactState();
+
+        //Initial state is idleState (DO NOT CHANGE) 
         currentState = projectileIdleState;
 
         projectileSpeed = preset.projectileSpeed;
+        attackStrength = preset.attackStrength;
+
         impactAnimation = Loader.impact(preset);
+        idleAnimation = Loader.idle(preset);
+        flyingAnimation = Loader.flying(preset);
         this.parent = parent;
     }
 

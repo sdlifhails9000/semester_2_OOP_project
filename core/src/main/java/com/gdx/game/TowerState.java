@@ -12,7 +12,10 @@ class TowerIdleState implements State<Tower> {
     @Override
     public void update(Tower e, float delta) {
         if (e.isDead) {
-            e.towerWeapon = null;
+            //Kill the weapon entirely alongwith it (towerWeapon is the reference of the TOWER'S weapon)
+            e.towerWeapon.setState(e.towerWeapon.weaponDeadState);
+            e.towerWeapon.isDead = true;
+
             e.setState(e.towerDeadState);
         }
     }
@@ -69,9 +72,9 @@ class WeaponIdleState implements State<Weapon> {
         if (closestEnemyDistance <= e.attackRange) {
             e.setState(e.weaponAttackState);
             e.setAttackTarget(potentialTarget);
+
+            //Set the arrow's attack target
             e.arrow.setAttackTarget(potentialTarget);
-            e.arrow.setTargetPosition(potentialTarget.getCurrentPosition().x,
-                potentialTarget.getCurrentPosition().y);
             return;
         }
 
@@ -81,15 +84,13 @@ class WeaponIdleState implements State<Weapon> {
         //-----NOTE----
         //you can add rotation or not your choice just uncomment the player.setRotation() lines to see it in play
 
-        e.setRotation(angle);
-
-        if (angle > 90 && angle < 270) {
-            e.setRotation(angle);        //We have to do a 180 degree CORRECTION offset because setFlip offsets the angle by 180 degrees (inverts x axis)            //This range signifies 2 and 3 quadrant
-            e.setFlip(true, false);       //Flip the x axis
+        if (angle > 0 && angle < 180) {
+            e.setRotation(angle - 90);        //We have to do a 180 degree CORRECTION offset because setFlip offsets the angle by 180 degrees (inverts x axis)            //This range signifies 2 and 3 quadrant
+            e.setFlip(false, false);       //Flip the x axis
         }
         else {
-            e.setRotation(angle + 180);         //Same reason as above
-            e.setFlip(false, false);      //If its a click in 1 or 4 quadrant no flip just bring sprite to what it was originally (sprite was originally drawn right facing)
+            e.setRotation(angle + 90);         //Same reason as above
+            e.setFlip(false, true);      //If its a click in 1 or 4 quadrant no flip just bring sprite to what it was originally (sprite was originally drawn right facing)
         }
     }
 
@@ -127,16 +128,21 @@ class WeaponAttackState implements State<Weapon> {
             return;
         }
 
+        //If you want homing projectiles just set it to flying state instead of idle state
+        if (e.arrow.currentState == e.arrow.projectileIdleState) {
+            e.arrow.setTargetPosition(e.getAttackTarget().getCurrentPosition().x, e.getAttackTarget().getCurrentPosition().y);
+        }
+
         float angle = getAngle(e);
 
 
-        if (angle > 90 && angle < 270) {
-            e.setRotation(angle);        //We have to do a 180 degree CORRECTION offset because setFlip offsets the angle by 180 degrees (inverts x axis)            //This range signifies 2 and 3 quadrant
-            e.setFlip(true, false);       //Flip the x axis
+        if (angle > 0 && angle < 180) {
+            e.setRotation(angle - 90);        //We have to do a 90 degree CORRECTION offset because initially our bow is facing upward
+            e.setFlip(false, false);       //Flip the x axis
         }
         else {
-            e.setRotation(angle + 180);         //Same reason as above
-            e.setFlip(false, false);      //If its a click in 1 or 4 quadrant no flip just bring sprite to what it was originally (sprite was originally drawn right facing)
+            e.setRotation(angle + 90);         //Same reason as above here arrow is facing directly downward now
+            e.setFlip(false, true);      //If its a click in 1 or 4 quadrant no flip just bring sprite to what it was originally (sprite was originally drawn right facing)
         }
 
     }
@@ -157,12 +163,35 @@ class WeaponAttackState implements State<Weapon> {
     public void exit(Weapon e) {
         e.animationTimer = 0;
         e.setAttackTarget(null);
+        e.arrow.attackTarget = null;
+    }
+}
+
+class WeaponDeadState implements State<Weapon> {
+    @Override
+    public void enter(Weapon e) {
+       e.currentAnimation = e.deadAnimation;
+
+       //Kill the projectile completely
+       e.arrow.isDead = true;
+       e.arrow.attackTarget = null;
+    }
+
+    @Override
+    public void update (Weapon e, float delta) {
+        //IT DIES FINITO KHALAS HASTA LA VISTA
+    }
+
+    @Override
+    public void exit(Weapon e){
+        e.animationTimer = 0;
     }
 }
 
 class ProjectileIdleState implements State<Projectile> {
     @Override
     public void enter(Projectile e) {
+        e.currentAnimation = e.idleAnimation;
     }
 
     @Override
@@ -175,24 +204,30 @@ class ProjectileIdleState implements State<Projectile> {
     @Override
     public void exit(Projectile e) {
         e.animationTimer = 0;
+        e.isDead = true;
     }
 }
 
 class ProjectileFlyingState implements State<Projectile> {
     @Override
     public void enter(Projectile e) {
-        e.currentAnimation = e.idleAnimation;
+        e.currentAnimation = e.flyingAnimation;
     }
 
     @Override
     public void update(Projectile e, float delta) {
-        boolean isArrowColliding = e.getHitBox().overlaps(e.getAttackTarget().getHitBox());
+        //Only calculate these if your in range of the weapon
+        if (e.getAttackTarget() != null){
+            boolean isArrowColliding = e.getHitBox().overlaps(e.getAttackTarget().getHitBox());
 
-        if (isArrowColliding) {
+            if (isArrowColliding) {
             e.getAttackTarget().takeDamage(e.attackStrength);
             e.setState(e.projectileImpactState);
             return;
         }
+        }
+
+        
 
         float angle = getAngle(e, e.targetPosition);
 
@@ -204,7 +239,6 @@ class ProjectileFlyingState implements State<Projectile> {
         }
 
         e.moveTowards(e.targetPosition, delta);
-        Vector2 currentPosition = e.getCurrentPosition();
 
         e.currentXY.mulAdd(e.velocity, delta);
         e.updateBoxes();
@@ -214,7 +248,6 @@ class ProjectileFlyingState implements State<Projectile> {
     @Override
     public void exit(Projectile e) {
         e.animationTimer = 0;
-        e.attackTarget = null;
     }
 
     private static float getAngle(Projectile e, Vector2 potentialTarget) {
@@ -234,18 +267,23 @@ class ProjectileImpactState implements State<Projectile> {
     @Override
     public void enter(Projectile e) {
         e.currentAnimation = e.impactAnimation;
+
+        //Kill the arrow for now (revived in exit of ProjectileIdleState)
+        e.isDead = true;
     }
 
     @Override
     public void update(Projectile e, float delta) {
         if (e.impactAnimation.isAnimationFinished(e.animationTimer)) {
             e.setCurrentPosition(e.parent.currentXY.x, e.parent.currentXY.y);
+            e.updateBoxes();
+            e.setCenter(e.parent.getCurrentPosition().x, e.parent.getCurrentPosition().y);      //Sets it back to the bow aka the parent
             e.setState(e.projectileIdleState);
         }
     }
 
     @Override
     public void exit(Projectile e) {
-
+        e.animationTimer = 0;
     }
 }

@@ -22,6 +22,9 @@ bounds:197,2,35,50
 Attack
 index:1
 bounds:234,7,35,45
+Dead
+index:1
+bounds:271,30,23,22
 weaponIdle
 index:1
 bounds:2,7,45,45
