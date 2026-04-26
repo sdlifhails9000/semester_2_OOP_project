@@ -5,66 +5,66 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
 
-class GoblinIdleState implements State<Goblin> {
+class BotIdleState implements State<Bot> {
     @Override
-    public void enter(Goblin e) {
+    public void enter(Bot e) {
         System.out.println("Entering idle state");
         e.currentAnimation = e.idleAnimation;       // starting animation as idle 
     }
 
     @Override
-    public void update(Goblin e, float delta) {
+    public void update(Bot e, float delta) {
         // If the entity itself dies
         System.out.println(1);
         if (e.isDead){
-            e.setState(e.goblinDeadState);
+            e.setState(e.BotDeadState);
             return;
         }
 
         // if the target position and current position don't match, start moving to that target position
         if (!e.currentXY.epsilonEquals(e.targetPosition, 0.5f)) {
-            e.setState(e.goblinMoveState);
+            e.setState(e.BotMoveState);
             return;
         }
 
         if(e.getAttackTarget() != null){        // in case of finding attack target
-            e.setState(e.goblinAttackState);
+            e.setState(e.BotAttackState);
             return;
         }
     }
 
     @Override
-    public void exit (Goblin e){            // exists the state
+    public void exit (Bot e){            // exists the state
         e.animationTimer = 0;
     }
 }
 
 
-class GoblinMoveState implements State<Goblin> {
+class BotMoveState implements State<Bot> {
     @Override
-    public void enter(Goblin e) {       // set current starting animation to idle
+    public void enter(Bot e) {       // set current starting animation to idle
         e.currentAnimation = e.runAnimation;
     }
 
     @Override
-    public void update(Goblin e, float delta) {
+    public void update(Bot e, float delta) {
         System.out.println("Target Position is: " + e.getTargetPosition());
 
         // If the entity itself dies
         if (e.isDead){
-            e.setState(e.goblinDeadState);
+            e.setState(e.BotDeadState);
             return;
         }
 
-        // In case of an attackTarget being found goblin attacks
+        // In case of an attackTarget being found Bot attacks
         if(e.getAttackTarget() != null){
-            e.setState(e.goblinAttackState);
+            e.setState(e.BotAttackState);
             return;
         }
 
         // If the current position and target position are equal, to a certain degree, stop walking and go into the idle state
         if (e.currentXY.epsilonEquals(e.targetPosition, 0.5f)) {
-            e.setState(e.goblinIdleState);
+            e.setState(e.BotIdleState);
             return;
         }
 
@@ -96,7 +96,7 @@ class GoblinMoveState implements State<Goblin> {
         }
 
         if (e.velocity.isZero()) {
-            e.setState(e.goblinIdleState);          // for no movement set to idle state
+            e.setState(e.BotIdleState);          // for no movement set to idle state
         }
 
         // Update collision and hitboxes and update the sprite position
@@ -104,7 +104,7 @@ class GoblinMoveState implements State<Goblin> {
     }
 
     @Override
-    public void exit(Goblin e) {        // exists the state
+    public void exit(Bot e) {        // exists the state
         e.velocity.setZero();
         e.targetPosition.set(e.currentXY);
         e.animationTimer = 0;
@@ -113,36 +113,36 @@ class GoblinMoveState implements State<Goblin> {
 
 
 
-class GoblinAttackState implements State<Goblin> {
-    public void enter(Goblin e){
+class BotAttackState implements State<Bot> {
+    public void enter(Bot e){
         e.currentAnimation = e.attackAnimation;         // set current starting animation to idle
     }
 
     @Override
-    public void update(Goblin e, float delta){
+    public void update(Bot e, float delta){
         // If the entity itself dies
         if (e.isDead){
-            e.setState(e.goblinDeadState);
+            e.setState(e.BotDeadState);
             e.attackTarget = null;
             return;
         }
 
-        // Movement of the goblin
+        // Movement of the Bot
         if (!e.currentXY.epsilonEquals(e.targetPosition, 0.5f)) {
-            e.setState(e.goblinMoveState);
+            e.setState(e.BotMoveState);
             return;
         }
 
         //If the target is dead
         if (e.getAttackTarget().isDead) {
-            e.setState(e.goblinIdleState);
+            e.setState(e.BotIdleState);
             e.attackTarget = null;
             return;
         }
 
         //If our hero is far from the enemy
         if (!e.isCloseToEnemy()){
-            e.setState(e.goblinChaseState);
+            e.setState(e.BotChaseState);
             return;
         }
 
@@ -171,42 +171,42 @@ class GoblinAttackState implements State<Goblin> {
     }
 
     @Override
-    public void exit(Goblin e) {
+    public void exit(Bot e) {
         e.animationTimer = 0;
     }
 }
 
-class GoblinChaseState implements State<Goblin> {
+class BotChaseState implements State<Bot> {
 
-    public void enter(Goblin e){
+    public void enter(Bot e){
         e.currentAnimation = e.runAnimation;
     }
 
-    public void update(Goblin e, float delta){
+    public void update(Bot e, float delta){
         //If the entity itself dies
         if (e.isDead){
-            e.setState(e.goblinDeadState);
+            e.setState(e.BotDeadState);
             e.attackTarget = null;
             return;
         }
 
         // MOVE NIGGA MOVE
         if (!e.currentXY.epsilonEquals(e.targetPosition, 0.5f)) {
-            e.setState(e.goblinMoveState);
+            e.setState(e.BotMoveState);
             e.attackTarget = null;
             return;
         }
 
         //If the target is dead
         if (e.getAttackTarget().isDead) {
-            e.setState(e.goblinIdleState);
+            e.setState(e.BotIdleState);
             e.attackTarget = null;
             return;
         }
 
-        // if goblin is close to an enemy then go into attack state
+        // if Bot is close to an enemy then go into attack state
         if (e.isCloseToEnemy()){
-            e.setState(e.goblinAttackState);
+            e.setState(e.BotAttackState);
             return;
         }
 
@@ -242,34 +242,34 @@ class GoblinChaseState implements State<Goblin> {
 
         // in case of no movement
         if (e.velocity.isZero()) {
-            e.setState(e.goblinIdleState);
+            e.setState(e.BotIdleState);
         }
 
         // Update collision and hitboxes and update the sprite position
         e.setCenter(e.currentXY.x, e.currentXY.y);
     }
 
-    public void exit(Goblin e){
+    public void exit(Bot e){
         e.velocity.setZero();
         e.animationTimer = 0;
     }
 }
 
 
-class GoblinDeadState implements State<Goblin> {
+class BotDeadState implements State<Bot> {
     private float timer = 0f;
     private static final float MAX_RESPAWN_TIME = 5f; // In seconds btw
     private boolean isDying;
     private boolean isRespawing;
 
-    public void enter (Goblin e){
+    public void enter (Bot e){
         e.currentAnimation = e.deadAnimation;
         e.currentAnimation.setPlayMode(Animation.PlayMode.NORMAL);
         isDying = true;
         isRespawing = false;
     }
 
-    public void update (Goblin e, float delta) {
+    public void update (Bot e, float delta) {
         if (isDying) {
             if (e.currentAnimation.isAnimationFinished(e.animationTimer)) {
                 isDying = false;
@@ -278,7 +278,7 @@ class GoblinDeadState implements State<Goblin> {
         }
         else if (isRespawing) {
             if (e.currentAnimation.isAnimationFinished(e.animationTimer)) {
-                e.setState(e.goblinIdleState);
+                e.setState(e.BotIdleState);
             }
             return;
         }
@@ -287,7 +287,7 @@ class GoblinDeadState implements State<Goblin> {
             return;
         }
 
-        if (Goblin.goblinList.size() > 5) {
+        if (Bot.BotList.size() > 5) {
             return;
         }
 
@@ -326,7 +326,7 @@ class GoblinDeadState implements State<Goblin> {
         e.animationTimer = 0f;
     }
 
-    public void exit (Goblin e) {
+    public void exit (Bot e) {
         e.animationTimer = 0;
     }
 }

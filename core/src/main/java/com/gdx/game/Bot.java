@@ -7,18 +7,18 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
-class Goblin extends DynamicEntity{
-    public static ArrayList<Goblin> goblinList = new ArrayList<>();
+class Bot extends DynamicEntity{
+    public static ArrayList<Bot> BotList = new ArrayList<>();
 
     //Entities Declaration
     Entity attackTarget;
 
-    // Goblin States
-    State goblinIdleState = new GoblinIdleState();
-    State goblinMoveState = new GoblinMoveState();
-    State goblinChaseState = new GoblinChaseState();
-    State goblinAttackState = new GoblinAttackState();
-    State goblinDeadState = new GoblinDeadState();
+    // Bot States
+    State BotIdleState = new BotIdleState();
+    State BotMoveState = new BotMoveState();
+    State BotChaseState = new BotChaseState();
+    State BotAttackState = new BotAttackState();
+    State BotDeadState = new BotDeadState();
 
     //State declaration (for setState)
     State currentState;
@@ -34,7 +34,7 @@ class Goblin extends DynamicEntity{
     protected float attackStrength;
     protected float attackTimer;
 
-    Goblin (GoblinPreset preset, int startX, int startY){
+    Bot (BotPreset preset, int startX, int startY){          
         super(
             Loader.idle(preset),
             Loader.dead(preset),
@@ -47,7 +47,7 @@ class Goblin extends DynamicEntity{
             preset.isAlly
         );
 
-        goblinList.add(this);
+        BotList.add(this);
 
         this.attackAnimation = Loader.attack(preset);
         this.runAnimation = Loader.run(preset);
@@ -55,7 +55,7 @@ class Goblin extends DynamicEntity{
         this.attackRange = preset.attackRange;
         this.attackSpeed = preset.attackSpeed;
         this.attackStrength = preset.attackStrength;
-        this.currentState = goblinIdleState;
+        this.currentState = BotIdleState;
     }
 
     //Setters and Getters
