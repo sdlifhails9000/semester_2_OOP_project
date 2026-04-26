@@ -8,12 +8,14 @@ import com.badlogic.gdx.math.Vector2;
 class GoblinIdleState implements State<Goblin> {
     @Override
     public void enter(Goblin e) {
+        System.out.println("Entering idle state");
         e.currentAnimation = e.idleAnimation;       // starting animation as idle 
     }
 
     @Override
     public void update(Goblin e, float delta) {
         // If the entity itself dies
+        System.out.println(1);
         if (e.isDead){
             e.setState(e.goblinDeadState);
             return;

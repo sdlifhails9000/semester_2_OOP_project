@@ -142,8 +142,8 @@ public class MainGame extends ApplicationAdapter {
         clickCoords = new Vector3();
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 50, 50);
-        testEnemy = new HeroPlayer(HeroPreset.HERO_HEAVY, 20, 20);
+        player = new HeroPlayer(HeroPreset.HERO_HEAVY, 50, 50);
+        testEnemy = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 20, 20);
 
         // //Initialize the goblins
          g1 = new Goblin(GoblinPreset.GOBLIN, 10,20);

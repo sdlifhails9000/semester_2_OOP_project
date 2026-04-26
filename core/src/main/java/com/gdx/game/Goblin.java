@@ -14,11 +14,11 @@ class Goblin extends DynamicEntity{
     Entity attackTarget;
 
     // Goblin States
-    State goblinIdleState;
-    State goblinMoveState;
-    State goblinChaseState;
-    State goblinAttackState;
-    State goblinDeadState;
+    State goblinIdleState = new GoblinIdleState();
+    State goblinMoveState = new GoblinMoveState();
+    State goblinChaseState = new GoblinChaseState();
+    State goblinAttackState = new GoblinAttackState();
+    State goblinDeadState = new GoblinDeadState();
 
     //State declaration (for setState)
     State currentState;
@@ -55,6 +55,7 @@ class Goblin extends DynamicEntity{
         this.attackRange = preset.attackRange;
         this.attackSpeed = preset.attackSpeed;
         this.attackStrength = preset.attackStrength;
+        this.currentState = goblinIdleState;
     }
 
     //Setters and Getters
@@ -120,6 +121,7 @@ class Goblin extends DynamicEntity{
     @Override
     public void Update(float delta) {
         setAttackTarget(getAttackTarget());
+        currentState.update(this, delta);
         super.Update(delta);
     }
 
