@@ -158,10 +158,13 @@ public class MainGame extends ApplicationAdapter {
         clickCoords = new Vector3();
 
         //Initialize the DYNAMIC SPRITES
+        mainTower = new Tower(TowerPreset.MAIN, 400, 54);
+
+        //DRAW THE TOWER FIRST SO THAT WHEN TOWER DIES PLAYER CANNOT HIDE UNDER ITS RUBBLE
         player = new HeroPlayer(HeroPreset.ENEMY_HERO_LIGHT, 350, 50);
         testEnemy = new HeroPlayer(HeroPreset.HERO_HEAVY, 20, 20);
 
-        mainTower = new Tower(TowerPreset.MAIN, 400, 54);
+        
 
 
         // //Initialize the goblins
