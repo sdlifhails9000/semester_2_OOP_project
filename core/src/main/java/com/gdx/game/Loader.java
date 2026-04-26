@@ -53,7 +53,11 @@ enum HeroPreset {
     }
 }
 
-enum GoblinPreset {
+interface BotPreset{
+
+}
+
+enum GoblinPreset implements BotPreset {
     GOBLIN("GoblinAtlas/Goblin.atlas", 10, 10, 10, 75, 2, 8, 8, true),
     ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 10, 10, 10, 75, 2, 8, 8, false);
 
@@ -191,19 +195,31 @@ final class Loader {
     }
 
     //GoblinPreset getters
-    public static Animation<TextureRegion> run(GoblinPreset preset) {
-        return goblinRunAnimation.get(preset);
+    public static Animation<TextureRegion> run(BotPreset preset) {
+        if(preset instanceof GoblinPreset)
+            return goblinRunAnimation.get(preset);
+        else
+            return goblinRunAnimation.get(preset);
     }
 
-    public static Animation<TextureRegion> attack(GoblinPreset preset) {
-        return goblinAttackAnimation.get(preset);
+    public static Animation<TextureRegion> attack(BotPreset preset) {
+        if(preset instanceof GoblinPreset)
+            return goblinAttackAnimation.get(preset);
+        else
+            return goblinAttackAnimation.get(preset);
     }
 
-    public static Animation<TextureRegion> idle(GoblinPreset preset) {
-        return goblinIdleAnimation.get(preset);
+    public static Animation<TextureRegion> idle(BotPreset preset) {
+        if(preset instanceof GoblinPreset)
+            return goblinIdleAnimation.get(preset);
+        else
+            return goblinIdleAnimation.get(preset);
     }
 
-    public static Animation<TextureRegion> dead(GoblinPreset preset) {
-        return goblinDeadAnimation.get(preset);
+    public static Animation<TextureRegion> dead(BotPreset preset) {
+        if(preset instanceof GoblinPreset)
+            return goblinDeadAnimation.get(preset);
+        else
+            return goblinDeadAnimation.get(preset); // Change to herobot after if
     }
 }
