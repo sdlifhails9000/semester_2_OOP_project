@@ -289,10 +289,6 @@ class HeroDeadState implements State<HeroPlayer> {
             return;
         }
 
-        // if (Bot.goblinList.size() > 5) {
-        //     return;
-        // }
-
         e.currentHealth = e.maxHealth;
         e.isDead = false;
 
@@ -313,7 +309,7 @@ class HeroDeadState implements State<HeroPlayer> {
 
             e.setCurrentPosition(respawnPositionX, respawnPositionY);
             e.updateBoxes();
-            
+
             if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()) {
                 return;
             }

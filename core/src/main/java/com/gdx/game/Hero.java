@@ -19,6 +19,7 @@ abstract class Hero extends DynamicEntity {
     //Animation Declaration (Idle and dead is handled in Entity.java)   (Current animation is in entity.java because idle and dead is handled there)
     protected Animation<TextureRegion> runAnimation;
     protected Animation<TextureRegion> attackAnimation;
+    protected Animation<TextureRegion> deadAnimation;
 
     //Stats declaration
     protected float attackRange;
@@ -28,9 +29,7 @@ abstract class Hero extends DynamicEntity {
 
     Hero(HeroPreset preset, int startX, int startY) {
         super(Loader.idle(preset),
-              Loader.dead(preset),
               startX, startY,
-
               preset.maxHealth,
               preset.speed,
               preset.spriteWidth,
@@ -42,6 +41,7 @@ abstract class Hero extends DynamicEntity {
 
         this.attackAnimation = Loader.attack(preset);
         this.runAnimation = Loader.run(preset);
+        this.deadAnimation = Loader.dead(preset);
 
         this.attackRange = preset.attackRange;
         this.attackSpeed = preset.attackSpeed;
@@ -112,7 +112,6 @@ class HeroPlayer extends Hero{
         super.Update(delta);
         currentState.update(this, delta);
     }
-
 }
 
 class HeroBot extends Hero {
