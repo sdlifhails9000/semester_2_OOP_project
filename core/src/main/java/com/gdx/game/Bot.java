@@ -34,27 +34,30 @@ class Bot extends DynamicEntity{
     protected float attackStrength;
     protected float attackTimer;
 
-    Bot (BotPreset preset, int startX, int startY){          
+
+    Bot (BotPreset preset, int startX, int startY){     
         super(
             Loader.idle(preset),
             Loader.dead(preset),
             startX, startY,
             
-            preset.maxHealth,
-            preset.speed,
-            preset.spriteWidth,
-            preset.spriteHeight,
-            preset.isAlly
+            preset.getMaxHealth(),
+            preset.getSpeed(),
+            preset.getSpriteWidth(),
+            preset.getSpriteHeight(),
+            preset.getIsAlly()
         );
+
+        
 
         BotList.add(this);
 
         this.attackAnimation = Loader.attack(preset);
         this.runAnimation = Loader.run(preset);
 
-        this.attackRange = preset.attackRange;
-        this.attackSpeed = preset.attackSpeed;
-        this.attackStrength = preset.attackStrength;
+        this.attackRange = preset.getAttackRange();
+        this.attackSpeed = preset.getAttackSpeed();
+        this.attackStrength = preset.getAttackStrength();
         this.currentState = BotIdleState;
     }
 

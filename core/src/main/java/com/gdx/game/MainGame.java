@@ -86,8 +86,8 @@ public class MainGame extends ApplicationAdapter {
     HeroPlayer player;
     HeroPlayer testEnemy;
 
-    //DynamicEntities (Goblins)
-    Goblin g1, g2, g3, g4, g5, g6;
+    //DynamicEntities (Bots)
+    Bot g1, g2, g3, g4, g5, g6;
 
 
     //A variable to track elapsed time during animation
@@ -146,10 +146,10 @@ public class MainGame extends ApplicationAdapter {
         testEnemy = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 20, 20);
 
         // //Initialize the goblins
-         g1 = new Goblin(GoblinPreset.GOBLIN, 10,20);
+         g1 = new Bot(GoblinPreset.GOBLIN, 10,20);
         // // g2 = new Goblin(Preset.GOBLIN, 20,20);
         // // g3 = new Goblin(Preset.GOBLIN, 20,10);
-          g4 = new Goblin(GoblinPreset.ENEMY_GOBLIN, 30,30);
+          g4 = new Bot(GoblinPreset.ENEMY_GOBLIN, 30,30);
         // // g5 = new Goblin(Preset.ENEMY_GOBLIN, 180,180);
         // // g6 = new Goblin(Preset.ENEMY_GOBLIN, 180,190);
 

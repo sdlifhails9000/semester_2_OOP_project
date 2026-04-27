@@ -54,6 +54,15 @@ enum HeroPreset {
 }
 
 interface BotPreset{
+    // getter methods 
+    float getMaxHealth();
+    float getSpeed();
+    float getSpriteWidth();
+    float getSpriteHeight();
+    boolean getIsAlly();
+    float getAttackStrength();
+    float getAttackSpeed();
+    float getAttackRange();
 
 }
 
@@ -89,6 +98,46 @@ enum GoblinPreset implements BotPreset {
         this.spriteWidth = spriteWidth;
         this.spriteHeight = spriteHeight;
         this.isAlly = isAlly;
+    }
+
+    @Override
+    public float getMaxHealth() {
+        return maxHealth;
+    }
+
+    @Override
+    public float getSpeed() {
+        return speed;
+    }
+
+    @Override
+    public float getSpriteWidth() {
+        return spriteWidth;
+    }
+
+    @Override
+    public float getSpriteHeight() {
+        return spriteHeight;
+    }
+
+    @Override
+    public boolean getIsAlly() {
+        return isAlly;
+    }
+
+    @Override
+    public float getAttackStrength() {
+        return attackStrength;
+    }
+
+    @Override
+    public float getAttackSpeed() {
+        return attackSpeed;
+    }
+
+    @Override
+    public float getAttackRange() {
+        return attackRange;
     }
 }
 

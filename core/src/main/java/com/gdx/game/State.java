@@ -289,9 +289,9 @@ class HeroDeadState implements State<HeroPlayer> {
             return;
         }
 
-        if (Goblin.goblinList.size() > 5) {
-            return;
-        }
+        // if (Bot.goblinList.size() > 5) {
+        //     return;
+        // }
 
         e.currentHealth = e.maxHealth;
         e.isDead = false;

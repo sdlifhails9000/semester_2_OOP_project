@@ -134,11 +134,14 @@ class BotAttackState implements State<Bot> {
         }
 
         //If the target is dead
-        if (e.getAttackTarget().isDead) {
-            e.setState(e.BotIdleState);
-            e.attackTarget = null;
-            return;
+        if (e.getAttackTarget() != null){
+            if (e.getAttackTarget().isDead) {
+                e.setState(e.BotIdleState);
+                e.attackTarget = null;
+                return;
+            }
         }
+        
 
         //If our hero is far from the enemy
         if (!e.isCloseToEnemy()){
