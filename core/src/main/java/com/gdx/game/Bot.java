@@ -27,6 +27,7 @@ class Bot extends DynamicEntity{
     //Animation Declaration (Idle and dead is handled in Entity.java)   (Current animation is in entity.java because idle and dead is handled there)
     protected Animation<TextureRegion> runAnimation;
     protected Animation<TextureRegion> attackAnimation;
+    protected Animation<TextureRegion> deadAnimation;
 
     //Stats declaration
     protected float attackRange;
@@ -38,7 +39,6 @@ class Bot extends DynamicEntity{
     Bot (BotPreset preset, int startX, int startY){     
         super(
             Loader.idle(preset),
-            Loader.dead(preset),
             startX, startY,
             
             preset.getMaxHealth(),
@@ -54,6 +54,7 @@ class Bot extends DynamicEntity{
 
         this.attackAnimation = Loader.attack(preset);
         this.runAnimation = Loader.run(preset);
+        this.deadAnimation = Loader.dead(preset);
 
         this.attackRange = preset.getAttackRange();
         this.attackSpeed = preset.getAttackSpeed();
