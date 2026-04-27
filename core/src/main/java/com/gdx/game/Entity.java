@@ -22,7 +22,6 @@ abstract class Entity extends Sprite {
 
     //Animations
     protected Animation<TextureRegion> idleAnimation;
-    protected Animation<TextureRegion> deadAnimation;
     protected Animation<TextureRegion> currentAnimation;
 
     protected float animationTimer = 0;
@@ -40,10 +39,9 @@ abstract class Entity extends Sprite {
     protected Vector2 currentXY;     //Starting points (game World Coords not screen coords)  //IN CHILD CLASS NOW
 
     protected Rectangle collisionBox;
-    protected Rectangle hitBox; 
-    
+    protected Rectangle hitBox;
+
     Entity(Animation<TextureRegion> idleAnimation,
-        Animation<TextureRegion> deadAnimation,
            float startX, float startY,
            float maxHealth,
            float spriteWidth,
@@ -51,9 +49,8 @@ abstract class Entity extends Sprite {
            boolean isAlly) {
 
         super(idleAnimation.getKeyFrame(0));     //Get first idle frame
-        
+
         this.idleAnimation = idleAnimation;
-        this.deadAnimation = deadAnimation;
         this.currentAnimation = idleAnimation;  //Initially your character is idle
 
         this.currentXY = new Vector2(startX, startY);
@@ -61,16 +58,16 @@ abstract class Entity extends Sprite {
         this.maxHealth = maxHealth;
         this.currentHealth = maxHealth;     //Forgot to initialize this
         this.isAlly = isAlly;
-        
+
         this.setSize(spriteWidth, spriteHeight);        //Set size here
         this.setOriginCenter();
         this.setCenter(startX, startY);
-        
+
         //Please DONT REMOVE THIS MFER
         entityList.add(this);
         createBoxes();
     }
-    
+
     protected void takeDamage(float damage) {
         if (isDead) {
             return;
@@ -149,7 +146,7 @@ abstract class Entity extends Sprite {
     // ################### GETTERS SETTER ###################
 
     public Rectangle getCollisionBox(){
-        return this.collisionBox;    
+        return this.collisionBox;
     }
     public Rectangle getHitBox(){
         return this.hitBox;
@@ -158,7 +155,7 @@ abstract class Entity extends Sprite {
     public Vector2 getCurrentPosition() {
         return currentXY;
     }
-    
+
     public void setCurrentPosition(float newX, float newY) {
         currentXY.x = newX;
         currentXY.y = newY;
