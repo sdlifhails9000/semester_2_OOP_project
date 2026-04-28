@@ -8,14 +8,12 @@ import com.badlogic.gdx.math.Vector2;
 class BotIdleState implements State<Bot> {
     @Override
     public void enter(Bot e) {
-        System.out.println("Entering idle state");
         e.currentAnimation = e.idleAnimation;       // starting animation as idle 
     }
 
     @Override
     public void update(Bot e, float delta) {
         // If the entity itself dies
-        System.out.println(1);
         if (e.isDead){
             e.setState(e.BotDeadState);
             return;
@@ -48,7 +46,6 @@ class BotMoveState implements State<Bot> {
 
     @Override
     public void update(Bot e, float delta) {
-        System.out.println("Target Position is: " + e.getTargetPosition());
 
         // If the entity itself dies
         if (e.isDead){
@@ -152,7 +149,6 @@ class BotAttackState implements State<Bot> {
         // Check if we have passed the interval of attack and reset the timer
         if (e.attackTimer >= e.attackSpeed) {
             e.attackTarget.takeDamage(e.attackStrength);
-            System.out.printf("Victim's Current Health... %f\n", e.attackTarget.currentHealth);
             e.attackTimer = 0;
         }
 

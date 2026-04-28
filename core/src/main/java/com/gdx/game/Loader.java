@@ -14,6 +14,7 @@ import java.util.Map;
 
 
 enum HeroPreset {
+    // Last is height ,second last is width, in what scale tho
     HERO_HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, true),
 
     HERO_LIGHT("HeroAtlas/lightHero.atlas", 20f, 20f, 10f, 125f, 0.5f, 10, 10, true),

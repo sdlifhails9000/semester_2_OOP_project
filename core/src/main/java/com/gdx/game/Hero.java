@@ -106,7 +106,6 @@ class HeroPlayer extends Hero{
         //Set the currentState (its idle initially)
         currentState = heroIdleState;
     }
-
     @Override
     public void Update(float delta){
         super.Update(delta);
@@ -160,7 +159,6 @@ class HeroBot extends Hero {
         // Handle the scenario when no entities were found
 
         if (nearestEnemyDistance == Float.MAX_VALUE) {
-            System.out.println("None found");
             return null;
         }
 

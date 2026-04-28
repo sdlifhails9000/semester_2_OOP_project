@@ -93,7 +93,6 @@ abstract class DynamicEntity extends Entity {
 
             Rectangle enemyHitBox = i.getCollisionBox();
             if (this.collisionBox.overlaps(enemyHitBox)) {
-                System.out.println("Colliding");
                 return true;
             }
         }
@@ -112,7 +111,6 @@ abstract class DynamicEntity extends Entity {
             }
 
             if (this.collisionBox.overlaps(rect)) {
-                System.out.println("Colliding with boundary");
                 return true;
             }
         }

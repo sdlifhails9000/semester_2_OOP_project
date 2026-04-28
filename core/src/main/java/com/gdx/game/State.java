@@ -51,7 +51,6 @@ class HeroMoveState implements State<HeroPlayer> {
 
     @Override
     public void update(HeroPlayer e, float delta) {
-        System.out.println("Target Position is: " + e.getTargetPosition());
 
         //If the entity itself dies
         if (e.isDead){
@@ -152,7 +151,6 @@ class HeroAttackState implements State<HeroPlayer> {
         // Check if we have passed the interval of attack and reset the timer
         if (e.attackTimer >= e.attackSpeed) {
             e.attackTarget.takeDamage(e.attackStrength);
-            System.out.printf("Victim's Current Health... %f\n", e.attackTarget.currentHealth);
             e.attackTimer = 0;
         }
 

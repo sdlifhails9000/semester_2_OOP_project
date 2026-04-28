@@ -59,14 +59,14 @@ public class MainGame extends ApplicationAdapter {
     // ----MAP WORK DECLARATION END----
 
     //Initializing gameWorld sizing and camera sizing
-    final float worldWidth = 800f;                // -> Playable Region (Scaled to 1 tile = 1 world units)
-    final float worldHeight = 108f;               //Equivalent to a pixel in tiled map
+    final static float worldWidth = 800f;                // -> Playable Region (Scaled to 1 tile = 1 world units)
+    final static float worldHeight = 108f;               //Equivalent to a pixel in tiled map
 
-    float mapWidth = 200f;
-    float mapHeight = 27f;       //Map number of tiles i.e 50x50 tiles
-    float tileSize = 16f;        //Each tile size in pixels (16x16)
+    static float mapWidth = 200f;
+    static float mapHeight = 27f;       //Map number of tiles i.e 50x50 tiles
+    static float tileSize = 16f;        //Each tile size in pixels (16x16)
 
-    float scale = (worldWidth/mapWidth)/tileSize;       // Current scale is 1 tile = 4 gameUnits
+    static float scale = (worldWidth/mapWidth)/tileSize;       // Current scale is 1 tile = 4 gameUnits
 
     float aspectRatio = 0.5625f;        //Use to fix scaling (comment out viewport portion and see orthocamera libgdx way)
 
@@ -104,6 +104,9 @@ public class MainGame extends ApplicationAdapter {
     // TODO: REMOVE
     // DEBUGGING HITBOXES
     ShapeRenderer shapeRenderer;  // DEBUG tool
+
+    // Pathfinding
+    static boolean[][] blocked;
 
     @Override
     public void create() {
@@ -146,7 +149,7 @@ public class MainGame extends ApplicationAdapter {
         testEnemy = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 20, 20);
 
         // //Initialize the goblins
-         g1 = new Bot(GoblinPreset.GOBLIN, 10,20);
+        // g1 = new Bot(GoblinPreset.GOBLIN, 10,20);
         // // g2 = new Goblin(Preset.GOBLIN, 20,20);
         // // g3 = new Goblin(Preset.GOBLIN, 20,10);
           g4 = new Bot(GoblinPreset.ENEMY_GOBLIN, 30,30);
@@ -175,9 +178,17 @@ public class MainGame extends ApplicationAdapter {
         // TO DO: REMOVE
         shapeRenderer = new ShapeRenderer();  // DEBUG tool
 
+        // Pathfinding
+        blocked = new boolean[(int)worldWidth][(int)worldHeight];
+        blocked = getGrid();
+        Bot.blocked = blocked;
+        g4.tstgetbsflist();
+
         // store all the map collisions
         ArrayList<Rectangle> boundaryCollisions = getMapCollisions();
         DynamicEntity.boundaryCollisions = boundaryCollisions;
+
+
     }
 
     @Override
@@ -259,13 +270,37 @@ public class MainGame extends ApplicationAdapter {
         for (Rectangle rect : getMapCollisions()) {
             listOfHitbox.add(rect);
         }
-
+        
+        // Grid is sized to match map tiles (200x27 grid from getGrid)
+        float cellSize = worldWidth / mapWidth;  // = 800/200 = 4 world units per tile
+        
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        for(Rectangle rect : listOfHitbox) {
-            shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
-        }
+        for (int x = 0; x < blocked.length; x++) {
+            for (int y = 0; y < blocked[0].length; y++) {
 
+                if (blocked[x][y]) {
+                    shapeRenderer.setColor(1, 0, 0, 0.5f); // red = blocked
+                } else {
+                    shapeRenderer.setColor(0, 1, 0, 0.5f); // green = walkable
+                }
+
+                // Render at map tile position (already in world units)
+                shapeRenderer.rect(
+                    x * cellSize,
+                    y * cellSize,
+                    cellSize,
+                    cellSize
+                );
+            }
+        }
         shapeRenderer.end();
+
+        // shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        // for(Rectangle rect : listOfHitbox) {
+        //     shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
+        // }
+        // shapeRenderer.end();
+
 
         // } REMOVE END
     }
@@ -390,7 +425,6 @@ public class MainGame extends ApplicationAdapter {
 
     // this method return an arraylist with all static collision boxes (environment)
     public ArrayList<Rectangle> getMapCollisions() {
-
         ArrayList<Rectangle> mapCollisions = new ArrayList<Rectangle>();
 
         for (MapLayer mapLayer : map.getLayers()){
@@ -406,6 +440,7 @@ public class MainGame extends ApplicationAdapter {
 
                         if (tile == null) continue;     // skip if tile is empty
                         MapObjects objects = tile.getObjects();     // return collision data of tile
+
                         
                         for (MapObject obj : objects){          // loop through 
                             if (obj instanceof RectangleMapObject){     // check if collision is rectangular collision
@@ -425,4 +460,53 @@ public class MainGame extends ApplicationAdapter {
         }
         return mapCollisions;
     }
+
+    
+    // this method return an arraylist with all static collision boxes (environment)
+    public boolean[][] getGrid() {
+        int width;
+        int height;
+        boolean[][] blocked;
+
+        // Find a base layer for dimensions
+        TiledMapTileLayer baseLayer = null;
+
+        for (MapLayer l : map.getLayers()) {
+            if (l instanceof TiledMapTileLayer) {
+                baseLayer = (TiledMapTileLayer) l;
+                break;
+            }
+        }
+        if (baseLayer == null) return null;
+
+        // The +3 are here because the map height and width are in float, converting loses some numbers
+        // And i am too lazy to do math to figure it out, 3 is the minimum that works fine
+        width = (int)mapWidth+3;
+        height = (int)mapHeight+3;
+
+        blocked = new boolean[width][height];
+
+        for (MapLayer mapLayer : map.getLayers()){
+                if(mapLayer instanceof TiledMapTileLayer){   // gives us only tiles layers not object or image
+                    TiledMapTileLayer layer = (TiledMapTileLayer) mapLayer; // downcast 
+
+                    for (int x = 0; x < layer.getWidth(); x++){    // loop through horizontal tiles
+                        for(int y = 0; y < layer.getHeight(); y++){    // loop through vertical tiles
+
+                        TiledMapTileLayer.Cell cell = layer.getCell(x, y);
+
+                        if (cell == null) continue;     // skip cell if its empty
+                        TiledMapTile tile = cell.getTile();         // gets the actual tile in the map
+
+                        // If tile has collision objects mark blocked
+                        if (tile.getObjects().getCount() > 0) {
+                            blocked[x][y] = true;
+                        }
+                    }
+                }
+            }
+        }
+    return blocked;
+    }
 }
+
