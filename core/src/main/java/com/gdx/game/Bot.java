@@ -72,30 +72,34 @@ class Bot extends DynamicEntity{
         this.attackStrength = preset.getAttackStrength();
         this.currentState = BotIdleState;
 
-        gridSpanHeight = (int) Math.ceil(preset.getSpriteHeight()  / 16 / scale); // I GOT THIS THROUGH TRIAL AND ERROR
-        gridSpanWidth = (int) Math.ceil(preset.getSpriteWidth()  / 16 / scale);
+        gridSpanHeight = (int) Math.ceil(preset.getSpriteHeight()  / tileSize / scale); // I GOT THIS THROUGH TRIAL AND ERROR
+        gridSpanWidth = (int) Math.ceil(preset.getSpriteWidth()  / tileSize / scale);
 
 
     }
     List<Node> s;
     int length;
+    Vector2 moveTo;
     public void tstgetbsflist(){
-        s = bfs((int) Math.ceil(this.currentXY.x/16/scale),(int) Math.ceil(this.currentXY.y/16/scale) , (int) Math.ceil(50/16/scale), (int) Math.ceil(50/16/scale) , gridSpanWidth, gridSpanHeight, blocked);
-        length = s.size();
+        System.out.println((int) Math.ceil(40/tileSize/scale));
+        s = bfs((int) Math.ceil(this.currentXY.x/tileSize/scale),(int) Math.ceil(this.currentXY.y/tileSize/scale) , (int) Math.ceil(currentXY.x/tileSize/scale + 10), (int) Math.ceil(currentXY.y/tileSize/scale + 3) , gridSpanWidth, gridSpanHeight, blocked);
+        for(Node node :s)
+            System.out.println(node.x*tileSize*scale+","+node.y*tileSize*scale);
+        if(s!=null) // No path found
+            length = s.size();
+        moveTo = currentXY;
     }
 
     int i = 0;
-
     public void test(){
-        Vector2 moveTo = currentXY;
+        System.out.println("Current Position: " + currentXY.x + ","+currentXY.y);
         if(i==length){
             return;
         }
         Node node = s.get(i);
         System.out.println("Distance to MoveTo: " + currentXY.dst(moveTo));
-        System.out.println("Current Position:");
         if(this.currentXY.epsilonEquals(this.targetPosition, 0.5f)){
-            moveTo = new Vector2(node.x *16 * scale,node.y * 16 * scale);
+            moveTo = new Vector2(node.x *tileSize * scale,node.y * tileSize * scale);
             targetPosition.set(moveTo);
             this.setState(this.BotMoveState);
             System.out.println("Set State to Move");
@@ -191,8 +195,8 @@ class Bot extends DynamicEntity{
         visited[sx][sy] = true;
 
         int[][] dirs = {
-            {1, 0}, {-1, 0},
-            {0, 1}, {0, -1}
+            {1, 0}, {-1, 0}, {0, 1}, {0, -1},   // 4-way
+            {1, 1}, {1, -1}, {-1, 1}, {-1, -1}  // diagonals
         };
 
         while (!queue.isEmpty()) {
