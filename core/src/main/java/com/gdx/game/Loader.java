@@ -68,8 +68,9 @@ interface BotPreset{
 }
 
 enum GoblinPreset implements BotPreset {
-    GOBLIN("GoblinAtlas/Goblin.atlas", 10, 10, 10, 75, 2, 8, 8, true),
-    ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 10, 10, 10, 75, 2, 8, 8, false);
+    // Hardcoding gridspan at the end, width ,height
+    GOBLIN("GoblinAtlas/Goblin.atlas", 10, 10, 10, 75, 2, 8, 8, true,1,2),
+    ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 10, 10, 10, 75, 2, 8, 8, false,1,2);
 
     final String assetPath;
 
@@ -84,11 +85,14 @@ enum GoblinPreset implements BotPreset {
     final float spriteWidth;        //Store width and height and set at Entity.java
     final float spriteHeight;       //This gets rid of manually settings each entity size
 
+    int gridSpanHeight;
+    int gridSpanWidth;
+
     boolean isAlly;
 
     GoblinPreset(String path, float speed, float attackStrength,
                float attackRange, float maxHealth, float attackSpeed,
-                float spriteWidth, float spriteHeight, boolean isAlly) {
+                float spriteWidth, float spriteHeight, boolean isAlly, int gridSpanWidth,int gridSpanHeight) {
 
         this.assetPath = path;
         this.speed = speed;
@@ -99,6 +103,8 @@ enum GoblinPreset implements BotPreset {
         this.spriteWidth = spriteWidth;
         this.spriteHeight = spriteHeight;
         this.isAlly = isAlly;
+        this.gridSpanWidth = gridSpanWidth;
+        this.gridSpanHeight = gridSpanWidth;
     }
 
     @Override

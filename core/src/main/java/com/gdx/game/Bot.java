@@ -15,6 +15,7 @@ class Bot extends DynamicEntity{
     static float tileSize = MainGame.tileSize;
     public static ArrayList<Bot> BotList = new ArrayList<>();
     static float scale = MainGame.scale;
+    int collisionCounter = 0;
 
     //Entities Declaration
     Entity attackTarget;
@@ -33,6 +34,7 @@ class Bot extends DynamicEntity{
     int gridSpanHeight;
     int gridSpanWidth;
     public static boolean[][] blocked;
+    List<Node> BFSpath;
 
     
     //Animation Declaration (Idle and dead is handled in Entity.java)   (Current animation is in entity.java because idle and dead is handled there)
@@ -72,41 +74,14 @@ class Bot extends DynamicEntity{
         this.attackStrength = preset.getAttackStrength();
         this.currentState = BotIdleState;
 
-        gridSpanHeight = (int) Math.ceil(preset.getSpriteHeight()  / tileSize / scale); // I GOT THIS THROUGH TRIAL AND ERROR
-        gridSpanWidth = (int) Math.ceil(preset.getSpriteWidth()  / tileSize / scale);
+        gridSpanWidth = 1;
+        gridSpanHeight = 2;
 
+        System.out.println("Sprite: " + preset.getSpriteWidth() + "x" + preset.getSpriteHeight());
+System.out.println("Scale: " + scale);
+System.out.println("TileSize: " + tileSize);
+System.out.println("GridSpan: " + gridSpanWidth + "x" + gridSpanHeight);
 
-    }
-    List<Node> s;
-    int length;
-    Vector2 moveTo;
-    public void tstgetbsflist(){
-        System.out.println((int) Math.ceil(40/tileSize/scale));
-        s = bfs((int) Math.ceil(this.currentXY.x/tileSize/scale),(int) Math.ceil(this.currentXY.y/tileSize/scale) , (int) Math.ceil(currentXY.x/tileSize/scale -5), (int) Math.ceil(currentXY.y/tileSize/scale + 3) , gridSpanWidth, gridSpanHeight, blocked);
-        for(Node node :s)
-            System.out.println(node.x*tileSize*scale+","+node.y*tileSize*scale);
-        if(s!=null) // No path found
-            length = s.size();
-        moveTo = currentXY;
-    }
-
-    int i = 0;
-    public void test(){
-        System.out.println("Current Position: " + currentXY.x + ","+currentXY.y);
-        if(i==length){
-            return;
-        }
-        Node node = s.get(i);
-        System.out.println("Distance to MoveTo: " + currentXY.dst(moveTo));
-        if(this.currentXY.epsilonEquals(this.targetPosition, 0.5f)){
-            moveTo = new Vector2(node.x *tileSize * scale,node.y * tileSize * scale);
-            targetPosition.set(moveTo);
-            this.setState(this.BotMoveState);
-            System.out.println("Set State to Move");
-            System.out.println("Target Position: " + targetPosition.x + ","+targetPosition.y);
-            i++;
-
-        }
 
     }
 
@@ -154,6 +129,7 @@ class Bot extends DynamicEntity{
                 nearestEnemyDistance = distance;
                 nearestEntity = entity;
             }
+            return nearestEntity;
         }
 
         // Handle the scenario when no entities were found
@@ -174,102 +150,92 @@ class Bot extends DynamicEntity{
     @Override
     public void Update(float delta) {
         setAttackTarget(getAttackTarget());
-        test();
         super.Update(delta);
         currentState.update(this, delta);
     }
 
 
-    public List<Node> bfs(
-        int sx, int sy,
-        int gx, int gy,
-        int gridSpanWidth,
-        int gridSpanHeight,
-        boolean[][] blocked){
+    public List<Node> bfs(int sx, int sy, int gx, int gy, boolean[][] blocked, int width, int height){
+    
+    Queue<Node> queue = new LinkedList<>();
+        boolean[][] visited = new boolean[blocked.length][blocked[0].length];
 
-        Queue<Node> queue = new LinkedList<>(); // FIFO mode
-        boolean[][] visited = new boolean[blocked.length][blocked[0].length]; // Grids already checked
-
-        Node start = new Node(sx, sy); // Starting node
+        Node start = new Node(sx, sy);
         queue.add(start);
         visited[sx][sy] = true;
 
         int[][] dirs = {
-            {1, 0}, {-1, 0}, {0, 1}, {0, -1},   // 4-way
-            {1, 1}, {1, -1}, {-1, 1}, {-1, -1}  // diagonals
+            {1, 0}, {-1, 0}, {0, 1}, {0, -1}
         };
 
-        while (!queue.isEmpty()) {  // Until queue becomes empty
+        while (!queue.isEmpty()) {
 
-            Node current = queue.poll();    // Return and remove first element
+            Node current = queue.poll();
 
-            // Check if reached
             if (current.x == gx && current.y == gy) {
                 return reconstructPath(current);
             }
 
-            // Get neighbours
-            for (int[] d : dirs) {  // Get neighbours in all directions, including diagonals
+    for (int[] d : dirs) {
+        int nx = current.x + d[0];
+        int ny = current.y + d[1];
 
-                int nx = current.x + d[0];
-                int ny = current.y + d[1];
+        if (nx < 0 || ny < 0 || nx >= blocked.length || ny >= blocked[0].length)
+            continue;
 
-                // bounds check
-                if (nx < 0 || ny < 0 || // Dont go out the map
-                    nx >= blocked.length ||
-                    ny >= blocked[0].length)
-                    continue;
+        if (visited[nx][ny])
+            continue;
 
-                // already visited
-                if (visited[nx][ny])
-                    continue;
 
-                // Check if the sprite fits
-                if (!canStand(nx, ny, gridSpanWidth, gridSpanHeight, blocked))
-                    continue;
+    // Check the actual target position
+    int spriteTopY = ny - (height - 1);
+    if (!canStand(nx, spriteTopY, width, height, blocked))
+        continue;
 
-                Node next = new Node(nx, ny);   // If all pass
-                next.parent = current;
-
-                visited[nx][ny] = true;
-                queue.add(next);
-            }
+    Node next = new Node(nx, ny);
+    next.parent = current;
+    visited[nx][ny] = true;
+    queue.add(next);
+}
         }
 
-        return null; // no path found
+        System.out.println("Didnt find a path");
+        return null;
     }
 
-    boolean canStand(
-        int x, int y,
-        int w, int h,
-        boolean[][] blocked){
+   boolean canStand(
+    int x, int y,
+    int w, int h,
+    boolean[][] blocked){
 
-        for (int dx = 0; dx < w; dx++) {
-            for (int dy = 0; dy < h; dy++) {
+    System.out.println("canStand check at (" + x + "," + y + ") size " + w + "x" + h);
+    
+    for (int dx = 0; dx < w; dx++) {
+        for (int dy = 0; dy < h; dy++) {
 
-                int nx = x + dx;
-                int ny = y + dy;
+            int nx = x + dx;
+            int ny = y + dy;
 
-                // out of bounds
-                if (nx < 0 || ny < 0 ||
-                    nx >= blocked.length ||
-                    ny >= blocked[0].length)
-                    return false;
+            System.out.println("  Checking (" + nx + "," + ny + "): blocked=" + 
+                (nx < 0 || ny < 0 || nx >= blocked.length || ny >= blocked[0].length ? "OOB" : blocked[nx][ny]));
 
-                // collision check
-                if (blocked[nx][ny])
-                    return false;
-            }
+            if (nx < 0 || ny < 0 ||
+                nx >= blocked.length ||
+                ny >= blocked[0].length)
+                return false;
+
+            if (blocked[nx][ny])
+                return false;
         }
-
-        return true;
     }
+
+    return true;
+}
 
 
     public List<Node> reconstructPath(Node end) {
 
         List<Node> path = new ArrayList<>();
-
         Node current = end;
 
         while (current != null) {
@@ -278,6 +244,10 @@ class Bot extends DynamicEntity{
         }
 
         Collections.reverse(path);
+        System.out.println("Path");
+        for(Node i :path){
+            System.out.println(i.x+","+i.y);
+        }
         return path;
     }
 

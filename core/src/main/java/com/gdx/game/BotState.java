@@ -1,5 +1,6 @@
+// Try and understand BotChaseState, i dare you
+// Ask me about BotChaseState, and i will cry
 package com.gdx.game;
-
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -65,21 +66,15 @@ class BotMoveState implements State<Bot> {
             return;
         }
 
-        // calculate speed and turn towards the target
-        e.moveTowards(e.getTargetPosition(), delta);
+        else{
+            // calculate speed and turn towards the target
+            e.moveTowards(e.getTargetPosition(), delta);
+        }
 
         // Change position based on velocity 
 
         // Change x
         e.currentXY.x += e.velocity.x * delta;
-        e.updateBoxes();
-
-        // Handle collision;
-        if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()) {
-            e.currentXY.x -= e.velocity.x * delta;
-            e.velocity.x = 0;
-            e.updateBoxes();
-        }
 
         // Change y
         e.currentXY.y += e.velocity.y * delta;
@@ -190,11 +185,12 @@ class BotChaseState implements State<Bot> {
         }
 
         // MOVE NIGGA MOVE
-        if (!e.currentXY.epsilonEquals(e.targetPosition, 0.5f)) {
-            e.setState(e.BotMoveState);
-            e.attackTarget = null;
-            return;
+
+        // Use BFS path if available, otherwise use normal movement
+        if(e.BFSpath != null){
+            moveOnPath(e, delta);
         }
+
 
         //If the target is dead
         if (e.getAttackTarget().isDead) {
@@ -210,47 +206,151 @@ class BotChaseState implements State<Bot> {
         }
 
         // calculate speed and turn towards the target
-        e.moveTowards(e.attackTarget.getCurrentPosition(), delta);
+        if(e.BFSpath == null){
+            e.moveTowards(e.attackTarget.getCurrentPosition(), delta);
+        }
 
-        // Change position based on velocity
+
+        // Change position based on velocity - ALWAYS update currentXY regardless of BFS path
         // Change x
         e.currentXY.x += e.velocity.x * delta;
         e.targetPosition.x += e.velocity.x * delta;
         e.updateBoxes();
-
-        // Handle collision
-        if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()) {
-            e.currentXY.x -= e.velocity.x * delta;
-            e.targetPosition.x -= e.velocity.x * delta;
-            e.velocity.x = 0;
-            e.updateBoxes();
-        }
 
         // Change y
         e.currentXY.y += e.velocity.y * delta;
         e.targetPosition.y += e.velocity.y * delta;
         e.updateBoxes();
 
-        // Handle collision
-        if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()) {
-            e.currentXY.y -= e.velocity.y * delta;
-            e.targetPosition.y -= e.velocity.y * delta;
-            e.velocity.y = 0;
-            e.updateBoxes();
-        }
+        // Handle collision - revert movement when colliding
+        if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()){
+            System.out.println("Collision detected!");
+            
+            if(e.isCollidingWithBoundry()){
+                e.collisionCounter++;
+            }
+            // Revert position
+            if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()){
+                System.out.println("Current Position grid:"+Math.ceil(e.currentXY.x/Bot.tileSize/Bot.scale)+","+Math.ceil(e.currentXY.y/Bot.tileSize/Bot.scale));
 
-        // in case of no movement
-        if (e.velocity.isZero()) {
-            e.setState(e.BotIdleState);
-        }
+                Vector2 backScale = e.velocity.scl(2f);
 
-        // Update collision and hitboxes and update the sprite position
+                e.currentXY.x -= backScale.x * delta;
+                e.targetPosition.x -= backScale.x * delta;
+                e.velocity.x = 0;
+                e.updateBoxes();
+
+                // Change y
+                e.currentXY.y += backScale.y * delta;
+                e.targetPosition.y += backScale.y * delta;
+                e.velocity.y = 0;
+                e.updateBoxes();
+                
+                System.out.println("positions reverted");
+                System.out.println("New Position grid:"+Math.ceil(e.currentXY.x/Bot.tileSize/Bot.scale)+","+Math.ceil(e.currentXY.y/Bot.tileSize/Bot.scale));
+
+            }
+
+            if(e.collisionCounter>3){
+                System.out.println(1);
+                // Calculate BFS from CURRENT position to target position
+                int gx = (int) (e.attackTarget.getCurrentPosition().x / Bot.tileSize / Bot.scale);
+                int gy = (int) (e.attackTarget.getCurrentPosition().y / Bot.tileSize / Bot.scale);
+
+                System.out.println("Calculating BFS to (" + gx + "," + gy + ")");
+                
+                int sx = (int) Math.ceil(e.currentXY.x/Bot.tileSize/Bot.scale);
+                int sy = (int) Math.ceil(e.currentXY.y/Bot.tileSize/Bot.scale);
+
+                int goalX = gx;
+                int goalY = gy;
+                int goalTopY = goalY - (e.gridSpanHeight - 1);
+
+                if (!e.canStand(goalX, goalTopY, e.gridSpanWidth, e.gridSpanWidth, Bot.blocked)) {
+                    // Search nearby cells for a valid position
+                    for (int radius = 1; radius < 5; radius++) {
+                        boolean found = false;
+                        for (int dx = -radius; dx <= radius && !found; dx++) {
+                            for (int dy = -radius; dy <= radius && !found; dy++) {
+                                if (e.canStand(goalX + dx, goalTopY + dy, e.gridSpanWidth, e.gridSpanHeight, Bot.blocked)) {
+                                    goalX += dx;
+                                    goalY = (goalY + dy) + (e.gridSpanHeight - 1);
+                                    found = true;
+                                }
+                            }
+                        }
+                        if (found) break;
+                    }
+                }
+
+                e.BFSpath = e.bfs(sx, sy, goalX, goalY, Bot.blocked,e.gridSpanWidth, e.gridSpanHeight);
+                pathIndex = 0;
+                
+                if(e.BFSpath != null) {
+                    System.out.println("BFS path found with " + e.BFSpath.size() + " nodes");
+                } else {
+                    System.out.println("No BFS path found!");
+                }
+                e.collisionCounter++;
+            }
+    }
+    else
         e.setCenter(e.currentXY.x, e.currentXY.y);
+
+        // Update collision and hitboxes and update the sprite position - ALWAYS update
     }
 
     public void exit(Bot e){
         e.velocity.setZero();
         e.animationTimer = 0;
+    }
+    
+    // Fixed moveOnPath - uses e.BFSpath directly instead of uninitialized local variables
+    private int pathIndex = 0;
+    
+    public void moveOnPath(Bot e, float delta){
+        // Safety check: if path is null or empty, fall back to normal movement
+        if(e.BFSpath == null || e.BFSpath.isEmpty()){
+            e.BFSpath = null;
+            pathIndex = 0;
+            e.moveTowards(e.attackTarget.getCurrentPosition(), delta);
+            return;
+        }
+        
+        System.out.println("Following BFS path - index: " + pathIndex + " of " + e.BFSpath.size());
+        
+        // If we've reached the end of the path, clear it and return
+        if(pathIndex >= e.BFSpath.size()){
+            e.BFSpath = null;
+            pathIndex = 0;
+            return;
+        }
+        
+        // Get the current target node from the path
+        Node targetNode = e.BFSpath.get(pathIndex);
+        Vector2 pathTarget = new Vector2(
+            targetNode.x * Bot.tileSize * Bot.scale,
+            targetNode.y * Bot.tileSize * Bot.scale
+        );
+        
+        System.out.println("Path target: " + pathTarget.x + "," + pathTarget.y);
+        System.out.println("Current position: " + e.currentXY.x + "," + e.currentXY.y);
+        
+        // Move towards the path target
+        e.moveTowards(pathTarget, delta);
+        
+        // Update targetPosition for collision handling
+        e.targetPosition.set(pathTarget);
+        
+        // Check if we've reached the current path node (within tolerance)
+        if(e.currentXY.epsilonEquals(pathTarget, 2.0f)){
+            pathIndex++;
+            System.out.println("Reached node " + (pathIndex - 1) + ", moving to next...");
+        }
+        
+        // Update sprite position
+        e.setCenter(e.currentXY.x, e.currentXY.y);
+
     }
 }
 
@@ -310,10 +410,6 @@ class BotDeadState implements State<Bot> {
 
             e.setCurrentPosition(respawnPositionX, respawnPositionY);
             e.updateBoxes();
-            
-            if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()) {
-                return;
-            }
         }
 
         e.setTargetPosition(respawnPositionX, respawnPositionY);
@@ -324,7 +420,6 @@ class BotDeadState implements State<Bot> {
         e.currentAnimation.setPlayMode(Animation.PlayMode.REVERSED);
         e.animationTimer = 0f;
     }
-
     public void exit (Bot e) {
         e.animationTimer = 0;
     }

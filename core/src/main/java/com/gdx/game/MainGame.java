@@ -145,14 +145,14 @@ public class MainGame extends ApplicationAdapter {
         clickCoords = new Vector3();
 
         //Initialize the DYNAMIC SPRITES
-        player = new HeroPlayer(HeroPreset.HERO_HEAVY, 50, 50);
+        player = new HeroPlayer(HeroPreset.HERO_HEAVY, 400, 50);
         testEnemy = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 20, 20);
 
         // //Initialize the goblins
         // g1 = new Bot(GoblinPreset.GOBLIN, 10,20);
         // // g2 = new Goblin(Preset.GOBLIN, 20,20);
         // // g3 = new Goblin(Preset.GOBLIN, 20,10);
-          g4 = new Bot(GoblinPreset.ENEMY_GOBLIN, 30,30);
+          g4 = new Bot(GoblinPreset.ENEMY_GOBLIN, 300,30);
         // // g5 = new Goblin(Preset.ENEMY_GOBLIN, 180,180);
         // // g6 = new Goblin(Preset.ENEMY_GOBLIN, 180,190);
 
@@ -182,7 +182,6 @@ public class MainGame extends ApplicationAdapter {
         blocked = new boolean[(int)worldWidth][(int)worldHeight];
         blocked = getGrid();
         Bot.blocked = blocked;
-        g4.tstgetbsflist();
 
         // store all the map collisions
         ArrayList<Rectangle> boundaryCollisions = getMapCollisions();
@@ -280,17 +279,15 @@ public class MainGame extends ApplicationAdapter {
 
                 if (blocked[x][y]) {
                     shapeRenderer.setColor(1, 0, 0, 0.5f); // red = blocked
-                } else {
-                    shapeRenderer.setColor(0, 1, 0, 0.5f); // green = walkable
-                }
-
-                // Render at map tile position (already in world units)
-                shapeRenderer.rect(
+                    shapeRenderer.rect(
                     x * cellSize,
                     y * cellSize,
                     cellSize,
                     cellSize
                 );
+                }
+
+                // Render at map tile position (already in world units
             }
         }
         shapeRenderer.end();
@@ -464,49 +461,73 @@ public class MainGame extends ApplicationAdapter {
     
     // this method return an arraylist with all static collision boxes (environment)
     public boolean[][] getGrid() {
-        int width;
-        int height;
         boolean[][] blocked;
 
-        // Find a base layer for dimensions
+        // Find a base layer for dimensions - use the same layer that getMapCollisions uses
         TiledMapTileLayer baseLayer = null;
+        TiledMapTileLayer gridLayer = null;
 
         for (MapLayer l : map.getLayers()) {
             if (l instanceof TiledMapTileLayer) {
-                baseLayer = (TiledMapTileLayer) l;
-                break;
+                TiledMapTileLayer layer = (TiledMapTileLayer) l;
+                if (baseLayer == null) {
+                    baseLayer = layer;
+                }
+                // Use the layer with most tiles for the grid
+                if (gridLayer == null || layer.getWidth() * layer.getHeight() > gridLayer.getWidth() * gridLayer.getHeight()) {
+                    gridLayer = layer;
+                }
             }
         }
-        if (baseLayer == null) return null;
+        if (gridLayer == null) return null;
 
-        // The +3 are here because the map height and width are in float, converting loses some numbers
-        // And i am too lazy to do math to figure it out, 3 is the minimum that works fine
-        width = (int)mapWidth+3;
-        height = (int)mapHeight+3;
+        // Use actual layer dimensions instead of mapWidth+3
+        int width = gridLayer.getWidth();
+        int height = gridLayer.getHeight();
 
         blocked = new boolean[width][height];
 
+        // Use the same iteration as getMapCollisions - check ALL layers
         for (MapLayer mapLayer : map.getLayers()){
-                if(mapLayer instanceof TiledMapTileLayer){   // gives us only tiles layers not object or image
-                    TiledMapTileLayer layer = (TiledMapTileLayer) mapLayer; // downcast 
+            if(mapLayer instanceof TiledMapTileLayer){   // gives us only tiles layers not object or image
+                TiledMapTileLayer layer = (TiledMapTileLayer) mapLayer; // downcast 
 
-                    for (int x = 0; x < layer.getWidth(); x++){    // loop through horizontal tiles
-                        for(int y = 0; y < layer.getHeight(); y++){    // loop through vertical tiles
+                for (int x = 0; x < layer.getWidth(); x++){    // loop through horizontal tiles
+                    for(int y = 0; y < layer.getHeight(); y++){    // loop through vertical tiles
 
                         TiledMapTileLayer.Cell cell = layer.getCell(x, y);
 
                         if (cell == null) continue;     // skip cell if its empty
                         TiledMapTile tile = cell.getTile();         // gets the actual tile in the map
 
-                        // If tile has collision objects mark blocked
-                        if (tile.getObjects().getCount() > 0) {
-                            blocked[x][y] = true;
+                        if (tile == null) continue;     // skip if tile is empty
+                        
+                        // Use SAME logic as getMapCollisions - only check for RectangleMapObject
+                        MapObjects objects = tile.getObjects();
+                        for (MapObject obj : objects) {
+                            if (obj instanceof RectangleMapObject) {
+                                // Only mark as blocked if within grid bounds
+                                if (x < width && y < height) {
+                                    blocked[x][y] = true;
+                                }
+                                break; // Found a collision, no need to check more objects
+                            }
                         }
                     }
                 }
             }
         }
-    return blocked;
+        
+        // Debug output
+        System.out.println("Blocked grids");
+        for(int k=0;k<blocked.length;k++)
+            for(int j=0;j<blocked[0].length;j++){
+                if(blocked[k][j]){
+                    System.out.println(k+","+j);
+                }
+            }
+
+        return blocked;
     }
 }
 
