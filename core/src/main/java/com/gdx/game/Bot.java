@@ -82,7 +82,7 @@ class Bot extends DynamicEntity{
     Vector2 moveTo;
     public void tstgetbsflist(){
         System.out.println((int) Math.ceil(40/tileSize/scale));
-        s = bfs((int) Math.ceil(this.currentXY.x/tileSize/scale),(int) Math.ceil(this.currentXY.y/tileSize/scale) , (int) Math.ceil(currentXY.x/tileSize/scale + 10), (int) Math.ceil(currentXY.y/tileSize/scale + 3) , gridSpanWidth, gridSpanHeight, blocked);
+        s = bfs((int) Math.ceil(this.currentXY.x/tileSize/scale),(int) Math.ceil(this.currentXY.y/tileSize/scale) , (int) Math.ceil(currentXY.x/tileSize/scale -5), (int) Math.ceil(currentXY.y/tileSize/scale + 3) , gridSpanWidth, gridSpanHeight, blocked);
         for(Node node :s)
             System.out.println(node.x*tileSize*scale+","+node.y*tileSize*scale);
         if(s!=null) // No path found
@@ -175,8 +175,8 @@ class Bot extends DynamicEntity{
     public void Update(float delta) {
         setAttackTarget(getAttackTarget());
         test();
-        currentState.update(this, delta);
         super.Update(delta);
+        currentState.update(this, delta);
     }
 
 
@@ -187,10 +187,10 @@ class Bot extends DynamicEntity{
         int gridSpanHeight,
         boolean[][] blocked){
 
-        Queue<Node> queue = new LinkedList<>();
-        boolean[][] visited = new boolean[blocked.length][blocked[0].length];
+        Queue<Node> queue = new LinkedList<>(); // FIFO mode
+        boolean[][] visited = new boolean[blocked.length][blocked[0].length]; // Grids already checked
 
-        Node start = new Node(sx, sy);
+        Node start = new Node(sx, sy); // Starting node
         queue.add(start);
         visited[sx][sy] = true;
 
@@ -199,23 +199,23 @@ class Bot extends DynamicEntity{
             {1, 1}, {1, -1}, {-1, 1}, {-1, -1}  // diagonals
         };
 
-        while (!queue.isEmpty()) {
+        while (!queue.isEmpty()) {  // Until queue becomes empty
 
-            Node current = queue.poll();
+            Node current = queue.poll();    // Return and remove first element
 
-            // GOAL REACHED
+            // Check if reached
             if (current.x == gx && current.y == gy) {
                 return reconstructPath(current);
             }
 
-            // EXPAND NEIGHBORS
-            for (int[] d : dirs) {
+            // Get neighbours
+            for (int[] d : dirs) {  // Get neighbours in all directions, including diagonals
 
                 int nx = current.x + d[0];
                 int ny = current.y + d[1];
 
                 // bounds check
-                if (nx < 0 || ny < 0 ||
+                if (nx < 0 || ny < 0 || // Dont go out the map
                     nx >= blocked.length ||
                     ny >= blocked[0].length)
                     continue;
@@ -224,11 +224,11 @@ class Bot extends DynamicEntity{
                 if (visited[nx][ny])
                     continue;
 
-                // 🧠 SIZE-AWARE CHECK (IMPORTANT PART)
+                // Check if the sprite fits
                 if (!canStand(nx, ny, gridSpanWidth, gridSpanHeight, blocked))
                     continue;
 
-                Node next = new Node(nx, ny);
+                Node next = new Node(nx, ny);   // If all pass
                 next.parent = current;
 
                 visited[nx][ny] = true;
