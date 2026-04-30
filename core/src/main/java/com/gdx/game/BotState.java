@@ -192,8 +192,8 @@ class BotChaseState implements State<Bot> {
         }
 
 
-        //If the target is dead
-        if (e.getAttackTarget().isDead) {
+        // If the target is dead
+        if (e != null && e.getAttackTarget().isDead) {
             e.setState(e.BotIdleState);
             e.attackTarget = null;
             return;
