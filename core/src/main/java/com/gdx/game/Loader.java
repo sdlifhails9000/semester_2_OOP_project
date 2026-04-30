@@ -14,6 +14,7 @@ import java.util.Map;
 
 
 enum HeroPreset {
+    // Last is height ,second last is width
     HERO_HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, true),
 
     HERO_LIGHT("HeroAtlas/lightHero.atlas", 20f, 20f, 10f, 125f, 0.5f, 10, 10, true),
@@ -53,9 +54,23 @@ enum HeroPreset {
     }
 }
 
-enum GoblinPreset {
-    GOBLIN("GoblinAtlas/Goblin.atlas", 10, 10, 10, 75, 2, 8, 8, true),
-    ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 10, 10, 10, 75, 2, 8, 8, false);
+interface BotPreset{
+    // getter methods 
+    float getMaxHealth();
+    float getSpeed();
+    float getSpriteWidth();
+    float getSpriteHeight();
+    boolean getIsAlly();
+    float getAttackStrength();
+    float getAttackSpeed();
+    float getAttackRange();
+
+}
+
+enum GoblinPreset implements BotPreset {
+    // Hardcoding gridspan at the end, width ,height
+    GOBLIN("GoblinAtlas/Goblin.atlas", 10, 10, 10, 75, 2, 8, 8, true,1,2),
+    ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 10, 10, 10, 75, 2, 8, 8, false,1,2);
 
     final String assetPath;
 
@@ -70,11 +85,14 @@ enum GoblinPreset {
     final float spriteWidth;        //Store width and height and set at Entity.java
     final float spriteHeight;       //This gets rid of manually settings each entity size
 
+    int gridSpanHeight;
+    int gridSpanWidth;
+
     boolean isAlly;
 
     GoblinPreset(String path, float speed, float attackStrength,
                float attackRange, float maxHealth, float attackSpeed,
-                float spriteWidth, float spriteHeight, boolean isAlly) {
+                float spriteWidth, float spriteHeight, boolean isAlly, int gridSpanWidth,int gridSpanHeight) {
 
         this.assetPath = path;
         this.speed = speed;
@@ -85,6 +103,48 @@ enum GoblinPreset {
         this.spriteWidth = spriteWidth;
         this.spriteHeight = spriteHeight;
         this.isAlly = isAlly;
+        this.gridSpanWidth = gridSpanWidth;
+        this.gridSpanHeight = gridSpanWidth;
+    }
+
+    @Override
+    public float getMaxHealth() {
+        return maxHealth;
+    }
+
+    @Override
+    public float getSpeed() {
+        return speed;
+    }
+
+    @Override
+    public float getSpriteWidth() {
+        return spriteWidth;
+    }
+
+    @Override
+    public float getSpriteHeight() {
+        return spriteHeight;
+    }
+
+    @Override
+    public boolean getIsAlly() {
+        return isAlly;
+    }
+
+    @Override
+    public float getAttackStrength() {
+        return attackStrength;
+    }
+
+    @Override
+    public float getAttackSpeed() {
+        return attackSpeed;
+    }
+
+    @Override
+    public float getAttackRange() {
+        return attackRange;
     }
 }
 
@@ -384,20 +444,32 @@ final class Loader {
 //------------------------------------------------------------------------
 
     //GoblinPreset getters
-    public static Animation<TextureRegion> run(GoblinPreset preset) {
-        return goblinRunAnimation.get(preset);
+    public static Animation<TextureRegion> run(BotPreset preset) {
+        if(preset instanceof GoblinPreset)
+            return goblinRunAnimation.get(preset);
+        else
+            return goblinRunAnimation.get(preset);
     }
 
-    public static Animation<TextureRegion> attack(GoblinPreset preset) {
-        return goblinAttackAnimation.get(preset);
+    public static Animation<TextureRegion> attack(BotPreset preset) {
+        if(preset instanceof GoblinPreset)
+            return goblinAttackAnimation.get(preset);
+        else
+            return goblinAttackAnimation.get(preset);
     }
 
-    public static Animation<TextureRegion> idle(GoblinPreset preset) {
-        return goblinIdleAnimation.get(preset);
+    public static Animation<TextureRegion> idle(BotPreset preset) {
+        if(preset instanceof GoblinPreset)
+            return goblinIdleAnimation.get(preset);
+        else
+            return goblinIdleAnimation.get(preset);
     }
 
-    public static Animation<TextureRegion> dead(GoblinPreset preset) {
-        return goblinDeadAnimation.get(preset);
+    public static Animation<TextureRegion> dead(BotPreset preset) {
+        if(preset instanceof GoblinPreset)
+            return goblinDeadAnimation.get(preset);
+        else
+            return goblinDeadAnimation.get(preset); // Change to herobot after if
     }
 
 //------------------------------------------------------------------------
