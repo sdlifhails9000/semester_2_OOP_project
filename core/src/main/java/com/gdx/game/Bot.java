@@ -115,6 +115,7 @@ System.out.println("GridSpan: " + gridSpanWidth + "x" + gridSpanHeight);
 
         // This finds the nearest enemy to this bot
         for (Entity entity : Entity.entityList) {
+            System.out.println("Checking entity:" + entity);
             // This skips allies. They aren't enemies, entities which are dead and itself
             if (this.isAlly == entity.isAlly || entity.isDead || this == entity) {
                 continue;
@@ -129,16 +130,9 @@ System.out.println("GridSpan: " + gridSpanWidth + "x" + gridSpanHeight);
                 nearestEnemyDistance = distance;
                 nearestEntity = entity;
             }
-            return nearestEntity;
         }
 
-        // Handle the scenario when no entities were found
-        if (nearestEnemyDistance == Float.MAX_VALUE) {
-            return null;
-        }
-
-        //return nearestEntity;
-        return null; // testing
+        return nearestEntity;
     }
     
     public void setState(State state){

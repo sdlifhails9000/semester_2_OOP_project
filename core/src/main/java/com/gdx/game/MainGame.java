@@ -164,7 +164,7 @@ public class MainGame extends ApplicationAdapter {
         mainTower = new Tower(TowerPreset.MAIN, 400, 54);
 
         //DRAW THE TOWER FIRST SO THAT WHEN TOWER DIES PLAYER CANNOT HIDE UNDER ITS RUBBLE
-        player = new HeroPlayer(HeroPreset.HERO_LIGHT, 3400, 50);
+        player = new HeroPlayer(HeroPreset.HERO_LIGHT, 300, 50);
         testEnemy = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 20, 20);
 
         
@@ -173,8 +173,8 @@ public class MainGame extends ApplicationAdapter {
         // //Initialize the goblins
         // g1 = new Bot(GoblinPreset.GOBLIN, 10,20);
         // // g2 = new Goblin(Preset.GOBLIN, 20,20);
-        // // g3 = new Goblin(Preset.GOBLIN, 20,10);
-          g4 = new Bot(GoblinPreset.ENEMY_GOBLIN, 300,30);
+        // g3 = new Bot(GoblinPreset.GOBLIN, 300,30);
+        g4 = new Bot(GoblinPreset.ENEMY_GOBLIN, 300,40);
         // // g5 = new Goblin(Preset.ENEMY_GOBLIN, 180,180);
         // // g6 = new Goblin(Preset.ENEMY_GOBLIN, 180,190);
 
@@ -539,15 +539,6 @@ public class MainGame extends ApplicationAdapter {
                 }
             }
         }
-        
-        // Debug output
-        System.out.println("Blocked grids");
-        for(int k=0;k<blocked.length;k++)
-            for(int j=0;j<blocked[0].length;j++){
-                if(blocked[k][j]){
-                    System.out.println(k+","+j);
-                }
-            }
 
         return blocked;
     }

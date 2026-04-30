@@ -65,6 +65,7 @@ abstract class Entity extends Sprite {
 
         //Please DONT REMOVE THIS MFER
         entityList.add(this);
+        System.out.println("Added:" + this);
         createBoxes();
     }
 

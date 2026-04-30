@@ -177,6 +177,8 @@ class BotChaseState implements State<Bot> {
     }
 
     public void update(Bot e, float delta){
+        System.out.println("111");
+        e.setAttackTarget(e.getAttackTarget());
         //If the entity itself dies
         if (e.isDead){
             e.setState(e.BotDeadState);
@@ -349,7 +351,8 @@ class BotChaseState implements State<Bot> {
         }
         
         // Update sprite position
-        e.setCenter(e.currentXY.x, e.currentXY.y);
+        e.setCenter(e.currentXY.x, e.currentXY.y);  // TODO: Check if this line is needed
+        // TODO: Add revert here
 
     }
 }
