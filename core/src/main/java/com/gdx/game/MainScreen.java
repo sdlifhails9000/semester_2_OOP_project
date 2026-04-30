@@ -48,8 +48,8 @@ public class MainScreen implements Screen {
 
         showMainState();
 
-        //For sound effects
-        clickSound = Gdx.audio.newSound(Gdx.files.internal("Kwality_Sounds/Game_Click.wav"));
+        //For sound effects (Loaded from MainGame)
+        clickSound = game.manager.get("Kwality_Sounds/Game_Click.wav", Sound.class);
     }
 
     private void createSkin() {
@@ -203,8 +203,7 @@ public class MainScreen implements Screen {
     public void dispose() {
         stage.dispose();
         skin.dispose();
-        if (clickSound != null){
-            clickSound.dispose();
-        } 
+
+        //ClickSound dispose is handled by manager which is disposed when game ends
     }
 }

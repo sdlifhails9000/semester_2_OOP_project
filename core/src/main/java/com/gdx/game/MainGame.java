@@ -5,6 +5,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.audio.Sound;
 
 public class MainGame extends Game {
     AssetManager manager;
@@ -15,26 +16,29 @@ public class MainGame extends Game {
 
         // -------------- Queue all the assets in `manager` --------------
 
-        manager.load("atlas\\practiceAtlas.atlas", com.badlogic.gdx.graphics.g2d.TextureAtlas.class);
+        manager.load("atlas\\practiceAtlas.atlas", TextureAtlas.class);
+
+        //Load sounds
+        manager.load("Kwality_Sounds/Game_Click.wav", Sound.class);
 
         //Loads HeroPreset which is made in Loader.java
         for (HeroPreset preset : HeroPreset.values()) {
-            manager.load(preset.assetPath, com.badlogic.gdx.graphics.g2d.TextureAtlas.class);
+            manager.load(preset.assetPath, TextureAtlas.class);
         }
 
         //Loads GoblinPreset which is made in Loader.java
         for (GoblinPreset preset: GoblinPreset.values()){
-            manager.load(preset.assetPath, com.badlogic.gdx.graphics.g2d.TextureAtlas.class);
+            manager.load(preset.assetPath, TextureAtlas.class);
         }
 
         //Loads TowerPreset which is made in Loader.java
         for (TowerPreset preset: TowerPreset.values()){
-            manager.load(preset.assetPath, com.badlogic.gdx.graphics.g2d.TextureAtlas.class);
+            manager.load(preset.assetPath, TextureAtlas.class);
         }
 
         //Loads WeaponPreset which is made in Loader.java
         for (WeaponPreset preset: WeaponPreset.values()){
-            manager.load(preset.assetPath, com.badlogic.gdx.graphics.g2d.TextureAtlas.class);
+            manager.load(preset.assetPath, TextureAtlas.class);
         }
 
         //Loads WeaponPreset which is made in Loader.java
