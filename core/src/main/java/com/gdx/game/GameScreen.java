@@ -9,13 +9,12 @@ package com.gdx.game;
 
 import java.util.ArrayList;
 
-import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -40,9 +39,7 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 // This contain default values for specific hero types
 
-public class MainGame extends ApplicationAdapter {
-    public static AssetManager manager = new AssetManager();
-
+public class GameScreen implements Screen {
     //-----MAP WORK DECLARATION START----
     //ALERT: google why we use tmxmaploader and tiledmap together
 
@@ -109,50 +106,18 @@ public class MainGame extends ApplicationAdapter {
     // Pathfinding
     static boolean[][] blocked;
 
-    @Override
-    public void create() {
+    MainGame game;
+
+    public GameScreen(MainGame entry) {
         // Initialize SpriteBatch
         batch = new SpriteBatch();
 
-
-        // -------------- Queue all the assets in `manager` --------------
-
-        manager.load("atlas\\practiceAtlas.atlas", TextureAtlas.class);
-
-        //Loads HeroPreset which is made in Loader.java
-        for (HeroPreset preset : HeroPreset.values()) {
-            manager.load(preset.assetPath, TextureAtlas.class);
-        }
-
-        //Loads GoblinPreset which is made in Loader.java
-        for (GoblinPreset preset: GoblinPreset.values()){
-            manager.load(preset.assetPath, TextureAtlas.class);
-        }
-
-        //Loads TowerPreset which is made in Loader.java
-        for (TowerPreset preset: TowerPreset.values()){
-            manager.load(preset.assetPath, TextureAtlas.class);
-        }
-
-        //Loads WeaponPreset which is made in Loader.java
-        for (WeaponPreset preset: WeaponPreset.values()){
-            manager.load(preset.assetPath, TextureAtlas.class);
-        }
-
-        //Loads WeaponPreset which is made in Loader.java
-        for (ProjectilePreset preset: ProjectilePreset.values()){
-            manager.load(preset.assetPath, TextureAtlas.class);
-        }
-
-        manager.setLoader(TiledMap.class, new TmxMapLoader());
-        manager.load("practiceMap/projectmap.tmx", TiledMap.class);
-
-        manager.finishLoading(); // We could add a loading screen here if there are enough assets that it becomes slow
+        game = entry;
 
         // -------------- Make all the necessary thingies --------------
 
-        Loader.load(manager);
-        TextureAtlas atlas = manager.get("atlas\\practiceAtlas.atlas");
+        Loader.load(game.manager);
+        TextureAtlas atlas = game.manager.get("atlas\\practiceAtlas.atlas");
 
         // Initialize health bar from atlas
 
@@ -167,7 +132,7 @@ public class MainGame extends ApplicationAdapter {
         player = new HeroPlayer(HeroPreset.HERO_LIGHT, 300, 50);
         testEnemy = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 20, 20);
 
-        
+
 
 
         // //Initialize the goblins
@@ -192,7 +157,7 @@ public class MainGame extends ApplicationAdapter {
         //----MAPWORK INITIALIZATION----
 
         //Initialize the tiledMap
-        map = manager.get("practiceMap/projectmap.tmx");
+        map = game.manager.get("practiceMap/projectmap.tmx");
 
         //Initialize the mapRenderer (this is the main working unit here which scales the tiledMap with our current game units)
         mapRenderer = new OrthogonalTiledMapRenderer(map, scale);       //We can pass our own spritebatch for optimization but will have to change some internal methods so jst let it use its own spritebatch for map
@@ -213,10 +178,7 @@ public class MainGame extends ApplicationAdapter {
     }
 
     @Override
-    public void render() {
-        //delta exists in render because its the amount of time between first and second frame
-        float delta = Gdx.graphics.getDeltaTime();  //StateTime is being handled in Update of entity
-
+    public void render(float delta) {
         clickEvent(delta);    // Check left click movement
 
         for (Entity e : Entity.entityList) {
@@ -236,6 +198,12 @@ public class MainGame extends ApplicationAdapter {
 
 
     @Override
+    public void show() {
+
+    }
+
+
+    @Override
     public void resize(int width, int height){
         viewport.update(width, height, true);       //True to centre camera when resized (not resizing camera here as viewport was made to handle it)
 
@@ -246,10 +214,24 @@ public class MainGame extends ApplicationAdapter {
         // camera.viewportHeight = cameraHeight;
     }
 
-     @Override
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void hide() {
+
+    }
+
+    @Override
     public void dispose() {
         batch.dispose();
-        manager.dispose();
         shapeRenderer.dispose();   // TO DO: Remove DEBUG tool
         mapRenderer.dispose();
     }
@@ -291,10 +273,10 @@ public class MainGame extends ApplicationAdapter {
         for (Rectangle rect : getMapCollisions()) {
             listOfHitbox.add(rect);
         }
-        
+
         // Grid is sized to match map tiles (200x27 grid from getGrid)
         float cellSize = worldWidth / mapWidth;  // = 800/200 = 4 world units per tile
-        
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         for (int x = 0; x < blocked.length; x++) {
             for (int y = 0; y < blocked[0].length; y++) {
@@ -460,8 +442,8 @@ public class MainGame extends ApplicationAdapter {
                         if (tile == null) continue;     // skip if tile is empty
                         MapObjects objects = tile.getObjects();     // return collision data of tile
 
-                        
-                        for (MapObject obj : objects){          // loop through 
+
+                        for (MapObject obj : objects){          // loop through
                             if (obj instanceof RectangleMapObject){     // check if collision is rectangular collision
                                 Rectangle rect = ((RectangleMapObject) obj).getRectangle(); // gives us the collision shape of tile
                                 Rectangle worldRect = new Rectangle(        // Convert from tile coordinates to world coordinates
@@ -480,7 +462,7 @@ public class MainGame extends ApplicationAdapter {
         return mapCollisions;
     }
 
-    
+
     // this method return an arraylist with all static collision boxes (environment)
     public boolean[][] getGrid() {
         boolean[][] blocked;
@@ -512,7 +494,7 @@ public class MainGame extends ApplicationAdapter {
         // Use the same iteration as getMapCollisions - check ALL layers
         for (MapLayer mapLayer : map.getLayers()){
             if(mapLayer instanceof TiledMapTileLayer){   // gives us only tiles layers not object or image
-                TiledMapTileLayer layer = (TiledMapTileLayer) mapLayer; // downcast 
+                TiledMapTileLayer layer = (TiledMapTileLayer) mapLayer; // downcast
 
                 for (int x = 0; x < layer.getWidth(); x++){    // loop through horizontal tiles
                     for(int y = 0; y < layer.getHeight(); y++){    // loop through vertical tiles
@@ -523,7 +505,7 @@ public class MainGame extends ApplicationAdapter {
                         TiledMapTile tile = cell.getTile();         // gets the actual tile in the map
 
                         if (tile == null) continue;     // skip if tile is empty
-                        
+
                         // Use SAME logic as getMapCollisions - only check for RectangleMapObject
                         MapObjects objects = tile.getObjects();
                         for (MapObject obj : objects) {

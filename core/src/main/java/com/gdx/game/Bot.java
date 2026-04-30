@@ -12,9 +12,9 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 class Bot extends DynamicEntity{
-    static float tileSize = MainGame.tileSize;
+    static float tileSize = GameScreen.tileSize;
     public static ArrayList<Bot> BotList = new ArrayList<>();
-    static float scale = MainGame.scale;
+    static float scale = GameScreen.scale;
     int collisionCounter = 0;
 
     //Entities Declaration
@@ -36,7 +36,7 @@ class Bot extends DynamicEntity{
     public static boolean[][] blocked;
     List<Node> BFSpath;
 
-    
+
     //Animation Declaration (Idle and dead is handled in Entity.java)   (Current animation is in entity.java because idle and dead is handled there)
     protected Animation<TextureRegion> runAnimation;
     protected Animation<TextureRegion> attackAnimation;
@@ -49,11 +49,11 @@ class Bot extends DynamicEntity{
     protected float attackTimer;
 
 
-    Bot (BotPreset preset, int startX, int startY){     
+    Bot (BotPreset preset, int startX, int startY){
         super(
             Loader.idle(preset),
             startX, startY,
-            
+
             preset.getMaxHealth(),
             preset.getSpeed(),
             preset.getSpriteWidth(),
@@ -61,7 +61,7 @@ class Bot extends DynamicEntity{
             preset.getIsAlly()
         );
 
-        
+
 
         BotList.add(this);
 
@@ -134,7 +134,7 @@ System.out.println("GridSpan: " + gridSpanWidth + "x" + gridSpanHeight);
 
         return nearestEntity;
     }
-    
+
     public void setState(State state){
         this.currentState.exit(this);
         this.currentState = state;
@@ -150,7 +150,7 @@ System.out.println("GridSpan: " + gridSpanWidth + "x" + gridSpanHeight);
 
 
     public List<Node> bfs(int sx, int sy, int gx, int gy, boolean[][] blocked, int width, int height){
-    
+
     Queue<Node> queue = new LinkedList<>();
         boolean[][] visited = new boolean[blocked.length][blocked[0].length];
 
@@ -203,14 +203,14 @@ System.out.println("GridSpan: " + gridSpanWidth + "x" + gridSpanHeight);
     boolean[][] blocked){
 
     System.out.println("canStand check at (" + x + "," + y + ") size " + w + "x" + h);
-    
+
     for (int dx = 0; dx < w; dx++) {
         for (int dy = 0; dy < h; dy++) {
 
             int nx = x + dx;
             int ny = y + dy;
 
-            System.out.println("  Checking (" + nx + "," + ny + "): blocked=" + 
+            System.out.println("  Checking (" + nx + "," + ny + "): blocked=" +
                 (nx < 0 || ny < 0 || nx >= blocked.length || ny >= blocked[0].length ? "OOB" : blocked[nx][ny]));
 
             if (nx < 0 || ny < 0 ||
