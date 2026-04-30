@@ -50,7 +50,7 @@ public class LoadingScreen implements Screen {
         if (game.manager.update()) {
             // Assets are ready — run Loader.load() then switch to menu
             Loader.load(game.manager);
-            game.setScreen(new GameScreen(game));
+            game.setScreen(new MainScreen(game));
             return; // stop rendering this screen
         }
 

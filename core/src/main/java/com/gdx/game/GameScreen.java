@@ -108,7 +108,7 @@ public class GameScreen implements Screen {
 
     MainGame game;
 
-    public GameScreen(MainGame entry) {
+    public GameScreen(MainGame entry, HeroPreset preset) {
         // Initialize SpriteBatch
         batch = new SpriteBatch();
 
@@ -129,11 +129,8 @@ public class GameScreen implements Screen {
         mainTower = new Tower(TowerPreset.MAIN, 400, 54);
 
         //DRAW THE TOWER FIRST SO THAT WHEN TOWER DIES PLAYER CANNOT HIDE UNDER ITS RUBBLE
-        player = new HeroPlayer(HeroPreset.HERO_LIGHT, 300, 50);
+        player = new HeroPlayer(preset, 300, 50);
         testEnemy = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 20, 20);
-
-
-
 
         // //Initialize the goblins
         // g1 = new Bot(GoblinPreset.GOBLIN, 10,20);
