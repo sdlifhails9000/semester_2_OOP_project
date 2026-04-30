@@ -12,6 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.audio.Sound;
+
 
 public class MainScreen implements Screen {
     private final MainGame game;
@@ -19,6 +21,9 @@ public class MainScreen implements Screen {
     private Skin skin;
     private Table mainTable;
     private Table pickTable;
+
+    //Sound
+    private Sound clickSound;
 
     // Background color
     private static final float BG_R = 0.07f, BG_G = 0.07f, BG_B = 0.10f;
@@ -42,6 +47,9 @@ public class MainScreen implements Screen {
         stage.addActor(pickTable);
 
         showMainState();
+
+        //For sound effects
+        clickSound = Gdx.audio.newSound(Gdx.files.internal("Kwality_Sounds/Game_Click.wav"));
     }
 
     private void createSkin() {
@@ -100,9 +108,10 @@ public class MainScreen implements Screen {
         Label title = new Label("ARENA LEGENDS", skin, "title");
         TextButton startBtn = new TextButton("START GAME", skin);
 
-        startBtn.addListener(new ClickListener() {
+        startBtn.addListener(new ClickListener() {      //This is an argument btw (ALL OF IT)
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                clickSound.play();
                 showPickState();
             }
         });
@@ -131,9 +140,10 @@ public class MainScreen implements Screen {
         lightCol.addActor(lightBtn);
         lightCol.addActor(lightHint);
 
-        lightBtn.addListener(new ClickListener() {
+        lightBtn.addListener(new ClickListener() {      //This is an argument btw (ALL OF IT)
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                clickSound.play();
                 game.setScreen(new GameScreen(game, HeroPreset.HERO_LIGHT));
             }
         });
@@ -146,9 +156,10 @@ public class MainScreen implements Screen {
         heavyCol.addActor(heavyBtn);
         heavyCol.addActor(heavyHint);
 
-        heavyBtn.addListener(new ClickListener() {
+        heavyBtn.addListener(new ClickListener() {      //This is an argument btw (ALL OF IT)
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                clickSound.play();
                 game.setScreen(new GameScreen(game, HeroPreset.HERO_HEAVY));
             }
         });
@@ -192,5 +203,8 @@ public class MainScreen implements Screen {
     public void dispose() {
         stage.dispose();
         skin.dispose();
+        if (clickSound != null){
+            clickSound.dispose();
+        } 
     }
 }
