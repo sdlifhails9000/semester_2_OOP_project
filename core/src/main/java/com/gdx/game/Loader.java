@@ -65,6 +65,8 @@ interface BotPreset{
     float getAttackStrength();
     float getAttackSpeed();
     float getAttackRange();
+    int getGridSpanWidth();
+    int getGridSpanHeight();
 
 }
 
@@ -105,7 +107,7 @@ enum GoblinPreset implements BotPreset {
         this.spriteHeight = spriteHeight;
         this.isAlly = isAlly;
         this.gridSpanWidth = gridSpanWidth;
-        this.gridSpanHeight = gridSpanWidth;
+        this.gridSpanHeight = gridSpanHeight;
     }
 
     @Override
@@ -147,6 +149,113 @@ enum GoblinPreset implements BotPreset {
     public float getAttackRange() {
         return attackRange;
     }
+
+    @Override
+    public int getGridSpanWidth() {
+        return gridSpanWidth;
+    }
+
+    @Override
+    public int getGridSpanHeight() {
+        return gridSpanHeight;
+    }
+}
+
+enum HeroBotPreset implements BotPreset  {
+    // Last is height ,second last is width
+    HERO_HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, true, 1, 2),
+
+    HERO_LIGHT("HeroAtlas/lightHero.atlas", 20f, 20f, 10f, 125f, 0.5f, 10, 10, true, 1, 2),
+
+    ENEMY_HERO_LIGHT("HeroAtlas/lightEnemyHero.atlas", 20f, 20f, 10f, 125f, 0.5f, 10, 10, false, 1, 2),
+
+    ENEMY_HERO_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, false, 1, 2);
+
+    final String assetPath;
+
+    final float speed;
+    final float attackStrength;
+    final float attackRange;
+    final float maxHealth;
+
+    // This will effect the attack animation
+    float attackSpeed;
+
+    final float spriteWidth;        //Store width and height and set at Entity.java
+    final float spriteHeight;       //This gets rid of manually settings each entity size
+
+    int gridSpanHeight;
+    int gridSpanWidth;
+
+    boolean isAlly;
+
+    HeroBotPreset(String path, float speed, float attackStrength,
+               float attackRange, float maxHealth, float attackSpeed,
+                float spriteWidth, float spriteHeight, boolean isAlly, int gridSpanWidth, int gridSpanHeight) {
+
+        this.assetPath = path;
+        this.speed = speed;
+        this.attackStrength = attackStrength;
+        this.attackRange = attackRange;
+        this.maxHealth = maxHealth;
+        this.attackSpeed = attackSpeed;
+        this.spriteWidth = spriteWidth;
+        this.spriteHeight = spriteHeight;
+        this.isAlly = isAlly;
+        this.gridSpanWidth = gridSpanWidth;
+        this.gridSpanHeight = gridSpanHeight;
+    }
+
+        @Override
+    public float getMaxHealth() {
+        return maxHealth;
+    }
+
+    @Override
+    public float getSpeed() {
+        return speed;
+    }
+
+    @Override
+    public float getSpriteWidth() {
+        return spriteWidth;
+    }
+
+    @Override
+    public float getSpriteHeight() {
+        return spriteHeight;
+    }
+
+    @Override
+    public boolean getIsAlly() {
+        return isAlly;
+    }
+
+    @Override
+    public float getAttackStrength() {
+        return attackStrength;
+    }
+
+    @Override
+    public float getAttackSpeed() {
+        return attackSpeed;
+    }
+
+    @Override
+    public float getAttackRange() {
+        return attackRange;
+    }
+
+    @Override
+    public int getGridSpanWidth() {
+        return gridSpanWidth;
+    }
+
+    @Override
+    public int getGridSpanHeight() {
+        return gridSpanHeight;
+    }
+
 }
 
 enum TowerPreset {
@@ -274,6 +383,14 @@ final class Loader {
     private static Map<GoblinPreset, Animation<TextureRegion>> goblinDeadAnimation;
     private static Map<GoblinPreset, TextureRegion> goblinHealthBar;
 
+    // Declare hash map to store assets for HeroBotPreset
+    private static Map<HeroBotPreset, TextureAtlas> heroBotAtlass;
+
+    private static Map<HeroBotPreset, Animation<TextureRegion>> heroBotRunAnimation;
+    private static Map<HeroBotPreset, Animation<TextureRegion>> heroBotIdleAnimation;
+    private static Map<HeroBotPreset, Animation<TextureRegion>> heroBotAttackAnimation;
+    private static Map<HeroBotPreset, Animation<TextureRegion>> heroBotDeadAnimation; 
+
     // Declaring hash map to store assets related to Tower, Weapon, Projectile (All three related in Tower.java)
     private static Map<TowerPreset, TextureAtlas> towerAtlass;
     private static Map<WeaponPreset, TextureAtlas> weaponAtlass;
@@ -312,6 +429,14 @@ final class Loader {
         goblinAttackAnimation = new HashMap<>();
         goblinDeadAnimation = new HashMap<>();
         goblinHealthBar = new HashMap<>();
+
+        // Hash maps for herobot
+        heroBotAtlass = new HashMap<>();
+        heroBotRunAnimation = new HashMap<>();
+        heroBotIdleAnimation = new HashMap<>();
+        heroBotAttackAnimation = new HashMap<>();
+        heroBotDeadAnimation = new HashMap<>();
+
 
         // Hash maps for tower and projectile presets
         towerAtlass = new HashMap<>();
@@ -384,6 +509,33 @@ final class Loader {
             //Create goblin health bar sprite
             goblinHealthBar.put(preset, gobAtlas.findRegion("heartStrip"));
         }
+
+        // HeroBotPreset
+        for (HeroBotPreset preset : HeroBotPreset.values()) {
+            TextureAtlas atlas = manager.get(preset.assetPath, TextureAtlas.class);
+            heroBotAtlass.put(preset, atlas);
+
+            heroBotRunAnimation.put(preset, new Animation<>(0.075f, atlas.findRegions("Run"), PlayMode.LOOP));
+
+            heroBotIdleAnimation.put(preset, new Animation<>(0.5f, atlas.findRegions("Idle"), PlayMode.LOOP));
+
+            heroBotDeadAnimation.put(preset, new Animation<>(0.25f, atlas.findRegions("Dead"), PlayMode.NORMAL));
+
+            Animation<TextureRegion> attack = new Animation<>(
+            0.5f, // this is just a temporary value
+            atlas.findRegions("Attack"), PlayMode.LOOP);
+
+            // Calculate the correct frame duration for the attack speed, OK?
+            float attackFrameDuration = preset.attackSpeed / attack.getKeyFrames().length;
+
+            // this reset the frame duration to the correct amount
+            attack.setFrameDuration(attackFrameDuration);
+
+            // Load all the animations into the hash map
+            heroBotAttackAnimation.put(preset, attack);
+        }
+        
+
 
         //Store animation of TowerPreset in its destined hashmap
 
@@ -469,28 +621,28 @@ final class Loader {
         if(preset instanceof GoblinPreset)
             return goblinRunAnimation.get(preset);
         else
-            return goblinRunAnimation.get(preset);
+            return heroBotRunAnimation.get(preset);
     }
 
     public static Animation<TextureRegion> attack(BotPreset preset) {
         if(preset instanceof GoblinPreset)
             return goblinAttackAnimation.get(preset);
         else
-            return goblinAttackAnimation.get(preset);
+            return heroBotAttackAnimation.get(preset);
     }
 
     public static Animation<TextureRegion> idle(BotPreset preset) {
         if(preset instanceof GoblinPreset)
             return goblinIdleAnimation.get(preset);
         else
-            return goblinIdleAnimation.get(preset);
+            return heroBotIdleAnimation.get(preset);
     }
 
     public static Animation<TextureRegion> dead(BotPreset preset) {
         if(preset instanceof GoblinPreset)
             return goblinDeadAnimation.get(preset);
         else
-            return goblinDeadAnimation.get(preset); // Change to herobot after if
+            return heroBotDeadAnimation.get(preset); // Fixed to use heroBotDeadAnimation
     }
 
     public static TextureRegion healthBar (BotPreset preset){

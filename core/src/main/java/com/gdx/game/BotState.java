@@ -171,13 +171,14 @@ class BotAttackState implements State<Bot> {
 }
 
 class BotChaseState implements State<Bot> {
+    Vector2 backScale = new Vector2(0,0);
+    Vector2 maxBackScale = new Vector2(0,0);
 
     public void enter(Bot e){
         e.currentAnimation = e.runAnimation;
     }
 
     public void update(Bot e, float delta){
-        System.out.println("111");
         e.setAttackTarget(e.getAttackTarget());
         //If the entity itself dies
         if (e.isDead){
@@ -235,7 +236,14 @@ class BotChaseState implements State<Bot> {
             if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()){
                 System.out.println("Current Position grid:"+Math.ceil(e.currentXY.x/Bot.tileSize/Bot.scale)+","+Math.ceil(e.currentXY.y/Bot.tileSize/Bot.scale));
 
-                Vector2 backScale = e.velocity.scl(2f);
+                backScale = e.velocity.scl(5f);
+                if(backScale.x>maxBackScale.x){
+                    maxBackScale.x = backScale.x;
+                }
+                if(backScale.y>maxBackScale.y){
+                    maxBackScale.y = backScale.y;
+                }
+
 
                 e.currentXY.x -= backScale.x * delta;
                 e.targetPosition.x -= backScale.x * delta;
@@ -256,36 +264,20 @@ class BotChaseState implements State<Bot> {
             if(e.collisionCounter>3){
                 System.out.println(1);
                 // Calculate BFS from CURRENT position to target position
-                int gx = (int) (e.attackTarget.getCurrentPosition().x / Bot.tileSize / Bot.scale);
-                int gy = (int) (e.attackTarget.getCurrentPosition().y / Bot.tileSize / Bot.scale);
-
-                System.out.println("Calculating BFS to (" + gx + "," + gy + ")");
+                int gx = (int) Math.ceil(e.attackTarget.getCurrentPosition().x / Bot.tileSize / Bot.scale);
+                int gy = (int) Math.ceil(e.attackTarget.getCurrentPosition().y / Bot.tileSize / Bot.scale);
                 
-                int sx = (int) Math.ceil(e.currentXY.x/Bot.tileSize/Bot.scale);
-                int sy = (int) Math.ceil(e.currentXY.y/Bot.tileSize/Bot.scale);
-
-                int goalX = gx;
-                int goalY = gy;
-                int goalTopY = goalY - (e.gridSpanHeight - 1);
-
-                if (!e.canStand(goalX, goalTopY, e.gridSpanWidth, e.gridSpanWidth, Bot.blocked)) {
-                    // Search nearby cells for a valid position
-                    for (int radius = 1; radius < 5; radius++) {
-                        boolean found = false;
-                        for (int dx = -radius; dx <= radius && !found; dx++) {
-                            for (int dy = -radius; dy <= radius && !found; dy++) {
-                                if (e.canStand(goalX + dx, goalTopY + dy, e.gridSpanWidth, e.gridSpanHeight, Bot.blocked)) {
-                                    goalX += dx;
-                                    goalY = (goalY + dy) + (e.gridSpanHeight - 1);
-                                    found = true;
-                                }
-                            }
-                        }
-                        if (found) break;
-                    }
+                int sx = (int) Math.ceil(e.currentXY.x / Bot.tileSize / Bot.scale);
+                int sy = (int) Math.ceil(e.currentXY.y / Bot.tileSize / Bot.scale);
+                
+                if(maxBackScale.y>0){
+                    sy = (int) Math.floor(e.currentXY.y / Bot.tileSize / Bot.scale);
+                }
+                if(maxBackScale.x>0){
+                    sx = (int) Math.ceil(e.currentXY.x / Bot.tileSize / Bot.scale);
                 }
 
-                e.BFSpath = e.bfs(sx, sy, goalX, goalY, Bot.blocked,e.gridSpanWidth, e.gridSpanHeight);
+                e.BFSpath = e.bfs(sx, sy, gx, gy, Bot.blocked,e.gridSpanWidth, e.gridSpanHeight);
                 pathIndex = 0;
                 
                 if(e.BFSpath != null) {
@@ -352,7 +344,20 @@ class BotChaseState implements State<Bot> {
         
         // Update sprite position
         e.setCenter(e.currentXY.x, e.currentXY.y);  // TODO: Check if this line is needed
-        // TODO: Add revert here
+        if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()){
+                backScale = e.velocity.scl(5f);
+
+                e.currentXY.x -= backScale.x * delta;
+                e.targetPosition.x -= backScale.x * delta;
+                e.velocity.x = 0;
+                e.updateBoxes();
+
+                // Change y
+                e.currentXY.y += backScale.y * delta;
+                e.targetPosition.y += backScale.y * delta;
+                e.velocity.y = 0;
+                e.updateBoxes();
+            }
 
     }
 }

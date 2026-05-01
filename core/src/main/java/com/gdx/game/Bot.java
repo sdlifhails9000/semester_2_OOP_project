@@ -86,6 +86,8 @@ class Bot extends DynamicEntity{
 
         gridSpanWidth = 1;
         gridSpanHeight = 2;
+        gridSpanWidth = preset.getGridSpanWidth();
+        gridSpanHeight = preset.getGridSpanHeight();
 
         System.out.println("Sprite: " + preset.getSpriteWidth() + "x" + preset.getSpriteHeight());
         System.out.println("Scale: " + scale);
@@ -125,7 +127,6 @@ class Bot extends DynamicEntity{
 
         // This finds the nearest enemy to this bot
         for (Entity entity : Entity.entityList) {
-            System.out.println("Checking entity:" + entity);
             // This skips allies. They aren't enemies, entities which are dead and itself
             if (this.isAlly == entity.isAlly || entity.isDead || this == entity) {
                 continue;
@@ -187,69 +188,66 @@ class Bot extends DynamicEntity{
     }
 
 
-    public List<Node> bfs(int sx, int sy, int gx, int gy, boolean[][] blocked, int width, int height){
-
+    public List<Node> bfs(int sx, int sy, int gx, int gy, boolean[][] blocked, int width, int height){        
     Queue<Node> queue = new LinkedList<>();
-        boolean[][] visited = new boolean[blocked.length][blocked[0].length];
+    boolean[][] visited = new boolean[blocked.length][blocked[0].length];
 
-        Node start = new Node(sx, sy);
-        queue.add(start);
-        visited[sx][sy] = true;
+    Node start = new Node(sx, sy);
+    queue.add(start);
+    visited[sx][sy] = true;
 
-        int[][] dirs = {
-            {1, 0}, {-1, 0}, {0, 1}, {0, -1}
-        };
+    int[][] dirs = {
+        {1, 0}, {-1, 0}, {0, 1}, {0, -1}
+    };
 
-        while (!queue.isEmpty()) {
+    while (!queue.isEmpty()) {
 
-            Node current = queue.poll();
+        Node current = queue.poll();
 
-            if (current.x == gx && current.y == gy) {
-                return reconstructPath(current);
-            }
-
-    for (int[] d : dirs) {
-        int nx = current.x + d[0];
-        int ny = current.y + d[1];
-
-        if (nx < 0 || ny < 0 || nx >= blocked.length || ny >= blocked[0].length)
-            continue;
-
-        if (visited[nx][ny])
-            continue;
-
-
-    // Check the actual target position
-    int spriteTopY = ny - (height - 1);
-    if (!canStand(nx, spriteTopY, width, height, blocked))
-        continue;
-
-    Node next = new Node(nx, ny);
-    next.parent = current;
-    visited[nx][ny] = true;
-    queue.add(next);
-}
+        if (current.x == gx && current.y == gy) {
+            return reconstructPath(current);
         }
 
-        System.out.println("Didnt find a path");
-        return null;
+        for (int[] d : dirs) {
+            int nx = current.x + d[0];
+            int ny = current.y + d[1];
+
+            if (nx < 0 || ny < 0 || nx >= blocked.length || ny >= blocked[0].length)
+                continue;
+
+            if (visited[nx][ny])
+                continue;
+
+            
+            if (!canStand(nx, ny, width, height, blocked))
+                continue;
+
+            Node next = new Node(nx, ny);
+            next.parent = current;
+            visited[nx][ny] = true;
+            queue.add(next);
+        }
     }
+
+    System.out.println("Didnt find a path");
+    return null;
+}
 
    boolean canStand(
     int x, int y,
     int w, int h,
     boolean[][] blocked){
-
-    System.out.println("canStand check at (" + x + "," + y + ") size " + w + "x" + h);
-
+    
+    // x, y is now the CENTER of the sprite
+    // Calculate the top-left corner
+    int topLeftX = x - (w / 2);
+    int topLeftY = y - (h / 2);
+    
     for (int dx = 0; dx < w; dx++) {
         for (int dy = 0; dy < h; dy++) {
 
-            int nx = x + dx;
-            int ny = y + dy;
-
-            System.out.println("  Checking (" + nx + "," + ny + "): blocked=" +
-                (nx < 0 || ny < 0 || nx >= blocked.length || ny >= blocked[0].length ? "OOB" : blocked[nx][ny]));
+            int nx = topLeftX + dx;
+            int ny = topLeftY + dy;
 
             if (nx < 0 || ny < 0 ||
                 nx >= blocked.length ||
@@ -276,10 +274,6 @@ class Bot extends DynamicEntity{
         }
 
         Collections.reverse(path);
-        System.out.println("Path");
-        for(Node i :path){
-            System.out.println(i.x+","+i.y);
-        }
         return path;
     }
 
@@ -295,3 +289,9 @@ class Node {
     }
 }
 
+class HeroBot extends Bot{
+    HeroBot(BotPreset preset, int startX, int startY){
+    super(preset, startX,startY);
+    }
+
+}

@@ -38,6 +38,10 @@ public class MainGame extends Game {
         for (GoblinPreset preset: GoblinPreset.values()){
             manager.load(preset.assetPath, TextureAtlas.class);
         }
+        // Loads HeroBotPreset
+        for (HeroBotPreset preset: HeroBotPreset.values()){
+            manager.load(preset.assetPath, TextureAtlas.class);
+        }
 
         //Loads TowerPreset which is made in Loader.java
         for (TowerPreset preset: TowerPreset.values()){
