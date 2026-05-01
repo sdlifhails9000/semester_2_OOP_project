@@ -3,18 +3,27 @@ package com.gdx.game;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
-abstract class Hero extends DynamicEntity {
-    public static ArrayList<Hero> heroList = new ArrayList<>();
+class HeroPlayer extends DynamicEntity {
+    public static ArrayList<HeroPlayer> heroList = new ArrayList<>();
 
     //Entities Declaration
     Entity attackTarget;
 
+    //Healthbar Sprite declaration
+    Sprite HealthBarSprite;
+
     //State declaration (for setState)
     State currentState;
+    State heroIdleState;
+    State heroMoveState;
+    State heroChaseState;
+    State heroAttackState;
+    State heroDeadState;
 
     //Animation Declaration (Idle and dead is handled in Entity.java)   (Current animation is in entity.java because idle and dead is handled there)
     protected Animation<TextureRegion> runAnimation;
@@ -27,7 +36,9 @@ abstract class Hero extends DynamicEntity {
     protected float attackStrength;
     protected float attackTimer;
 
-    Hero(HeroPreset preset, int startX, int startY) {
+    private TextureRegion fullHealthRegion;
+    
+    HeroPlayer(HeroPreset preset, int startX, int startY) {
         super(Loader.idle(preset),
               startX, startY,
               preset.maxHealth,
@@ -39,13 +50,32 @@ abstract class Hero extends DynamicEntity {
 
         heroList.add(this);
 
+        // Selecting required states from the factory State.java
+        heroIdleState = new HeroIdleState();
+        heroMoveState = new HeroMoveState();
+        heroChaseState = new HeroChaseState();
+        heroAttackState = new HeroAttackState();
+        heroDeadState = new HeroDeadState();
+
+        //Set the currentState (its idle initially)
+        currentState = heroIdleState;
+
+        //Loads Animations
         this.attackAnimation = Loader.attack(preset);
         this.runAnimation = Loader.run(preset);
         this.deadAnimation = Loader.dead(preset);
 
+        //Loads Stats
         this.attackRange = preset.attackRange;
         this.attackSpeed = preset.attackSpeed;
         this.attackStrength = preset.attackStrength;
+
+        //Loads healthBarSprite and sets it above the hero with offset
+        this.fullHealthRegion = Loader.healthBar(preset);
+        this.HealthBarSprite = new Sprite(fullHealthRegion);
+        //HealthBarSprite.setScale(0.15f);
+        
+
     }
 
     //Setters and Getters
@@ -76,98 +106,46 @@ abstract class Hero extends DynamicEntity {
         return isClose || isInRange;
     }
 
+    public void updateHealthBar() {
+    float healthPercent = currentHealth / maxHealth;
+
+    int fullWidth = fullHealthRegion.getRegionWidth();
+    int height = fullHealthRegion.getRegionHeight();
+
+    int visibleWidth = (int)(fullWidth * healthPercent);
+
+    // Clamp so it doesn’t go negative and cry
+    visibleWidth = Math.max(0, visibleWidth);
+
+    HealthBarSprite.setRegion(
+        fullHealthRegion.getRegionX(),
+        fullHealthRegion.getRegionY(),
+        visibleWidth,
+        height
+    );
+
+    HealthBarSprite.setSize(visibleWidth * 0.15f, height * 0.15f);
+
+    HealthBarSprite.setCenter(
+        getCurrentPosition().x,
+        getCurrentPosition().y + spriteHeight / 2f + 1f
+    );
+}
+
+    @Override
+    public void Update(float delta){
+        super.Update(delta);
+        currentState.update(this, delta);
+
+        updateHealthBar();
+
+    }
+
     @Override
     public void setState(State state){
         this.currentState.exit(this);
         this.currentState = state;
         this.currentState.enter(this);
     }
-
 }
 
-//Keeping it a seperate class if we want some seperate capabilities other than HeroBot
-class HeroPlayer extends Hero{
-    State heroIdleState;
-    State heroMoveState;
-    State heroChaseState;
-    State heroAttackState;
-    State heroDeadState;
-
-    HeroPlayer(HeroPreset preset, int startX, int startY) {
-        super(preset, startX, startY);
-
-        // Selecting required states from the factory State.java
-        heroIdleState = new HeroIdleState();
-        heroMoveState = new HeroMoveState();
-        heroChaseState = new HeroChaseState();
-        heroAttackState = new HeroAttackState();
-        heroDeadState = new HeroDeadState();
-
-        //Set the currentState (its idle initially)
-        currentState = heroIdleState;
-    }
-    @Override
-    public void Update(float delta){
-        super.Update(delta);
-        currentState.update(this, delta);
-    }
-}
-
-class HeroBot extends Hero {
-    private static final float HERO_ALERT_RADIUS = 10f;
-
-    HeroBot(HeroPreset preset, int startX, int startY) {
-        super(preset, startX, startY);
-    }
-
-    @Override
-    public Entity getAttackTarget() {
-        for (Hero hero : Hero.heroList) {
-            if (isAlly == hero.isAlly || hero.isDead || this == hero) {
-                continue;
-            }
-
-            Vector2 heroPos = hero.getCurrentPosition();
-            float enemyHeroDistance = heroPos.dst(getCurrentPosition());
-
-            if (enemyHeroDistance < HERO_ALERT_RADIUS) {
-                return hero;
-            }
-        }
-
-        Entity nearestEntity = null;
-        float nearestEnemyDistance = Float.MAX_VALUE;
-
-        // This finds the nearest enemy to this bot
-        for (Entity entity : Entity.entityList) {
-            // This skips allies. They aren't enemies
-            if (isAlly == entity.isAlly || entity.isDead || this == entity) {
-                continue;
-            }
-
-            // Calculate distance
-            Vector2 entityPos = entity.getCurrentPosition();
-            float distance = entityPos.dst(getCurrentPosition());
-
-            // Check if distance is smaller than the current nearestEnemyDistance
-            if (nearestEnemyDistance > distance) {
-                nearestEnemyDistance = distance;
-                nearestEntity = entity;
-            }
-        }
-
-        // Handle the scenario when no entities were found
-
-        if (nearestEnemyDistance == Float.MAX_VALUE) {
-            return null;
-        }
-
-        return nearestEntity;
-    }
-
-    @Override
-    public void Update(float delta) {
-        setAttackTarget(getAttackTarget());
-        super.Update(delta);
-    }
-}

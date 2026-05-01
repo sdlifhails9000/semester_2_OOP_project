@@ -54,7 +54,7 @@ class WeaponIdleState implements State<Weapon> {
         float closestEnemyDistance = Float.MAX_VALUE;
 
         for (Entity entity : Entity.entityList) {
-            if (entity == e || entity.isAlly == e.isAlly || entity.isDead) {
+            if (entity == e.parent || entity == e || entity == e.arrow ||entity.isAlly == e.isAlly || entity.isDead) {
                 continue;
             }
 
@@ -192,11 +192,17 @@ class ProjectileIdleState implements State<Projectile> {
     @Override
     public void enter(Projectile e) {
         e.currentAnimation = e.idleAnimation;
+
+        //To come back to parent (Weapon) position after impact
+        e.setTargetPosition(e.parent.getCurrentPosition().x, e.parent.getCurrentPosition().y);
+
     }
 
     @Override
     public void update(Projectile e, float delta) {
         if (e.getAttackTarget() != null) {
+            //Set targetPosition to the attackTarget once
+            e.setTargetPosition(e.getAttackTarget().getCurrentPosition().x, e.getAttackTarget().getCurrentPosition().y);
             e.setState(e.projectileFlyingState);
         }
     }
@@ -220,19 +226,21 @@ class ProjectileFlyingState implements State<Projectile> {
         if (e.getAttackTarget() != null){
             boolean isArrowColliding = e.getHitBox().overlaps(e.getAttackTarget().getHitBox());
 
-            if (isArrowColliding) {
-            e.getAttackTarget().takeDamage(e.attackStrength);
-            e.setState(e.projectileImpactState);
-            return;
-        }
-        }
+            // Prevent damaging if projectile overlaps with tower bounds
+            boolean overlapsTower = e.getHitBox().overlaps(e.parent.parent.getHitBox());
 
-        
+            if (isArrowColliding && !overlapsTower) {
+                e.getAttackTarget().takeDamage(e.attackStrength);
+                e.setState(e.projectileImpactState);
+                return;
+            }
+        }
 
         float angle = getAngle(e, e.targetPosition);
 
         e.setRotation(angle);
 
+        //Initially targetPosition is equal to currentXY thats why it explodes
         if (e.targetPosition.epsilonEquals(e.currentXY, 0.5f)) {
             e.setState(e.projectileImpactState);
             return;

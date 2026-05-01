@@ -59,6 +59,9 @@ abstract class Entity extends Sprite {
         this.currentHealth = maxHealth;     //Forgot to initialize this
         this.isAlly = isAlly;
 
+        this.spriteWidth = spriteWidth;
+        this.spriteHeight = spriteHeight;
+
         this.setSize(spriteWidth, spriteHeight);        //Set size here
         this.setOriginCenter();
         this.setCenter(startX, startY);

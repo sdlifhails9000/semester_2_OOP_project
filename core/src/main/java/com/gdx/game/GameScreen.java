@@ -77,7 +77,6 @@ public class GameScreen implements Screen {
 
     // Declare Spritbatch and textureAtlas for Images
     SpriteBatch batch;
-    Sprite background, healthBarSprite;
 
     //DynamicSprites (self defined)
     HeroPlayer player;
@@ -117,16 +116,11 @@ public class GameScreen implements Screen {
         // -------------- Make all the necessary thingies --------------
 
         Loader.load(game.manager);
-        TextureAtlas atlas = game.manager.get("atlas\\practiceAtlas.atlas");
-
-        // Initialize health bar from atlas
-
-        healthBarSprite = atlas.createSprite("healthBar");
 
         clickCoords = new Vector3();
 
         //Initialize the DYNAMIC SPRITES
-        mainTower = new Tower(TowerPreset.MAIN, 400, 54);
+        mainTower = new Tower(TowerPreset.ENEMY_MAIN, 400, 54);
 
         //DRAW THE TOWER FIRST SO THAT WHEN TOWER DIES PLAYER CANNOT HIDE UNDER ITS RUBBLE
         player = new HeroPlayer(preset, 300, 50);
@@ -183,7 +177,6 @@ public class GameScreen implements Screen {
         }
 
         cameraRoam(delta);  // Camera Free Roam
-        updateHealthBar();  //Updates position and size of health bar
 
         camera.update();    //Update camera
 
@@ -246,13 +239,21 @@ public class GameScreen implements Screen {
 
         // Draw the batch
         batch.begin();
-
-        //Draw the sprites
-        healthBarSprite.draw(batch);    //Draw HealthBar
-
         //Draw all the entities by for loop
         for (Entity e : Entity.entityList){
             e.draw(batch);
+        }
+
+        for (HeroPlayer h : HeroPlayer.heroList) {
+            h.HealthBarSprite.draw(batch);
+        }
+
+        for (Bot b : Bot.BotList) {
+            b.HealthBarSprite.draw(batch);
+        }
+
+        for (Tower t : Tower.towerList) {
+            t.HealthBarSprite.draw(batch);
         }
 
         batch.end();
@@ -412,14 +413,6 @@ public class GameScreen implements Screen {
 
     }
 
-    public void updateHealthBar(){
-        healthBarSprite.setCenter(player.getCurrentPosition().x, player.getCurrentPosition().y + 3);        //Setting it just above our hero sprite
-        float healthBarWidth = 5 * player.currentHealth / player.maxHealth;
-        float healthBarHeight = 5;
-
-        healthBarSprite.setSize(healthBarWidth, healthBarHeight);
-
-    }
 
     // this method return an arraylist with all static collision boxes (environment)
     public ArrayList<Rectangle> getMapCollisions() {

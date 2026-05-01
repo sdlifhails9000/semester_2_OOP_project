@@ -1,6 +1,7 @@
 package com.gdx.game;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import java.util.ArrayList;
@@ -9,6 +10,10 @@ class Tower extends Entity {
     public static ArrayList<Tower> towerList = new ArrayList<>();
 
     Animation<TextureRegion> deadAnimation;
+
+    //Healthbar Sprite necessity declaration
+    Sprite HealthBarSprite;
+    private TextureRegion fullHealthRegion;
 
     State towerIdleState;
     State towerDeadState;
@@ -31,10 +36,14 @@ class Tower extends Entity {
         towerDeadState = new TowerDeadState();
         currentState = towerIdleState;
 
-        WeaponPreset weaponPreset = mapWeaponPreset(preset);
-        float offset = spriteHeight / 2 + 5;
+        //Loads healthBarSprite and sets it above the hero with offset
+        this.fullHealthRegion = Loader.healthBar(preset);
+        this.HealthBarSprite = new Sprite(fullHealthRegion);
 
-        towerWeapon = new Weapon(weaponPreset, startX, startY + offset);
+        WeaponPreset weaponPreset = mapWeaponPreset(preset);
+        float offset = 5;
+
+        towerWeapon = new Weapon(weaponPreset, this, startX, startY + offset);
 
         towerList.add(this);
     }
@@ -57,6 +66,32 @@ class Tower extends Entity {
         return WeaponPreset.ENEMY_MINI_TOWER;
     }
 
+    public void updateHealthBar() {
+    float healthPercent = currentHealth / maxHealth;
+
+    int fullWidth = fullHealthRegion.getRegionWidth();
+    int height = fullHealthRegion.getRegionHeight();
+
+    int visibleWidth = (int)(fullWidth * healthPercent);
+
+    // Clamp so it doesn’t go negative and cry
+    visibleWidth = Math.max(0, visibleWidth);
+
+    HealthBarSprite.setRegion(
+        fullHealthRegion.getRegionX(),
+        fullHealthRegion.getRegionY(),
+        visibleWidth,
+        height
+    );
+
+    HealthBarSprite.setSize(visibleWidth * 0.15f, height * 0.15f);
+
+    HealthBarSprite.setCenter(
+        getCurrentPosition().x,
+        getCurrentPosition().y + spriteHeight / 2f + 1f
+    );
+}
+
     @Override
     public void setState(State state){
         this.currentState.exit(this);
@@ -68,10 +103,13 @@ class Tower extends Entity {
     public void Update(float delta) {
         super.Update(delta);
         currentState.update(this, delta);
+
+        updateHealthBar();
     }
 }
 
 class Weapon extends Entity {
+    Tower parent;       //So that weapon can recognize its tower and not kill itself
     Projectile arrow;
     private Entity attackTarget;
 
@@ -86,7 +124,7 @@ class Weapon extends Entity {
     Animation<TextureRegion> attackAnimation;
     Animation<TextureRegion> deadAnimation;
 
-    public Weapon(WeaponPreset preset, float startX, float startY) {
+    public Weapon(WeaponPreset preset, Tower parent, float startX, float startY) {
         super(Loader.weaponIdle(preset),
             startX, startY,
             preset.maxHealth,
@@ -94,6 +132,8 @@ class Weapon extends Entity {
             preset.spriteHeight,
             preset.isAlly
         );
+
+        this.parent = parent;       //So the weapon can recognize its tower and not kill itself
 
         weaponIdleState = new WeaponIdleState();
         weaponAttackState = new WeaponAttackState();
@@ -189,6 +229,7 @@ class Projectile extends DynamicEntity {
         impactAnimation = Loader.impact(preset);
         idleAnimation = Loader.idle(preset);
         flyingAnimation = Loader.flying(preset);
+        currentAnimation = idleAnimation;
         this.parent = parent;
     }
 

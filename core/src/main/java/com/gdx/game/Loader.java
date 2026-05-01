@@ -8,6 +8,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.Animation;           //Animation imports are these two
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +18,7 @@ enum HeroPreset {
     // Last is height ,second last is width
     HERO_HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, true),
 
-    HERO_LIGHT("HeroAtlas/lightHero.atlas", 20f, 20f, 10f, 125f, 0.5f, 10, 10, true),
+    HERO_LIGHT("HeroAtlas/lightHero.atlas", 20f, 20f, 10f, 100f, 0.5f, 10, 10, true),
 
     ENEMY_HERO_LIGHT("HeroAtlas/lightEnemyHero.atlas", 20f, 20f, 10f, 125f, 0.5f, 10, 10, false),
 
@@ -69,8 +70,8 @@ interface BotPreset{
 
 enum GoblinPreset implements BotPreset {
     // Hardcoding gridspan at the end, width ,height
-    GOBLIN("GoblinAtlas/Goblin.atlas", 10, 10, 10, 75, 2, 8, 8, true,1,2),
-    ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 10, 10, 10, 75, 2, 8, 8, false,1,2);
+    GOBLIN("GoblinAtlas/Goblin.atlas", 10, 20, 10, 75, 2, 8, 8, true,1,2),
+    ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 10, 20, 10, 75, 2, 8, 8, false,1,2);
 
     final String assetPath;
 
@@ -156,10 +157,10 @@ enum TowerPreset {
          200, 20, 20, true),
 
     ENEMY_MAIN("TowerAtlas/EnemyMainTower.atlas",
-         200, 20, 20, true),
+         200, 20, 20, false),
 
     ENEMY_MINI("TowerAtlas/EnemyMiniTower.atlas",
-         200, 20, 20, true);
+         200, 20, 20, false);
 
     final String assetPath;
 
@@ -261,6 +262,8 @@ final class Loader {
     private static Map<HeroPreset, Animation<TextureRegion>> heroIdleAnimation;
     private static Map<HeroPreset, Animation<TextureRegion>> heroAttackAnimation;
     private static Map<HeroPreset, Animation<TextureRegion>> heroDeadAnimation;
+    private static Map<HeroPreset, TextureRegion> heroHealthBar;
+    
 
     // Declare hash map to store assets for GoblinPreset
     private static Map<GoblinPreset, TextureAtlas> goblinAtlass;
@@ -269,6 +272,7 @@ final class Loader {
     private static Map<GoblinPreset, Animation<TextureRegion>> goblinIdleAnimation;
     private static Map<GoblinPreset, Animation<TextureRegion>> goblinAttackAnimation;
     private static Map<GoblinPreset, Animation<TextureRegion>> goblinDeadAnimation;
+    private static Map<GoblinPreset, TextureRegion> goblinHealthBar;
 
     // Declaring hash map to store assets related to Tower, Weapon, Projectile (All three related in Tower.java)
     private static Map<TowerPreset, TextureAtlas> towerAtlass;
@@ -279,6 +283,7 @@ final class Loader {
     //Tower Animations
     private static Map<TowerPreset, Animation<TextureRegion>> towerIdleAnimation;
     private static Map<TowerPreset, Animation<TextureRegion>> towerDeadAnimation;
+    private static Map<TowerPreset, TextureRegion> towerHealthBar;
 
     //Weapon Animations
     private static Map<WeaponPreset, Animation<TextureRegion>> weaponAttackAnimation;
@@ -298,6 +303,7 @@ final class Loader {
         heroIdleAnimation = new HashMap<>();
         heroAttackAnimation = new HashMap<>();
         heroDeadAnimation = new HashMap<>();
+        heroHealthBar = new HashMap<>();
 
         //Hash maps for goblin animations to be recieved from GoblinPreset
         goblinAtlass = new HashMap<>();
@@ -305,6 +311,7 @@ final class Loader {
         goblinIdleAnimation = new HashMap<>();
         goblinAttackAnimation = new HashMap<>();
         goblinDeadAnimation = new HashMap<>();
+        goblinHealthBar = new HashMap<>();
 
         // Hash maps for tower and projectile presets
         towerAtlass = new HashMap<>();
@@ -313,6 +320,7 @@ final class Loader {
 
         towerIdleAnimation = new HashMap<>();
         towerDeadAnimation = new HashMap<>();
+        towerHealthBar = new HashMap<>();
 
         weaponAttackAnimation = new HashMap<>();
         weaponIdleAnimation = new HashMap<>();
@@ -344,6 +352,9 @@ final class Loader {
 
             // Load all the animations into the hash map
             heroAttackAnimation.put(preset, attack);
+
+            // Create the healthbar SPRITE
+            heroHealthBar.put(preset, atlas.findRegion("heartStrip"));
         }
 
         //Store animation of GoblinPreset in its destined hashmap
@@ -369,6 +380,9 @@ final class Loader {
 
             // Load all the animations into the hash map
             goblinAttackAnimation.put(preset, attack);
+
+            //Create goblin health bar sprite
+            goblinHealthBar.put(preset, gobAtlas.findRegion("heartStrip"));
         }
 
         //Store animation of TowerPreset in its destined hashmap
@@ -383,6 +397,9 @@ final class Loader {
 
 
             towerDeadAnimation.put(preset, new Animation<>(0.25f, towerAtlas.findRegions("Dead"), PlayMode.NORMAL));
+
+            //Create the tower healthbar sprite
+            towerHealthBar.put(preset, towerAtlas.findRegion("heartStrip"));
         }
 
         for (WeaponPreset preset: WeaponPreset.values()){
@@ -441,6 +458,10 @@ final class Loader {
         return heroDeadAnimation.get(preset);
     }
 
+    public static TextureRegion healthBar(HeroPreset preset) {
+        return heroHealthBar.get(preset);
+    }
+
 //------------------------------------------------------------------------
 
     //GoblinPreset getters
@@ -472,6 +493,13 @@ final class Loader {
             return goblinDeadAnimation.get(preset); // Change to herobot after if
     }
 
+    public static TextureRegion healthBar (BotPreset preset){
+        if(preset instanceof GoblinPreset)
+            return goblinHealthBar.get(preset);
+        else
+            return goblinHealthBar.get(preset); // Change to herobot after if
+    }
+
 //------------------------------------------------------------------------
 
     // TowerPreset getters
@@ -481,6 +509,10 @@ final class Loader {
 
     public static Animation<TextureRegion> dead(TowerPreset preset) {
         return towerDeadAnimation.get(preset);
+    }
+
+    public static TextureRegion healthBar (TowerPreset preset){
+        return towerHealthBar.get(preset);
     }
 
 //------------------------------------------------------------------------

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Queue;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -19,6 +20,10 @@ class Bot extends DynamicEntity{
 
     //Entities Declaration
     Entity attackTarget;
+
+    //Healthbar Sprite declaration
+    Sprite HealthBarSprite;
+    private TextureRegion fullHealthRegion;
 
     // Bot States
     State BotIdleState = new BotIdleState();
@@ -74,13 +79,18 @@ class Bot extends DynamicEntity{
         this.attackStrength = preset.getAttackStrength();
         this.currentState = BotIdleState;
 
+        //Loads healthBarSprite and sets it above the hero with offset
+        this.fullHealthRegion = Loader.healthBar(preset);
+        this.HealthBarSprite = new Sprite(fullHealthRegion);
+        //heroHealthBarSprite.setScale(0.15f);
+
         gridSpanWidth = 1;
         gridSpanHeight = 2;
 
         System.out.println("Sprite: " + preset.getSpriteWidth() + "x" + preset.getSpriteHeight());
-System.out.println("Scale: " + scale);
-System.out.println("TileSize: " + tileSize);
-System.out.println("GridSpan: " + gridSpanWidth + "x" + gridSpanHeight);
+        System.out.println("Scale: " + scale);
+        System.out.println("TileSize: " + tileSize);
+        System.out.println("GridSpan: " + gridSpanWidth + "x" + gridSpanHeight);
 
 
     }
@@ -135,6 +145,32 @@ System.out.println("GridSpan: " + gridSpanWidth + "x" + gridSpanHeight);
         return nearestEntity;
     }
 
+    public void updateHealthBar() {
+    float healthPercent = currentHealth / maxHealth;
+
+    int fullWidth = fullHealthRegion.getRegionWidth();
+    int height = fullHealthRegion.getRegionHeight();
+
+    int visibleWidth = (int)(fullWidth * healthPercent);
+
+    // Clamp so it doesn’t go negative and cry
+    visibleWidth = Math.max(0, visibleWidth);
+
+    HealthBarSprite.setRegion(
+        fullHealthRegion.getRegionX(),
+        fullHealthRegion.getRegionY(),
+        visibleWidth,
+        height
+    );
+
+    HealthBarSprite.setSize(visibleWidth * 0.15f, height * 0.15f);
+
+    HealthBarSprite.setCenter(
+        getCurrentPosition().x,
+        getCurrentPosition().y + spriteHeight / 2f + 1f
+    );
+}
+
     public void setState(State state){
         this.currentState.exit(this);
         this.currentState = state;
@@ -146,6 +182,8 @@ System.out.println("GridSpan: " + gridSpanWidth + "x" + gridSpanHeight);
         setAttackTarget(getAttackTarget());
         super.Update(delta);
         currentState.update(this, delta);
+
+        updateHealthBar();
     }
 
 
