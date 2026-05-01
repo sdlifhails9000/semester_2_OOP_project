@@ -35,6 +35,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import jdk.javadoc.internal.doclets.formats.html.Table;
 
 
 // This contain default values for specific hero types
@@ -172,8 +173,12 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        if (mainTower.isDead) {
+            game.setScreen(new EndGameScreen(game, true));
+        }
+
         clickEvent();    // Check left click movement
-        hoverEvent();    //Check if 
+        hoverEvent();    //Check if
 
         for (Entity e : Entity.entityList) {
             e.Update(delta);

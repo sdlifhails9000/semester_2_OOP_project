@@ -37,7 +37,10 @@ class HeroPlayer extends DynamicEntity {
     protected float attackTimer;
 
     private TextureRegion fullHealthRegion;
-    
+
+    float healTimer = 0f;
+    float healingRateRestrictTimer = 0f;
+
     HeroPlayer(HeroPreset preset, int startX, int startY) {
         super(Loader.idle(preset),
               startX, startY,
@@ -74,7 +77,7 @@ class HeroPlayer extends DynamicEntity {
         this.fullHealthRegion = Loader.healthBar(preset);
         this.HealthBarSprite = new Sprite(fullHealthRegion);
         //HealthBarSprite.setScale(0.15f);
-        
+
 
     }
 
@@ -107,30 +110,30 @@ class HeroPlayer extends DynamicEntity {
     }
 
     public void updateHealthBar() {
-    float healthPercent = currentHealth / maxHealth;
+        float healthPercent = currentHealth / maxHealth;
 
-    int fullWidth = fullHealthRegion.getRegionWidth();
-    int height = fullHealthRegion.getRegionHeight();
+        int fullWidth = fullHealthRegion.getRegionWidth();
+        int height = fullHealthRegion.getRegionHeight();
 
-    int visibleWidth = (int)(fullWidth * healthPercent);
+        int visibleWidth = (int)(fullWidth * healthPercent);
 
-    // Clamp so it doesn’t go negative and cry
-    visibleWidth = Math.max(0, visibleWidth);
+        // Clamp so it doesn’t go negative and cry
+        visibleWidth = Math.max(0, visibleWidth);
 
-    HealthBarSprite.setRegion(
-        fullHealthRegion.getRegionX(),
-        fullHealthRegion.getRegionY(),
-        visibleWidth,
-        height
-    );
+        HealthBarSprite.setRegion(
+            fullHealthRegion.getRegionX(),
+            fullHealthRegion.getRegionY(),
+            visibleWidth,
+            height
+        );
 
-    HealthBarSprite.setSize(visibleWidth * 0.15f, height * 0.15f);
+        HealthBarSprite.setSize(visibleWidth * 0.15f, height * 0.15f);
 
-    HealthBarSprite.setCenter(
-        getCurrentPosition().x,
-        getCurrentPosition().y + spriteHeight / 2f + 1f
-    );
-}
+        HealthBarSprite.setCenter(
+            getCurrentPosition().x,
+            getCurrentPosition().y + spriteHeight / 2f + 1f
+        );
+    }
 
     @Override
     public void Update(float delta){
@@ -146,6 +149,12 @@ class HeroPlayer extends DynamicEntity {
         this.currentState.exit(this);
         this.currentState = state;
         this.currentState.enter(this);
+    }
+
+    @Override
+    protected void takeDamage(float damage) {
+        super.takeDamage(damage);
+        healTimer = 0f;
     }
 }
 

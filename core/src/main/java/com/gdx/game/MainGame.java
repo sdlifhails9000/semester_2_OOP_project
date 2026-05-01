@@ -2,6 +2,7 @@ package com.gdx.game;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -19,7 +20,14 @@ public class MainGame extends Game {
         manager.load("atlas\\practiceAtlas.atlas", TextureAtlas.class);
 
         //Load sounds
-        manager.load("Kwality_Sounds/Game_Click.wav", Sound.class);
+        manager.load("Kwality_Sounds/Game_Click.mp3", Sound.class);
+
+        // Load the main menu music
+        manager.load("Kwality_Sounds/Menu_Music.mp3", Music.class);
+
+        // Load the ending music
+        manager.load("Kwality_Sounds/Game_Lose.wav", Music.class);
+        manager.load("Kwality_Sounds/Game_Win.wav", Music.class);
 
         //Loads HeroPreset which is made in Loader.java
         for (HeroPreset preset : HeroPreset.values()) {

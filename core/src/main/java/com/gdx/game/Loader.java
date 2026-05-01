@@ -56,7 +56,7 @@ enum HeroPreset {
 }
 
 interface BotPreset{
-    // getter methods 
+    // getter methods
     float getMaxHealth();
     float getSpeed();
     float getSpriteWidth();
@@ -222,10 +222,10 @@ enum WeaponPreset {
 }
 
 enum ProjectilePreset {
-    MAIN_TOWER("TowerAtlas/MainProjectile.atlas", true, 20, 30,4, 2),
-    MINI_TOWER("TowerAtlas/MiniProjectile.atlas",true, 20, 30, 4, 2),
-    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainProjectile.atlas", false, 20, 30, 4, 2),
-    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniProjectile.atlas", false, 20, 30, 4, 2);
+    MAIN_TOWER("TowerAtlas/MainProjectile.atlas", true, 20, 30,1, 5),
+    MINI_TOWER("TowerAtlas/MiniProjectile.atlas",true, 20, 30, 1, 5),
+    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainProjectile.atlas", false, 20, 30, 1, 5),
+    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniProjectile.atlas", false, 20, 30, 1, 5);
 
     final String assetPath;
 
@@ -263,7 +263,7 @@ final class Loader {
     private static Map<HeroPreset, Animation<TextureRegion>> heroAttackAnimation;
     private static Map<HeroPreset, Animation<TextureRegion>> heroDeadAnimation;
     private static Map<HeroPreset, TextureRegion> heroHealthBar;
-    
+
 
     // Declare hash map to store assets for GoblinPreset
     private static Map<GoblinPreset, TextureAtlas> goblinAtlass;

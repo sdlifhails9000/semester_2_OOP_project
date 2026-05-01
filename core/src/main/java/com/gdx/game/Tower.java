@@ -207,7 +207,7 @@ class Projectile extends DynamicEntity {
     Entity attackTarget;
 
     public Projectile(Weapon parent, ProjectilePreset preset, float startX, float startY) {
-        super(Loader.flying(preset),    //Passing in flying so that we generate correct sized hitbox (idle animation is not upto scale and is transparent) 
+        super(Loader.flying(preset),    //Passing in flying so that we generate correct sized hitbox (idle animation is not upto scale and is transparent)
             startX, startY,
             1000000, // placeholder
             preset.projectileSpeed,
@@ -220,7 +220,7 @@ class Projectile extends DynamicEntity {
         projectileFlyingState = new ProjectileFlyingState();
         projectileImpactState = new ProjectileImpactState();
 
-        //Initial state is idleState (DO NOT CHANGE) 
+        //Initial state is idleState (DO NOT CHANGE)
         currentState = projectileIdleState;
 
         projectileSpeed = preset.projectileSpeed;
@@ -252,6 +252,7 @@ class Projectile extends DynamicEntity {
     @Override
     public void Update(float delta) {
         super.Update(delta);
+
         currentState.update(this, delta);
     }
 }

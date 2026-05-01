@@ -235,7 +235,7 @@ class ProjectileFlyingState implements State<Projectile> {
 
         float angle = getAngle(e, e.targetPosition);
 
-        e.setRotation(angle);
+        e.setRotation(angle - 90);
 
         //Initially targetPosition is equal to currentXY thats why it explodes
         if (e.targetPosition.epsilonEquals(e.currentXY, 0.5f)) {

@@ -2,6 +2,7 @@ package com.gdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -24,6 +25,7 @@ public class MainScreen implements Screen {
 
     //Sound
     private Sound clickSound;
+    private Music menuMusic;
 
     // Background color
     private static final float BG_R = 0.07f, BG_G = 0.07f, BG_B = 0.10f;
@@ -49,7 +51,12 @@ public class MainScreen implements Screen {
         showMainState();
 
         //For sound effects (Loaded from MainGame)
-        clickSound = game.manager.get("Kwality_Sounds/Game_Click.wav", Sound.class);
+        clickSound = game.manager.get("Kwality_Sounds/Game_Click.mp3", Sound.class);
+        menuMusic = game.manager.get("Kwality_Sounds/Menu_Music.mp3", Music.class);
+        menuMusic.setLooping(true);
+        menuMusic.play();
+        menuMusic.setVolume(0.5f);
+
     }
 
     private void createSkin() {
@@ -203,7 +210,7 @@ public class MainScreen implements Screen {
     public void dispose() {
         stage.dispose();
         skin.dispose();
-
+        menuMusic.stop();
         //ClickSound dispose is handled by manager which is disposed when game ends
     }
 }

@@ -33,7 +33,15 @@ class HeroIdleState implements State<HeroPlayer> {
 
         if(e.getAttackTarget() != null){
             e.setState(e.heroAttackState);
-            return;
+        }
+
+        e.healTimer += delta;
+        if (e.healTimer >= 5) {
+            e.healingRateRestrictTimer += delta;
+            if (e.healingRateRestrictTimer > 1f) {
+                e.currentHealth = MathUtils.clamp(e.currentHealth + 20f, 0, e.maxHealth);
+                e.healingRateRestrictTimer = 0f;
+            }
         }
     }
 
@@ -51,7 +59,6 @@ class HeroMoveState implements State<HeroPlayer> {
 
     @Override
     public void update(HeroPlayer e, float delta) {
-
         //If the entity itself dies
         if (e.isDead){
             e.setState(e.heroDeadState);
@@ -104,6 +111,15 @@ class HeroMoveState implements State<HeroPlayer> {
 
         // Update collision and hitboxes and update the sprite position
         e.setCenter(e.currentXY.x, e.currentXY.y);
+
+        e.healTimer += delta;
+        if (e.healTimer >= 5) {
+            e.healingRateRestrictTimer += delta;
+            if (e.healingRateRestrictTimer > 1f) {
+                e.currentHealth = MathUtils.clamp(e.currentHealth + 20f, 0, e.maxHealth);
+                e.healingRateRestrictTimer = 0f;
+            }
+        }
     }
 
     @Override
@@ -117,6 +133,8 @@ class HeroMoveState implements State<HeroPlayer> {
 class HeroAttackState implements State<HeroPlayer> {
     public void enter(HeroPlayer e){
         e.currentAnimation = e.attackAnimation;
+        e.healTimer = 0f;
+        e.healingRateRestrictTimer = 0f;
     }
 
     @Override
@@ -179,7 +197,6 @@ class HeroAttackState implements State<HeroPlayer> {
 }
 
 class HeroChaseState implements State<HeroPlayer> {
-
     public void enter(HeroPlayer e){
         e.currentAnimation = e.runAnimation;
     }
@@ -248,6 +265,11 @@ class HeroChaseState implements State<HeroPlayer> {
 
         // Update collision and hitboxes and update the sprite position
         e.setCenter(e.currentXY.x, e.currentXY.y);
+
+        e.healTimer += delta;
+        if (e.healTimer >= 5) {
+            e.currentHealth = MathUtils.clamp(e.currentHealth + 20f, 0, e.maxHealth);
+        }
     }
 
     public void exit(HeroPlayer e){
@@ -304,7 +326,7 @@ class HeroDeadState implements State<HeroPlayer> {
             e.setCurrentPosition(-9999, -9999); // Some random position while we wait
             e.updateBoxes();
         }
-        
+
 
         if (!blocked){
             e.setTargetPosition(respawnPositionX, respawnPositionY);
@@ -317,7 +339,7 @@ class HeroDeadState implements State<HeroPlayer> {
             e.animationTimer = 0f;
         }
     }
-    
+
     @Override
     public void exit (HeroPlayer e) {
         e.animationTimer = 0;
