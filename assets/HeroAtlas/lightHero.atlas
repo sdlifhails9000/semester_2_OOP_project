@@ -70,3 +70,5 @@ bounds:104,87,100,80
 Run
 index:8
 bounds:206,87,100,80
+heartStrip
+bounds:308,87,80,16
