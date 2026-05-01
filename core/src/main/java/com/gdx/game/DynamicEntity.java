@@ -87,7 +87,7 @@ abstract class DynamicEntity extends Entity {
             }
 
             //Do not check collision between DEAD entities
-            if (this.isDead || i.isDead){
+            if (i.isDead){
                 continue;
             }
 

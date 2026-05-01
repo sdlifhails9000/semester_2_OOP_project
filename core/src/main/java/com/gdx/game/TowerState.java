@@ -226,10 +226,7 @@ class ProjectileFlyingState implements State<Projectile> {
         if (e.getAttackTarget() != null){
             boolean isArrowColliding = e.getHitBox().overlaps(e.getAttackTarget().getHitBox());
 
-            // Prevent damaging if projectile overlaps with tower bounds
-            boolean overlapsTower = e.getHitBox().overlaps(e.parent.parent.getHitBox());
-
-            if (isArrowColliding && !overlapsTower) {
+            if (isArrowColliding) {
                 e.getAttackTarget().takeDamage(e.attackStrength);
                 e.setState(e.projectileImpactState);
                 return;

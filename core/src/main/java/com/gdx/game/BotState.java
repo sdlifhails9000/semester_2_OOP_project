@@ -363,12 +363,14 @@ class BotDeadState implements State<Bot> {
     private static final float MAX_RESPAWN_TIME = 5f; // In seconds btw
     private boolean isDying;
     private boolean isRespawing;
+    private boolean blocked;
 
     public void enter (Bot e){
         e.currentAnimation = e.deadAnimation;
         e.currentAnimation.setPlayMode(Animation.PlayMode.NORMAL);
         isDying = true;
         isRespawing = false;
+        blocked = false;        //When in deadState your entity is not blocked
     }
 
     public void update (Bot e, float delta) {
@@ -389,40 +391,36 @@ class BotDeadState implements State<Bot> {
             return;
         }
 
-        if (Bot.BotList.size() > 5) {
-            return;
-        }
-
-        e.currentHealth = e.maxHealth;
-        e.isDead = false;
-
-        float respawnPositionX = 20f;
-        float respawnPositionY = 20f;
+        blocked = false;
+        //Every entity has their own specific spawn points
+        float respawnPositionX = e.startX;
+        float respawnPositionY = e.startY;
 
         e.setCurrentPosition(respawnPositionX, respawnPositionY);
         e.updateBoxes();
 
+        //In case someone is standing on their spawn point
         if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()) {
-            float respawnOffsetX = MathUtils.random(-100, 100);
-            float respawnOffsetY = MathUtils.random(-100, 100);
-
-            respawnPositionX = MathUtils.clamp(respawnPositionX + respawnOffsetX,
-                e.getCollisionBox().getWidth()/2, 200f - e.getCollisionBox().getWidth()/2);
-            respawnPositionY = MathUtils.clamp(respawnPositionY + respawnOffsetY,
-                e.getCollisionBox().getHeight()/2, 200f - e.getCollisionBox().getHeight()/2);
-
-            e.setCurrentPosition(respawnPositionX, respawnPositionY);
+            blocked = true;     //In case someone is standing on his respawn point
+            // Revert immediately
+            e.setCurrentPosition(-9999, -9999); // Some random position while we wait
             e.updateBoxes();
         }
+        
 
-        e.setTargetPosition(respawnPositionX, respawnPositionY);
-        e.setCenter(respawnPositionX, respawnPositionY);
-
-        timer = 0f;
-        isRespawing = true;
-        e.currentAnimation.setPlayMode(Animation.PlayMode.REVERSED);
-        e.animationTimer = 0f;
+        if (!blocked){
+            e.setTargetPosition(respawnPositionX, respawnPositionY);
+            e.setCenter(respawnPositionX, respawnPositionY);
+            e.currentHealth = e.maxHealth;
+            e.isDead = false;
+            timer = 0f;
+            isRespawing = true;     //This flag is what respawns the entity
+            e.currentAnimation.setPlayMode(Animation.PlayMode.REVERSED);
+            e.animationTimer = 0f;
+        }
     }
+
+    @Override
     public void exit (Bot e) {
         e.animationTimer = 0;
     }

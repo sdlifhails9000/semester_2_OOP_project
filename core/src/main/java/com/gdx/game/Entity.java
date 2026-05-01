@@ -25,6 +25,8 @@ abstract class Entity extends Sprite {
     protected Animation<TextureRegion> currentAnimation;
 
     protected float animationTimer = 0;
+    protected float startX;
+    protected float startY;
 
     // Health info
     protected final float maxHealth;
@@ -41,6 +43,7 @@ abstract class Entity extends Sprite {
     protected Rectangle collisionBox;
     protected Rectangle hitBox;
 
+
     Entity(Animation<TextureRegion> idleAnimation,
            float startX, float startY,
            float maxHealth,
@@ -52,7 +55,9 @@ abstract class Entity extends Sprite {
 
         this.idleAnimation = idleAnimation;
         this.currentAnimation = idleAnimation;  //Initially your character is idle
-
+        
+        this.startX = startX;
+        this.startY = startY;
         this.currentXY = new Vector2(startX, startY);
 
         this.maxHealth = maxHealth;

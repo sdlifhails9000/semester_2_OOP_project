@@ -74,13 +74,14 @@ public class GameScreen implements Screen {
     float cameraSpeed = 40f;             // -> Camera Move Speed (Based off above world size)
 
     Vector3 clickCoords;
+    Vector3 hoverCoords;
 
     // Declare Spritbatch and textureAtlas for Images
     SpriteBatch batch;
 
     //DynamicSprites (self defined)
     HeroPlayer player;
-    HeroPlayer testEnemy;
+    HeroPlayer enemy;
 
     //DynamicEntities (Bots)
     Bot g1, g2, g3, g4, g5, g6;
@@ -118,18 +119,19 @@ public class GameScreen implements Screen {
         Loader.load(game.manager);
 
         clickCoords = new Vector3();
+        hoverCoords = new Vector3();
 
         //Initialize the DYNAMIC SPRITES
         mainTower = new Tower(TowerPreset.ENEMY_MAIN, 400, 54);
 
         //DRAW THE TOWER FIRST SO THAT WHEN TOWER DIES PLAYER CANNOT HIDE UNDER ITS RUBBLE
         player = new HeroPlayer(preset, 300, 50);
-        testEnemy = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 20, 20);
+        enemy = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 20, 20);
 
         // //Initialize the goblins
         // g1 = new Bot(GoblinPreset.GOBLIN, 10,20);
         // // g2 = new Goblin(Preset.GOBLIN, 20,20);
-        // g3 = new Bot(GoblinPreset.GOBLIN, 300,30);
+        //g3 = new Bot(GoblinPreset.GOBLIN, 300,30);
         g4 = new Bot(GoblinPreset.ENEMY_GOBLIN, 300,40);
         // // g5 = new Goblin(Preset.ENEMY_GOBLIN, 180,180);
         // // g6 = new Goblin(Preset.ENEMY_GOBLIN, 180,190);
@@ -170,7 +172,8 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        clickEvent(delta);    // Check left click movement
+        clickEvent();    // Check left click movement
+        hoverEvent();    //Check if 
 
         for (Entity e : Entity.entityList) {
             e.Update(delta);
@@ -186,47 +189,6 @@ public class GameScreen implements Screen {
 
     }
 
-
-    @Override
-    public void show() {
-
-    }
-
-
-    @Override
-    public void resize(int width, int height){
-        viewport.update(width, height, true);       //True to centre camera when resized (not resizing camera here as viewport was made to handle it)
-
-        //USE THIS IF YOU WANT FIXED RESIZING SCALE (Abit cursed)
-
-        // float aspect = (float) width / (float) height;
-        // camera.viewportWidth = cameraWidth * aspect;
-        // camera.viewportHeight = cameraHeight;
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
-    }
-
-    @Override
-    public void dispose() {
-        batch.dispose();
-        shapeRenderer.dispose();   // TO DO: Remove DEBUG tool
-        mapRenderer.dispose();
-    }
-
-
     //METHODS USED IN CREATE, RENDER, ETC OVER HERE
 
     // Main draw function, draws everything that has breath, praise the Lord
@@ -237,6 +199,10 @@ public class GameScreen implements Screen {
         mapRenderer.setView(camera);    //This makes our tiled map use our camera we made
         mapRenderer.render();           //Render the map obv
 
+        //To get goblinHealth bar to be viewed by right Click (See getGoblinHealthBarSprite())
+        Sprite showGobHealthBarSprite = getGoblinHealthBarSprite();         //This is made so that when we right click on a goblin only then we can see its healthbar
+        Sprite hoverOverHealthBarSprite = getHovSprite();
+
         // Draw the batch
         batch.begin();
         //Draw all the entities by for loop
@@ -244,13 +210,20 @@ public class GameScreen implements Screen {
             e.draw(batch);
         }
 
-        for (HeroPlayer h : HeroPlayer.heroList) {
-            h.HealthBarSprite.draw(batch);
+        //Draw the player health bar
+        player.HealthBarSprite.draw(batch);
+
+        if (showGobHealthBarSprite != null){
+            showGobHealthBarSprite.draw(batch);
         }
 
-        for (Bot b : Bot.BotList) {
-            b.HealthBarSprite.draw(batch);
+        if (hoverOverHealthBarSprite != null){
+            hoverOverHealthBarSprite.draw(batch);
         }
+
+
+        //Draw the enemy healthbar
+        enemy.HealthBarSprite.draw(batch);
 
         for (Tower t : Tower.towerList) {
             t.HealthBarSprite.draw(batch);
@@ -304,6 +277,45 @@ public class GameScreen implements Screen {
         // } REMOVE END
     }
 
+    @Override
+    public void show() {
+
+    }
+
+
+    @Override
+    public void resize(int width, int height){
+        viewport.update(width, height, true);       //True to centre camera when resized (not resizing camera here as viewport was made to handle it)
+
+        //USE THIS IF YOU WANT FIXED RESIZING SCALE (Abit cursed)
+
+        // float aspect = (float) width / (float) height;
+        // camera.viewportWidth = cameraWidth * aspect;
+        // camera.viewportHeight = cameraHeight;
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void hide() {
+
+    }
+
+    @Override
+    public void dispose() {
+        batch.dispose();
+        shapeRenderer.dispose();   // TO DO: Remove DEBUG tool
+        mapRenderer.dispose();
+    }
+
 
     // Implement later for handling keyboard events
     // private void keyEvent(float delta) {
@@ -311,7 +323,7 @@ public class GameScreen implements Screen {
     // }
 
     // Mouse Click Event
-    private void clickEvent(float delta){
+    private void clickEvent(){
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             // Vector is basically a class with 3 data members, includes methods for magnitude,normalization(unit vector)
             clickCoords.set(Gdx.input.getX(), Gdx.input.getY(), 0 );
@@ -350,6 +362,26 @@ public class GameScreen implements Screen {
                 }
             }
         }
+    }
+
+    //Made to be passed in render (utilized by getHovSprite())
+    public void hoverEvent(){
+        if (hoverCoords != null){
+            hoverCoords.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            camera.unproject(hoverCoords);
+        }
+    }
+
+    //Made to be utilized in draw to get the effective sprite
+    public Sprite getHovSprite(){
+        //Convert to 2d coords
+        Vector2 hoverCoords2D = new Vector2(hoverCoords.x, hoverCoords.y);
+        for (Bot b : Bot.BotList){
+            if (b.getCollisionBox().contains(hoverCoords2D)){     //If we hover on a character get its healthbarsprite
+                return b.HealthBarSprite;
+            }
+        }
+        return null;        //Otherwise give null
     }
 
     boolean detachedState = false;
@@ -513,6 +545,13 @@ public class GameScreen implements Screen {
         }
 
         return blocked;
+    }
+    public Sprite getGoblinHealthBarSprite(){
+        if (player.getAttackTarget() instanceof Bot){
+            Bot target = (Bot)player.getAttackTarget();
+            return target.HealthBarSprite;
+        }
+        return null;
     }
 }
 

@@ -15,9 +15,9 @@ class Tower extends Entity {
     Sprite HealthBarSprite;
     private TextureRegion fullHealthRegion;
 
-    State towerIdleState;
-    State towerDeadState;
-    State currentState;
+    State<Tower> towerIdleState;
+    State<Tower> towerDeadState;
+    State<Tower> currentState;
 
     Weapon towerWeapon;
 
@@ -113,10 +113,10 @@ class Weapon extends Entity {
     Projectile arrow;
     private Entity attackTarget;
 
-    State weaponIdleState;
-    State weaponAttackState;
-    State weaponDeadState;
-    State currentState;
+    State<Weapon> weaponIdleState;
+    State<Weapon> weaponAttackState;
+    State<Weapon> weaponDeadState;
+    State<Weapon> currentState;
 
     float attackInterval;
     float attackRange;
@@ -197,10 +197,10 @@ class Projectile extends DynamicEntity {
     Animation<TextureRegion> idleAnimation;
     Animation<TextureRegion> flyingAnimation;
 
-    State projectileFlyingState;
-    State projectileImpactState;
-    State projectileIdleState;
-    State currentState;
+    State<Projectile> projectileFlyingState;
+    State<Projectile> projectileImpactState;
+    State<Projectile> projectileIdleState;
+    State<Projectile> currentState;
 
     float projectileSpeed;
     float attackStrength;
