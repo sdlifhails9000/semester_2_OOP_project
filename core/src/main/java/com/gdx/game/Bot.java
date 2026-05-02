@@ -27,7 +27,6 @@ class Bot extends DynamicEntity{
 
     // Bot States
     State BotIdleState = new BotIdleState();
-    State BotMoveState = new BotMoveState();
     State BotChaseState = new BotChaseState();
     State BotAttackState = new BotAttackState();
     State BotDeadState = new BotDeadState();
@@ -188,50 +187,68 @@ class Bot extends DynamicEntity{
     }
 
 
-    public List<Node> bfs(int sx, int sy, int gx, int gy, boolean[][] blocked, int width, int height){        
-    Queue<Node> queue = new LinkedList<>();
-    boolean[][] visited = new boolean[blocked.length][blocked[0].length];
+    public List<Node> bfs(int sx, int sy, int gx, int gy, boolean[][] blocked, int width, int height){     
+    
+    
+        int[][] dirs = {    // Directions to move to, removed diagonals
+                {1, 0}, {-1, 0}, {0, 1}, {0, -1}
+            };
+                
 
-    Node start = new Node(sx, sy);
-    queue.add(start);
-    visited[sx][sy] = true;
+            // If sx sy is blocked
+            // if(!canStand(sx, sy, width, height, blocked)){
+            //     for(int[] d : dirs){
+            //         int nx = sx + d[0];
+            //         int ny = sx + d[1];
 
-    int[][] dirs = {
-        {1, 0}, {-1, 0}, {0, 1}, {0, -1}
-    };
+            //         if(canStand(nx, ny, width, height, blocked)){   // If new grid is valid
+            //             sx = nx;
+            //             sy = ny;
 
-    while (!queue.isEmpty()) {
+            //         }
+            //     }
 
-        Node current = queue.poll();
+            // }
 
-        if (current.x == gx && current.y == gy) {
-            return reconstructPath(current);
+            Queue<Node> queue = new LinkedList<>();
+            boolean[][] visited = new boolean[blocked.length][blocked[0].length];
+
+            Node start = new Node(sx, sy);
+            queue.add(start);
+            visited[sx][sy] = true;
+
+            while (!queue.isEmpty()) {
+
+                Node current = queue.poll();
+
+                if (current.x == gx && current.y == gy) {
+                    return reconstructPath(current);
+                }
+
+                for (int[] d : dirs) {
+                    int nx = current.x + d[0];
+                    int ny = current.y + d[1];
+
+                    if (nx < 0 || ny < 0 || nx >= blocked.length || ny >= blocked[0].length)
+                        continue;
+
+                    if (visited[nx][ny])
+                        continue;
+
+                    
+                    if (!canStand(nx, ny, width, height, blocked))
+                        continue;
+
+                    Node next = new Node(nx, ny);
+                    next.parent = current;
+                    visited[nx][ny] = true;
+                    queue.add(next);
+                }
+            }
+
+            System.out.println("Didnt find a path");
+            return null;
         }
-
-        for (int[] d : dirs) {
-            int nx = current.x + d[0];
-            int ny = current.y + d[1];
-
-            if (nx < 0 || ny < 0 || nx >= blocked.length || ny >= blocked[0].length)
-                continue;
-
-            if (visited[nx][ny])
-                continue;
-
-            
-            if (!canStand(nx, ny, width, height, blocked))
-                continue;
-
-            Node next = new Node(nx, ny);
-            next.parent = current;
-            visited[nx][ny] = true;
-            queue.add(next);
-        }
-    }
-
-    System.out.println("Didnt find a path");
-    return null;
-}
 
    boolean canStand(
     int x, int y,
