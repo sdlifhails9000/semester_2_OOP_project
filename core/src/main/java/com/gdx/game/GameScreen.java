@@ -81,8 +81,8 @@ public class GameScreen implements Screen {
     SpriteBatch batch;
 
     //DynamicSprites (self defined)
-    HeroPlayer player;
-    HeroPlayer enemy;
+    static HeroPlayer player;
+    HeroBot enemy;
 
     //DynamicEntities (Bots)
     Bot g1, g2, g3, g4, g5, g6;
@@ -105,8 +105,6 @@ public class GameScreen implements Screen {
     ShapeRenderer shapeRenderer;  // DEBUG tool
     ShapeRenderer shapeRendererGreen;
 
-    // Pathfinding
-    static boolean[][] blocked;
 
     MainGame game;
 
@@ -128,13 +126,13 @@ public class GameScreen implements Screen {
 
         //DRAW THE TOWER FIRST SO THAT WHEN TOWER DIES PLAYER CANNOT HIDE UNDER ITS RUBBLE
         player = new HeroPlayer(preset, 300, 50);
-        enemy = new HeroPlayer(HeroPreset.ENEMY_HERO_HEAVY, 20, 20);
+        enemy = new HeroBot(HeroBotPreset.ENEMY_HERO_HEAVY, 300, 30);
 
         // //Initialize the goblins
         // g1 = new Bot(GoblinPreset.GOBLIN, 10,20);
         // // g2 = new Goblin(Preset.GOBLIN, 20,20);
         //g3 = new Bot(GoblinPreset.GOBLIN, 300,30);
-        g4 = new Bot(GoblinPreset.ENEMY_GOBLIN, 300,40);
+        //g4 = new Bot(GoblinPreset.ENEMY_GOBLIN, 300,40);
         // g5 = new Bot(GoblinPreset.ENEMY_GOBLIN, 330,40);
         // g6 = new Bot(GoblinPreset.ENEMY_GOBLIN, 320,40);
 
@@ -159,9 +157,6 @@ public class GameScreen implements Screen {
         // TO DO: REMOVE
         shapeRenderer = new ShapeRenderer();  // DEBUG tool
         shapeRendererGreen = new ShapeRenderer();
-        // Pathfinding
-        blocked = new boolean[(int)worldWidth][(int)worldHeight];
-        Bot.blocked = blocked;
 
         // store all the map collisions
         ArrayList<Rectangle> boundaryCollisions = getMapCollisions();
@@ -256,24 +251,6 @@ public class GameScreen implements Screen {
         // Grid is sized to match map tiles (200x27 grid from getGrid)
         float cellSize = worldWidth / mapWidth;  // = 800/200 = 4 world units per tile
 
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        for (int x = 0; x < blocked.length; x++) {
-            for (int y = 0; y < blocked[0].length; y++) {
-
-                if (blocked[x][y]) {
-                    shapeRenderer.setColor(1, 0, 0, 0.5f); // red = blocked
-                    shapeRenderer.rect(
-                    x * cellSize,
-                    y * cellSize,
-                    cellSize,
-                    cellSize
-                );
-                }
-
-                // Render at map tile position (already in world units
-            }
-        }
-        shapeRenderer.end();
         shapeRendererGreen.begin(ShapeRenderer.ShapeType.Line);
         for(Node i : BotChaseState.nodeList){
             int x = i.x;
@@ -516,6 +493,10 @@ public class GameScreen implements Screen {
             return target.HealthBarSprite;
         }
         return null;
+    }
+
+    public static Entity getPlayer(){
+        return player;
     }
 }
 

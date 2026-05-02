@@ -42,8 +42,8 @@ class Bot extends DynamicEntity{
     // Path finding
     int gridSpanHeight;
     int gridSpanWidth;
-    public static boolean[][] blocked;
     List<Node> BFSpath;
+    Vector2 BFSlastNode = null;
 
 
     //Animation Declaration (Idle and dead is handled in Entity.java)   (Current animation is in entity.java because idle and dead is handled there)
@@ -177,7 +177,7 @@ class Bot extends DynamicEntity{
 
     @Override
     public void Update(float delta) {
-        setAttackTarget(getAttackTarget());
+        this.setAttackTarget(this.getAttackTarget()); // Move to closest always
         super.Update(delta);
         currentState.update(this, delta);
 
@@ -204,6 +204,7 @@ class Bot extends DynamicEntity{
                 Node current = queue.poll();
 
                 if (current.x == gx && current.y == gy) {
+                    BFSlastNode = new Vector2(current.x,current.y);
                     return reconstructPath(current);
                 }
 
@@ -321,11 +322,4 @@ class Node {
         this.x = x;
         this.y = y;
     }
-}
-
-class HeroBot extends Bot{
-    HeroBot(BotPreset preset, int startX, int startY){
-    super(preset, startX,startY);
-    }
-
 }

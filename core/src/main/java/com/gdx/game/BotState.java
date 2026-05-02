@@ -108,13 +108,19 @@ class BotChaseState implements State<Bot> {
         
         lastValidPostion.set(e.currentXY);
 
-        e.setAttackTarget(e.getAttackTarget()); // Move to closest always
         //If the entity itself dies
         if (e.isDead){
             e.setState(e.BotDeadState);
             e.attackTarget = null;
             return;
         }
+
+        // If target is far from the node bot is moving towards
+        if(e.BFSlastNode!= null)
+            if(e.attackTarget.currentXY.dst(e.BFSlastNode.cpy().scl(Bot.tileSize*Bot.scale)) > 25){
+                e.BFSpath = null;
+                e.BFSlastNode = null;
+            }
 
         // if Bot is close to an enemy then go into attack state
         if (e.isCloseToEnemy()){
@@ -162,7 +168,6 @@ class BotChaseState implements State<Bot> {
         // Handle collision - revert movement when colliding
         if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()){
             // Calculate the direction we were trying to move (from last valid to current)
-            Vector2 moveDir = e.currentXY.cpy().sub(lastValidPostion).nor();
             
             e.collisionCounter++;
 

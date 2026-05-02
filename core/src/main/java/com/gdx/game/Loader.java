@@ -382,6 +382,7 @@ final class Loader {
     private static Map<GoblinPreset, Animation<TextureRegion>> goblinAttackAnimation;
     private static Map<GoblinPreset, Animation<TextureRegion>> goblinDeadAnimation;
     private static Map<GoblinPreset, TextureRegion> goblinHealthBar;
+    private static Map<HeroBotPreset, TextureRegion> heroBotHealthBar;
 
     // Declare hash map to store assets for HeroBotPreset
     private static Map<HeroBotPreset, TextureAtlas> heroBotAtlass;
@@ -429,6 +430,7 @@ final class Loader {
         goblinAttackAnimation = new HashMap<>();
         goblinDeadAnimation = new HashMap<>();
         goblinHealthBar = new HashMap<>();
+        heroBotHealthBar = new HashMap<>();
 
         // Hash maps for herobot
         heroBotAtlass = new HashMap<>();
@@ -533,6 +535,9 @@ final class Loader {
 
             // Load all the animations into the hash map
             heroBotAttackAnimation.put(preset, attack);
+
+            //Create goblin health bar sprite
+            heroBotHealthBar.put(preset, atlas.findRegion("heartStrip"));
         }
         
 
@@ -649,7 +654,7 @@ final class Loader {
         if(preset instanceof GoblinPreset)
             return goblinHealthBar.get(preset);
         else
-            return goblinHealthBar.get(preset); // Change to herobot after if
+            return heroBotHealthBar.get(preset); // Change to herobot after if
     }
 
 //------------------------------------------------------------------------
