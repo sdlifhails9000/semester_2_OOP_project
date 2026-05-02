@@ -21,4 +21,9 @@
    <object id="5" x="0.125" y="3.3125" width="15.375" height="12.1875"/>
   </objectgroup>
  </tile>
+ <tile id="13">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0.347826" y="0.173913" width="15.3478" height="14.1739"/>
+  </objectgroup>
+ </tile>
 </tileset>
