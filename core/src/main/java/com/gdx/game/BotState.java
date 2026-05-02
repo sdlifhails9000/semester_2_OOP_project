@@ -121,7 +121,8 @@ class BotChaseState implements State<Bot> {
 
 
         // If the target is dead
-        if (e != null && e.getAttackTarget().isDead) {
+        Entity attackTarget = e.getAttackTarget();
+        if (attackTarget != null && e.getAttackTarget().isDead) {
             e.setState(e.BotIdleState);
             e.attackTarget = null;
             return;
@@ -135,7 +136,8 @@ class BotChaseState implements State<Bot> {
 
         // calculate speed and turn towards the target
         if(e.BFSpath == null){
-            e.moveTowards(e.attackTarget.getCurrentPosition(), delta);
+            if(attackTarget != null)
+                e.moveTowards(e.attackTarget.getCurrentPosition(), delta);
         }
 
         // Change position based on velocity - ALWAYS update currentXY regardless of BFS path
@@ -158,6 +160,7 @@ class BotChaseState implements State<Bot> {
             System.out.println("Collision detected!");
             
             if(e.isCollidingWithBoundry()){
+                System.out.println(e.collisionCounter);
                 e.collisionCounter++;
             }
             
@@ -176,42 +179,44 @@ class BotChaseState implements State<Bot> {
 
             
             if(e.collisionCounter>3){
-                System.out.println(1);
-                // Calculate BFS from CURRENT position to target position
-                int gx = (int) Math.ceil(e.attackTarget.getCurrentPosition().x / Bot.tileSize / Bot.scale);
-                int gy = (int) Math.ceil(e.attackTarget.getCurrentPosition().y / Bot.tileSize / Bot.scale);
-                
-                int sx = (int) Math.ceil(e.currentXY.x / Bot.tileSize / Bot.scale);
-                int sy = (int) Math.ceil(e.currentXY.y / Bot.tileSize / Bot.scale);
-                
-                System.out.println("moveDir: " + moveDir.x + "," + moveDir.y);
-                // Adjust starting grid position based on direction of collision
-                // If we hit something while moving right (moveDir.x > 0), try starting from the left
-                if(moveDir.x > 0){
-                    sx--;
-                }
-                else if(moveDir.x < 0){
-                    sx++;
-                }
+                if(attackTarget != null){
+                    // Calculate BFS from CURRENT position to target position
+                    int gx = (int) Math.ceil(e.attackTarget.getCurrentPosition().x / Bot.tileSize / Bot.scale);
+                    int gy = (int) Math.ceil(e.attackTarget.getCurrentPosition().y / Bot.tileSize / Bot.scale);
+                    
+                    int sx = (int) Math.ceil(e.currentXY.x / Bot.tileSize / Bot.scale);
+                    int sy = (int) Math.ceil(e.currentXY.y / Bot.tileSize / Bot.scale);
+                    
+                    System.out.println("moveDir: " + moveDir.x + "," + moveDir.y);
+                    // Adjust starting grid position based on direction of collision
+                    // If we hit something while moving right (moveDir.x > 0), try starting from the left
+                    if(moveDir.x > 0){
+                        sx--;
+                    }
+                    else if(moveDir.x < 0){
+                        sx++;
+                    }
 
-                // If we hit something while moving up (moveDir.y > 0), try starting from below
-                if(moveDir.y > 0){
-                    sy--;
-                }
-                else if(moveDir.y < 0){
-                    sy++;
-                }
+                    // If we hit something while moving up (moveDir.y > 0), try starting from below
+                    if(moveDir.y > 0){
+                        sy--;
+                    }
+                    else if(moveDir.y < 0){
+                        sy++;
+                    }
 
-                System.out.println("BFS start: " + sx + "," + sy + " | target: " + gx + "," + gy);
-                e.BFSpath = e.bfs(sx, sy, gx, gy, Bot.blocked,e.gridSpanWidth, e.gridSpanHeight);
-                pathIndex = 0;
-                
-                if(e.BFSpath != null) {
-                    System.out.println("BFS path found with " + e.BFSpath.size() + " nodes");
-                } else {
-                    System.out.println("No BFS path found!");
+                    System.out.println("BFS start: " + sx + "," + sy + " | target: " + gx + "," + gy);
+                    e.BFSpath = e.bfs(sx, sy, gx, gy, Bot.blocked,e.gridSpanWidth, e.gridSpanHeight);
+                    pathIndex = 0;
+                    
+                    if(e.BFSpath != null) {
+                        System.out.println("BFS path found with " + e.BFSpath.size() + " nodes");
+                    } else {
+                        System.out.println("No BFS path found!");
+                    }
+                    e.collisionCounter++;
+
                 }
-                e.collisionCounter++;
             }
     }
     else

@@ -193,22 +193,6 @@ class Bot extends DynamicEntity{
         int[][] dirs = {    // Directions to move to, removed diagonals
                 {1, 0}, {-1, 0}, {0, 1}, {0, -1}
             };
-                
-
-            // If sx sy is blocked
-            // if(!canStand(sx, sy, width, height, blocked)){
-            //     for(int[] d : dirs){
-            //         int nx = sx + d[0];
-            //         int ny = sx + d[1];
-
-            //         if(canStand(nx, ny, width, height, blocked)){   // If new grid is valid
-            //             sx = nx;
-            //             sy = ny;
-
-            //         }
-            //     }
-
-            // }
 
             Queue<Node> queue = new LinkedList<>();
             boolean[][] visited = new boolean[blocked.length][blocked[0].length];
