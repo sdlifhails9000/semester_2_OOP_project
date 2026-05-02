@@ -114,6 +114,13 @@ class BotChaseState implements State<Bot> {
             return;
         }
 
+        // if Bot is close to an enemy then go into attack state
+        if (e.isCloseToEnemy()){
+            e.setState(e.BotAttackState);
+            return;
+        }
+
+
         // MOVE NIGGA MOVE
 
         // Use BFS path if available, otherwise use normal movement
@@ -130,11 +137,6 @@ class BotChaseState implements State<Bot> {
             return;
         }
 
-        // if Bot is close to an enemy then go into attack state
-        if (e.isCloseToEnemy()){
-            e.setState(e.BotAttackState);
-            return;
-        }
 
         // calculate speed and turn towards the target
         if(e.BFSpath == null){

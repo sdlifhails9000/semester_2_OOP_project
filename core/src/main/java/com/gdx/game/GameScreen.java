@@ -135,8 +135,8 @@ public class GameScreen implements Screen {
         // // g2 = new Goblin(Preset.GOBLIN, 20,20);
         //g3 = new Bot(GoblinPreset.GOBLIN, 300,30);
         g4 = new Bot(GoblinPreset.ENEMY_GOBLIN, 300,40);
-        // // g5 = new Goblin(Preset.ENEMY_GOBLIN, 180,180);
-        // // g6 = new Goblin(Preset.ENEMY_GOBLIN, 180,190);
+        // g5 = new Bot(GoblinPreset.ENEMY_GOBLIN, 330,40);
+        // g6 = new Bot(GoblinPreset.ENEMY_GOBLIN, 320,40);
 
         // Initialize Camera
         float height = Gdx.graphics.getHeight();    //For aspect ratio calculation

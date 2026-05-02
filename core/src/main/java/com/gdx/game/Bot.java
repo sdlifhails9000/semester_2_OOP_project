@@ -188,7 +188,7 @@ class Bot extends DynamicEntity{
     
     
         int[][] dirs = {    // Directions to move to, removed diagonals
-                {1, 0}, {-1, 0}, {0, 1}, {0, -1}
+                {1, 0}, {-1, 0}, {0, 1}, {0, -1},
             };
 
             Queue<Node> queue = new LinkedList<>(); // FIFO mode
@@ -223,6 +223,8 @@ class Bot extends DynamicEntity{
                     next.parent = current;
                     visited[nx][ny] = true;
                     queue.add(next);
+
+
                 }
             }
             return null;
@@ -244,23 +246,23 @@ boolean canStand(int x, int y, boolean[][] blocked) {
             float dy = tempCollisionBox.y - rect.y;        // change in y axis
             float distance = (float) Math.sqrt((dx*dx) + (dy*dy));      // distance to centre
 
-            if (distance >= 100) {
+            if (distance >= 100) { // If far away skip
                 continue;
             }
 
-            if (tempCollisionBox.overlaps(rect)) {
+            if (tempCollisionBox.overlaps(rect)) {  // IF collission 
                 return false;
             }
         }
 
-        for (Entity i : entityList) {
+        for (Entity i : entityList) {   // Loop through entities
             if (i == this) {
                 continue;
             }
             if(this.attackTarget == i){
                 continue;
             }
-
+            // Same stuff here
             float dx = tempCollisionBox.x - i.currentXY.x;        // change in x axis
             float dy = tempCollisionBox.y - i.currentXY.y;        // change in y axis
             float distance = (float) Math.sqrt((dx*dx) + (dy*dy));      // distance to centre
@@ -269,7 +271,7 @@ boolean canStand(int x, int y, boolean[][] blocked) {
                 continue;
             }
 
-            //Do not check collision between DEAD entities
+            //Do not check collision between DEAD entities <- Do not redeem the gift card ahh
             if (i.isDead){
                 continue;
             }

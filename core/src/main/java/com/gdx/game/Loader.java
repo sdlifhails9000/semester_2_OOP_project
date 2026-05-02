@@ -72,8 +72,8 @@ interface BotPreset{
 
 enum GoblinPreset implements BotPreset {
     // Hardcoding gridspan at the end, width ,height
-    GOBLIN("GoblinAtlas/Goblin.atlas", 10, 20, 10, 75, 2, 8, 8, true,1,2),
-    ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 10, 20, 10, 75, 2, 8, 8, false,1,2);
+    GOBLIN("GoblinAtlas/Goblin.atlas", 10, 20, 2, 75, 2, 8, 8, true,1,2),
+    ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 10, 0, 2, 75, 2, 8, 8, false,1,2);
 
     final String assetPath;
 
@@ -333,7 +333,7 @@ enum WeaponPreset {
 enum ProjectilePreset {
     MAIN_TOWER("TowerAtlas/MainProjectile.atlas", true, 20, 30,1, 5),
     MINI_TOWER("TowerAtlas/MiniProjectile.atlas",true, 20, 30, 1, 5),
-    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainProjectile.atlas", false, 20, 30, 1, 5),
+    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainProjectile.atlas", false, 20, 0, 1, 5),
     ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniProjectile.atlas", false, 20, 30, 1, 5);
 
     final String assetPath;
