@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tileset version="1.10" tiledversion="1.12.1" name="guild_floorwall1" tilewidth="16" tileheight="16" tilecount="192" columns="24">
  <image source="tilesets/guild/Tiled_files/Walls_interior.png" width="384" height="128"/>
+ <tile id="24">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="11.1875" y="-0.375" width="4.875" height="16.5"/>
+  </objectgroup>
+ </tile>
  <tile id="93">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0.125" y="12.5" width="15.75" height="3.25"/>
