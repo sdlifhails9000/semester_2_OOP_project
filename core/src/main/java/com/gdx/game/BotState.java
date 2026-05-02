@@ -2,6 +2,8 @@
 // Ask me about BotChaseState, and i will cry
 package com.gdx.game;
 import java.util.ArrayList;
+import java.util.Queue;
+import java.util.LinkedList;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.MathUtils;
@@ -174,32 +176,28 @@ class BotChaseState implements State<Bot> {
             
 
             
-            if(e.collisionCounter>30){
+            if(e.collisionCounter>1){
                 if(attackTarget != null){
                     // Calculate BFS from CURRENT position to target position
                     int gx = (int) (e.attackTarget.getCurrentPosition().x / Bot.tileSize / Bot.scale);
                     int gy = (int) (e.attackTarget.getCurrentPosition().y / Bot.tileSize / Bot.scale);
+
+                    if(!e.canStand(gx,gy,false)){
+                        int[] tempGrid = fixGridCoords(e, e.attackTarget.getCurrentPosition().x, e.attackTarget.getCurrentPosition().y);
+                        gx = tempGrid[0];
+                        gy = tempGrid[1];
+                    }
                     
                     int sx = (int) (e.currentXY.x / Bot.tileSize / Bot.scale);
                     int sy = (int) (e.currentXY.y / Bot.tileSize / Bot.scale);
                     
-                    // Adjust starting grid position based on direction of collision
-                    // If we hit something while moving right (moveDir.x > 0)
-                    if(moveDir.x > 0){
-                        sx--;
-                    }
-                    else if(moveDir.x < 0){
-                        sx++;
+                    if(!e.canStand(sx, sy,false)){
+                        int[] tempGrid = fixGridCoords(e, e.currentXY.x, e.currentXY.y);
+                        sx = tempGrid[0];
+                        sy = tempGrid[1];
                     }
 
-                    // If we hit something while moving up (moveDir.y > 0)
-                    if(moveDir.y > 0){
-                        sy--;
-                    }
-                    else if(moveDir.y < 0){
-                        sy++;
-                    }
-                    e.BFSpath = e.bfs(sx, sy, gx, gy, Bot.blocked,e.gridSpanWidth, e.gridSpanHeight);
+                    e.BFSpath = e.bfs(sx, sy, gx, gy);
                     if(e.BFSpath != null)
                         for(Node i : e.BFSpath){
                             nodeList.add(i);
@@ -207,9 +205,8 @@ class BotChaseState implements State<Bot> {
                     pathIndex = 0;
                     
                     if(e.BFSpath != null) {
-                    } else {
+                        e.collisionCounter = 0;
                     }
-                    e.collisionCounter++;
 
                 }
             }
@@ -281,6 +278,71 @@ class BotChaseState implements State<Bot> {
             }
 
     }
+
+    // Method to fix sx,sy gx,gy
+    private int[] fixGridCoords(Bot e,float x,float y){
+
+        int sx = (int) (x / Bot.tileSize / Bot.scale);
+        int sy = (int) (y / Bot.tileSize / Bot.scale);
+        int[] minGrid = {sx,sy};
+        ArrayList<int[]> validGridList =  new ArrayList<>();
+
+        Queue<int[]> q = new LinkedList<>();    // Make queue of integer array
+        boolean[][] visited = new boolean[(int)GameScreen.worldWidth][(int)GameScreen.worldHeight];  // Make boolean list
+
+        q.add(new int[]{sx, sy}); // Add starting
+        visited[sx][sy] = true;
+
+        int[][] dirs = {
+            {1,0},{-1,0},{0,1},{0,-1}
+        };
+
+        while (!q.isEmpty()) {
+
+            int[] cur = q.poll();
+            int currX = cur[0];
+            int currY = cur[1];
+
+            if (e.canStand(currX, currY,false)) {
+                validGridList.add(cur);
+            }
+            Vector2 defaultVector = new Vector2(x,y);
+            if(validGridList.size()>3){
+                float minDist = Float.MAX_VALUE;
+                minGrid = new int[] {sx,sy};
+
+                for(int[] i : validGridList){
+                    float half = (Bot.tileSize * Bot.scale) / 2f;
+                    Vector2 checkVector = new Vector2(i[0]* Bot.tileSize * Bot.scale + half,i[1]* Bot.tileSize * Bot.scale + half);
+                    float newDist = defaultVector.dst(checkVector);
+                    if(newDist<minDist){
+                        minDist = newDist;
+                        minGrid = new int[]{i[0],i[1]};
+                    }
+
+                }
+                return minGrid;
+
+            }
+
+            for (int[] d : dirs) {
+                int nx = currX + d[0];
+                int ny = currY + d[1];
+
+                if (nx < 0 || ny < 0 ||
+                    nx >= visited.length ||
+                    ny >= visited[0].length)
+                    continue;
+
+                if (visited[nx][ny])
+                    continue;
+
+                visited[nx][ny] = true;
+                q.add(new int[]{nx, ny});
+            }
+    }
+        return new int[]{sx,sy};
+    }
 }
 
 
@@ -349,5 +411,5 @@ class BotDeadState implements State<Bot> {
     @Override
     public void exit (Bot e) {
         e.animationTimer = 0;
-    }
+    }   
 }

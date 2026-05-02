@@ -20,7 +20,8 @@ class Bot extends DynamicEntity{
     public static ArrayList<Bot> BotList = new ArrayList<>();
     static float scale = GameScreen.scale;
     int collisionCounter = 0;
-    Rectangle tempCollisionBox = new Rectangle(0,0,collisionBox.width,collisionBox.height);
+    Rectangle tempCollisionRectangle = new Rectangle(0,0,collisionBox.width,collisionBox.height);
+    Rectangle greaterTempCollisioRectangle = new Rectangle(0,0,collisionBox.width*2f,collisionBox.height*2f);
 
     //Entities Declaration
     Entity attackTarget;
@@ -184,15 +185,15 @@ class Bot extends DynamicEntity{
     }
 
 
-    public List<Node> bfs(int sx, int sy, int gx, int gy, boolean[][] blocked, int width, int height){     
-    
+    public List<Node> bfs(int sx, int sy, int gx, int gy){     
     
         int[][] dirs = {    // Directions to move to, removed diagonals
                 {1, 0}, {-1, 0}, {0, 1}, {0, -1},
+                {1,1}, {1,-1}, {-1,1}, {-1,-1}
             };
 
             Queue<Node> queue = new LinkedList<>(); // FIFO mode
-            boolean[][] visited = new boolean[blocked.length][blocked[0].length];
+            boolean[][] visited = new boolean[(int)GameScreen.worldWidth][(int)GameScreen.worldHeight];
 
             Node start = new Node(sx, sy);
             queue.add(start);
@@ -210,15 +211,20 @@ class Bot extends DynamicEntity{
                     int nx = current.x + d[0];
                     int ny = current.y + d[1];
 
-                    if (nx < 0 || ny < 0 || nx >= blocked.length || ny >= blocked[0].length)
+                    if (nx < 0 || ny < 0 || nx >= visited.length || ny >= visited[0].length)
                         continue;
 
                     if (visited[nx][ny])
                         continue;
 
-                    if (!canStand(nx, ny, blocked))
-                        continue;
-
+                    if (Math.abs(d[0]) == 1 && Math.abs(d[1]) == 1){
+                        if (!canStand(nx, ny,true))
+                            continue;
+                    }
+                    else{
+                        if (!canStand(nx, ny,false))
+                            continue;
+                    }
                     Node next = new Node(nx, ny);
                     next.parent = current;
                     visited[nx][ny] = true;
@@ -230,27 +236,33 @@ class Bot extends DynamicEntity{
             return null;
         }
 
-boolean canStand(int x, int y, boolean[][] blocked) {
+boolean canStand(int x, int y,boolean diagonal) {
 
-        float half = (tileSize * scale) / 2f;
+    Rectangle usedCollisionBox;
+    float half = (tileSize * scale) / 2f;
 
     Vector2 worldCoords = new Vector2(
         x * tileSize * scale + half,
         y * tileSize * scale + half
     );
-
-    tempCollisionBox.setCenter(worldCoords);
+    if(diagonal){
+        usedCollisionBox = greaterTempCollisioRectangle;
+    }
+    else{
+        usedCollisionBox = tempCollisionRectangle;
+    }
+    usedCollisionBox.setCenter(worldCoords);
 
         for (Rectangle rect : boundaryCollisions) {
-            float dx = tempCollisionBox.x - rect.x;        // change in x axis
-            float dy = tempCollisionBox.y - rect.y;        // change in y axis
+            float dx = usedCollisionBox.x - rect.x;        // change in x axis
+            float dy = usedCollisionBox.y - rect.y;        // change in y axis
             float distance = (float) Math.sqrt((dx*dx) + (dy*dy));      // distance to centre
 
             if (distance >= 100) { // If far away skip
                 continue;
             }
 
-            if (tempCollisionBox.overlaps(rect)) {  // IF collission 
+            if (usedCollisionBox.overlaps(rect)) {  // IF collission 
                 return false;
             }
         }
@@ -263,8 +275,8 @@ boolean canStand(int x, int y, boolean[][] blocked) {
                 continue;
             }
             // Same stuff here
-            float dx = tempCollisionBox.x - i.currentXY.x;        // change in x axis
-            float dy = tempCollisionBox.y - i.currentXY.y;        // change in y axis
+            float dx = usedCollisionBox.x - i.currentXY.x;        // change in x axis
+            float dy = usedCollisionBox.y - i.currentXY.y;        // change in y axis
             float distance = (float) Math.sqrt((dx*dx) + (dy*dy));      // distance to centre
 
             if (distance > 100) {
@@ -277,7 +289,7 @@ boolean canStand(int x, int y, boolean[][] blocked) {
             }
 
             Rectangle enemyHitBox = i.getCollisionBox();
-            if (tempCollisionBox.overlaps(enemyHitBox)) {
+            if (usedCollisionBox.overlaps(enemyHitBox)) {
                 return false;
             }
         }    
