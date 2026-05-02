@@ -9,14 +9,18 @@ import java.util.Queue;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 class Bot extends DynamicEntity{
+    static ShapeRenderer shapeRenderer = new ShapeRenderer(); // DELETE
+    public static ArrayList<Rectangle> rectArray = new ArrayList<>(); // DELETE
     static float tileSize = GameScreen.tileSize;
     public static ArrayList<Bot> BotList = new ArrayList<>();
     static float scale = GameScreen.scale;
     int collisionCounter = 0;
+    Rectangle tempCollisionBox = new Rectangle(0,0,collisionBox.width,collisionBox.height);
 
     //Entities Declaration
     Entity attackTarget;
@@ -87,13 +91,6 @@ class Bot extends DynamicEntity{
         gridSpanHeight = 2;
         gridSpanWidth = preset.getGridSpanWidth();
         gridSpanHeight = preset.getGridSpanHeight();
-
-        System.out.println("Sprite: " + preset.getSpriteWidth() + "x" + preset.getSpriteHeight());
-        System.out.println("Scale: " + scale);
-        System.out.println("TileSize: " + tileSize);
-        System.out.println("GridSpan: " + gridSpanWidth + "x" + gridSpanHeight);
-
-
     }
 
     //Setters and Getters
@@ -194,7 +191,7 @@ class Bot extends DynamicEntity{
                 {1, 0}, {-1, 0}, {0, 1}, {0, -1}
             };
 
-            Queue<Node> queue = new LinkedList<>();
+            Queue<Node> queue = new LinkedList<>(); // FIFO mode
             boolean[][] visited = new boolean[blocked.length][blocked[0].length];
 
             Node start = new Node(sx, sy);
@@ -219,8 +216,7 @@ class Bot extends DynamicEntity{
                     if (visited[nx][ny])
                         continue;
 
-                    
-                    if (!canStand(nx, ny, width, height, blocked))
+                    if (!canStand(nx, ny, blocked))
                         continue;
 
                     Node next = new Node(nx, ny);
@@ -229,37 +225,60 @@ class Bot extends DynamicEntity{
                     queue.add(next);
                 }
             }
-
-            System.out.println("Didnt find a path");
             return null;
         }
 
-   boolean canStand(
-    int x, int y,
-    int w, int h,
-    boolean[][] blocked){
-    
-    // x, y is now the CENTER of the sprite
-    // Calculate the top-left corner
-    int topLeftX = x - (w / 2);
-    int topLeftY = y - (h / 2);
-    
-    for (int dx = 0; dx < w; dx++) {
-        for (int dy = 0; dy < h; dy++) {
+boolean canStand(int x, int y, boolean[][] blocked) {
 
-            int nx = topLeftX + dx;
-            int ny = topLeftY + dy;
+        float half = (tileSize * scale) / 2f;
 
-            if (nx < 0 || ny < 0 ||
-                nx >= blocked.length ||
-                ny >= blocked[0].length)
+    Vector2 worldCoords = new Vector2(
+        x * tileSize * scale + half,
+        y * tileSize * scale + half
+    );
+
+    tempCollisionBox.setCenter(worldCoords);
+
+        for (Rectangle rect : boundaryCollisions) {
+            float dx = tempCollisionBox.x - rect.x;        // change in x axis
+            float dy = tempCollisionBox.y - rect.y;        // change in y axis
+            float distance = (float) Math.sqrt((dx*dx) + (dy*dy));      // distance to centre
+
+            if (distance >= 100) {
+                continue;
+            }
+
+            if (tempCollisionBox.overlaps(rect)) {
                 return false;
-
-            if (blocked[nx][ny])
-                return false;
+            }
         }
-    }
 
+        for (Entity i : entityList) {
+            if (i == this) {
+                continue;
+            }
+            if(this.attackTarget == i){
+                continue;
+            }
+
+            float dx = tempCollisionBox.x - i.currentXY.x;        // change in x axis
+            float dy = tempCollisionBox.y - i.currentXY.y;        // change in y axis
+            float distance = (float) Math.sqrt((dx*dx) + (dy*dy));      // distance to centre
+
+            if (distance > 100) {
+                continue;
+            }
+
+            //Do not check collision between DEAD entities
+            if (i.isDead){
+                continue;
+            }
+
+            Rectangle enemyHitBox = i.getCollisionBox();
+            if (tempCollisionBox.overlaps(enemyHitBox)) {
+                return false;
+            }
+        }    
     return true;
 }
 

@@ -1,6 +1,8 @@
 // Try and understand BotChaseState, i dare you
 // Ask me about BotChaseState, and i will cry
 package com.gdx.game;
+import java.util.ArrayList;
+
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -92,6 +94,7 @@ class BotAttackState implements State<Bot> {
 
 class BotChaseState implements State<Bot> {
     Vector2 lastValidPostion = new Vector2();
+    public static ArrayList<Node> nodeList = new ArrayList<>();
 
     public void enter(Bot e){
         e.currentAnimation = e.runAnimation;
@@ -102,7 +105,6 @@ class BotChaseState implements State<Bot> {
 
         
         lastValidPostion.set(e.currentXY);
-        System.out.println(lastValidPostion);
 
         e.setAttackTarget(e.getAttackTarget()); // Move to closest always
         //If the entity itself dies
@@ -157,16 +159,10 @@ class BotChaseState implements State<Bot> {
         if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()){
             // Calculate the direction we were trying to move (from last valid to current)
             Vector2 moveDir = e.currentXY.cpy().sub(lastValidPostion).nor();
-            System.out.println("Collision detected!");
             
-            if(e.isCollidingWithBoundry()){
-                System.out.println(e.collisionCounter);
-                e.collisionCounter++;
-            }
-            
+            e.collisionCounter++;
+
             // Revert position to last valid state
-            System.out.println("Current Position grid:"+Math.ceil(e.currentXY.x/Bot.tileSize/Bot.scale)+","+Math.ceil(e.currentXY.y/Bot.tileSize/Bot.scale));
-            System.out.println("Setting to " + lastValidPostion.x+","+lastValidPostion.y);
             e.currentXY.set(lastValidPostion);
             e.targetPosition.x -= e.velocity.x * delta;
             e.targetPosition.y -= e.velocity.y * delta;
@@ -174,22 +170,19 @@ class BotChaseState implements State<Bot> {
 
             e.velocity.setZero();
             
-            System.out.println("positions reverted");
-            System.out.println("New Position grid:"+Math.ceil(e.currentXY.x/Bot.tileSize/Bot.scale)+","+Math.ceil(e.currentXY.y/Bot.tileSize/Bot.scale));
 
             
-            if(e.collisionCounter>3){
+            if(e.collisionCounter>30){
                 if(attackTarget != null){
                     // Calculate BFS from CURRENT position to target position
-                    int gx = (int) Math.ceil(e.attackTarget.getCurrentPosition().x / Bot.tileSize / Bot.scale);
-                    int gy = (int) Math.ceil(e.attackTarget.getCurrentPosition().y / Bot.tileSize / Bot.scale);
+                    int gx = (int) (e.attackTarget.getCurrentPosition().x / Bot.tileSize / Bot.scale);
+                    int gy = (int) (e.attackTarget.getCurrentPosition().y / Bot.tileSize / Bot.scale);
                     
-                    int sx = (int) Math.ceil(e.currentXY.x / Bot.tileSize / Bot.scale);
-                    int sy = (int) Math.ceil(e.currentXY.y / Bot.tileSize / Bot.scale);
+                    int sx = (int) (e.currentXY.x / Bot.tileSize / Bot.scale);
+                    int sy = (int) (e.currentXY.y / Bot.tileSize / Bot.scale);
                     
-                    System.out.println("moveDir: " + moveDir.x + "," + moveDir.y);
                     // Adjust starting grid position based on direction of collision
-                    // If we hit something while moving right (moveDir.x > 0), try starting from the left
+                    // If we hit something while moving right (moveDir.x > 0)
                     if(moveDir.x > 0){
                         sx--;
                     }
@@ -197,22 +190,22 @@ class BotChaseState implements State<Bot> {
                         sx++;
                     }
 
-                    // If we hit something while moving up (moveDir.y > 0), try starting from below
+                    // If we hit something while moving up (moveDir.y > 0)
                     if(moveDir.y > 0){
                         sy--;
                     }
                     else if(moveDir.y < 0){
                         sy++;
                     }
-
-                    System.out.println("BFS start: " + sx + "," + sy + " | target: " + gx + "," + gy);
                     e.BFSpath = e.bfs(sx, sy, gx, gy, Bot.blocked,e.gridSpanWidth, e.gridSpanHeight);
+                    if(e.BFSpath != null)
+                        for(Node i : e.BFSpath){
+                            nodeList.add(i);
+                        }
                     pathIndex = 0;
                     
                     if(e.BFSpath != null) {
-                        System.out.println("BFS path found with " + e.BFSpath.size() + " nodes");
                     } else {
-                        System.out.println("No BFS path found!");
                     }
                     e.collisionCounter++;
 
@@ -220,7 +213,6 @@ class BotChaseState implements State<Bot> {
             }
     }
     else
-        System.out.println("Current" + e.currentXY.x+","+e.currentXY.y);
         e.setCenter(e.currentXY.x, e.currentXY.y);
         // Update collision and hitboxes and update the sprite position - ALWAYS update
     }
@@ -242,7 +234,6 @@ class BotChaseState implements State<Bot> {
             return;
         }
         
-        System.out.println("Following BFS path - index: " + pathIndex + " of " + e.BFSpath.size());
         
         // If we've reached the end of the path, clear it and return
         if(pathIndex >= e.BFSpath.size()){
@@ -253,13 +244,14 @@ class BotChaseState implements State<Bot> {
         
         // Get the current target node from the path
         Node targetNode = e.BFSpath.get(pathIndex);
+
+       float unit = Bot.tileSize * Bot.scale;
+    
+        // Centre of grid
         Vector2 pathTarget = new Vector2(
-            targetNode.x * Bot.tileSize * Bot.scale,
-            targetNode.y * Bot.tileSize * Bot.scale
+            targetNode.x * unit + (unit / 2f),
+            targetNode.y * unit + (unit / 2f)
         );
-        
-        System.out.println("Path target: " + pathTarget.x + "," + pathTarget.y);
-        System.out.println("Current position: " + e.currentXY.x + "," + e.currentXY.y);
         
         // Move towards the path target
         e.moveTowards(pathTarget, delta);
@@ -270,11 +262,9 @@ class BotChaseState implements State<Bot> {
         // Check if we've reached the current path node (within tolerance)
         if(e.currentXY.epsilonEquals(pathTarget, 2.0f)){
             pathIndex++;
-            System.out.println("Reached node " + (pathIndex - 1) + ", moving to next...");
         }
         
         // Update sprite position
-        e.setCenter(e.currentXY.x, e.currentXY.y);  // TODO: Check if this line is needed
         if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()){
                 e.currentXY.x = lastValidPostion.x;
                 e.targetPosition.x -= e.velocity.x * delta;

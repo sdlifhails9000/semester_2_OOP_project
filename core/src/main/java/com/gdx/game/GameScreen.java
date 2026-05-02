@@ -103,6 +103,7 @@ public class GameScreen implements Screen {
     // TODO: REMOVE
     // DEBUGGING HITBOXES
     ShapeRenderer shapeRenderer;  // DEBUG tool
+    ShapeRenderer shapeRendererGreen;
 
     // Pathfinding
     static boolean[][] blocked;
@@ -144,7 +145,6 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera(cameraWidth, cameraHeight * (height / width));        //Visible region (multiplied height by aspect ratio)
         camera.position.set(player.getCurrentPosition(), 0);         //Takes vector3 so pass in the whole method made in DynamicSprite class
         camera.update();
-
         //Initialize Viewport (for scaling and resizing)
         viewport = new ExtendViewport(cameraWidth, cameraHeight, camera);  //Same sizing as camera as we want to scale camera coords if resized (for extend no need for aspect ratio google reason)
 
@@ -158,10 +158,9 @@ public class GameScreen implements Screen {
 
         // TO DO: REMOVE
         shapeRenderer = new ShapeRenderer();  // DEBUG tool
-
+        shapeRendererGreen = new ShapeRenderer();
         // Pathfinding
         blocked = new boolean[(int)worldWidth][(int)worldHeight];
-        blocked = getGrid();
         Bot.blocked = blocked;
 
         // store all the map collisions
@@ -240,13 +239,17 @@ public class GameScreen implements Screen {
 
         //DEBUG FOR COLLISION
         shapeRenderer.setProjectionMatrix(camera.combined);
+        shapeRendererGreen.setProjectionMatrix(camera.combined);
         ArrayList<Rectangle> listOfHitbox = new ArrayList<Rectangle>();
 
-        for (Entity e : Entity.entityList) {
-            listOfHitbox.add(e.getCollisionBox());
-        }
+        // for (Entity e : Entity.entityList) {
+        //     listOfHitbox.add(e.getCollisionBox());
+        // }
 
-        for (Rectangle rect : getMapCollisions()) {
+        // for (Rectangle rect : getMapCollisions()) {
+        //     listOfHitbox.add(rect);
+        // }
+        for (Rectangle rect: Bot.rectArray){
             listOfHitbox.add(rect);
         }
 
@@ -271,12 +274,28 @@ public class GameScreen implements Screen {
             }
         }
         shapeRenderer.end();
+        shapeRendererGreen.begin(ShapeRenderer.ShapeType.Line);
+        for(Node i : BotChaseState.nodeList){
+            int x = i.x;
+            int y = i.y; 
+                    shapeRendererGreen.setColor(0, 1, 0, 0.5f); // red = blocked
+                    shapeRendererGreen.rect(
+                    x * cellSize,
+                    y * cellSize,
+                    cellSize,
+                    cellSize
+                );
 
-        // shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        // for(Rectangle rect : listOfHitbox) {
-        //     shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
-        // }
-        // shapeRenderer.end();
+                // Render at map tile position (already in world units
+            }
+
+        shapeRendererGreen.end();
+        listOfHitbox.add(mainTower.getCollisionBox());
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        for(Rectangle rect : listOfHitbox) {
+            shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
+        }
+        shapeRenderer.end();
 
 
         // } REMOVE END
@@ -490,67 +509,7 @@ public class GameScreen implements Screen {
     }
 
 
-    // this method return an arraylist with all static collision boxes (environment)
-    public boolean[][] getGrid() {
-        boolean[][] blocked;
 
-        // Find a base layer for dimensions - use the same layer that getMapCollisions uses
-        TiledMapTileLayer baseLayer = null;
-        TiledMapTileLayer gridLayer = null;
-
-        for (MapLayer l : map.getLayers()) {
-            if (l instanceof TiledMapTileLayer) {
-                TiledMapTileLayer layer = (TiledMapTileLayer) l;
-                if (baseLayer == null) {
-                    baseLayer = layer;
-                }
-                // Use the layer with most tiles for the grid
-                if (gridLayer == null || layer.getWidth() * layer.getHeight() > gridLayer.getWidth() * gridLayer.getHeight()) {
-                    gridLayer = layer;
-                }
-            }
-        }
-        if (gridLayer == null) return null;
-
-        // Use actual layer dimensions instead of mapWidth+3
-        int width = gridLayer.getWidth();
-        int height = gridLayer.getHeight();
-
-        blocked = new boolean[width][height];
-
-        // Use the same iteration as getMapCollisions - check ALL layers
-        for (MapLayer mapLayer : map.getLayers()){
-            if(mapLayer instanceof TiledMapTileLayer){   // gives us only tiles layers not object or image
-                TiledMapTileLayer layer = (TiledMapTileLayer) mapLayer; // downcast
-
-                for (int x = 0; x < layer.getWidth(); x++){    // loop through horizontal tiles
-                    for(int y = 0; y < layer.getHeight(); y++){    // loop through vertical tiles
-
-                        TiledMapTileLayer.Cell cell = layer.getCell(x, y);
-
-                        if (cell == null) continue;     // skip cell if its empty
-                        TiledMapTile tile = cell.getTile();         // gets the actual tile in the map
-
-                        if (tile == null) continue;     // skip if tile is empty
-
-                        // Use SAME logic as getMapCollisions - only check for RectangleMapObject
-                        MapObjects objects = tile.getObjects();
-                        for (MapObject obj : objects) {
-                            if (obj instanceof RectangleMapObject) {
-                                // Only mark as blocked if within grid bounds
-                                if (x < width && y < height) {
-                                    blocked[x][y] = true;
-                                }
-                                break; // Found a collision, no need to check more objects
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return blocked;
-    }
     public Sprite getGoblinHealthBarSprite(){
         if (player.getAttackTarget() instanceof Bot){
             Bot target = (Bot)player.getAttackTarget();
