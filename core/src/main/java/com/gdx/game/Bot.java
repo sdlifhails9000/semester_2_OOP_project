@@ -9,14 +9,11 @@ import java.util.Queue;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 class Bot extends DynamicEntity{
-    static int gridSize = 2;
-    static ShapeRenderer shapeRenderer = new ShapeRenderer(); // DELETE
-    public static ArrayList<Rectangle> rectArray = new ArrayList<>(); // DELETE
+    static int gridSize = 1;
     static float tileSize = GameScreen.tileSize/gridSize;
     public static ArrayList<Bot> BotList = new ArrayList<>();
     static float scale = GameScreen.scale;
@@ -58,7 +55,7 @@ class Bot extends DynamicEntity{
     protected float attackStrength;
     protected float attackTimer;
 
-
+    // Constructor
     Bot (BotPreset preset, int startX, int startY){
         super(
             Loader.idle(preset),
@@ -185,10 +182,10 @@ class Bot extends DynamicEntity{
         updateHealthBar();
     }
 
-
+    // Breadth First Search
     public List<Node> bfs(int sx, int sy, int gx, int gy){     
     
-        int[][] dirs = {    // Directions to move to, removed diagonals
+        int[][] dirs = {    // Directions to move to, removed diagonals, ADDED DIAGONALS AGAIN RAHHHHHH
                 {1, 0}, {-1, 0}, {0, 1}, {0, -1},
                 {1,1}, {1,-1}, {-1,1}, {-1,-1}
             };
@@ -200,9 +197,9 @@ class Bot extends DynamicEntity{
             queue.add(start);
             visited[sx][sy] = true;
 
-            while (!queue.isEmpty()) {
+            while (!queue.isEmpty()) { // No more nodes available
 
-                Node current = queue.poll();
+                Node current = queue.poll();    // FIFO pull, and remove
 
                 if (current.x == gx && current.y == gy) {
                     BFSlastNode = new Vector2(current.x,current.y);
@@ -240,65 +237,66 @@ class Bot extends DynamicEntity{
             return null;    // No path
         }
 
-boolean canStand(int x, int y,boolean diagonal) {
+    // This method is called to check if the bot is able to move to a certain position
+    boolean canStand(int x, int y,boolean diagonal) {
 
-    Rectangle usedCollisionBox;
-    float half = (Bot.tileSize * scale) / 2f;
+        Rectangle usedCollisionBox;
+        float half = (Bot.tileSize * scale) / 2f;
 
-    Vector2 worldCoords = new Vector2(
-        x * Bot.tileSize * scale + half,
-        y * Bot.tileSize * scale + half
-    );
-    if(diagonal){
-        usedCollisionBox = greaterTempCollisioRectangle;
-    }
-    else{
-        usedCollisionBox = tempCollisionRectangle;
-    }
-    usedCollisionBox.setCenter(worldCoords);
-
-        for (Rectangle rect : boundaryCollisions) {
-            float dx = usedCollisionBox.x - rect.x;        // change in x axis
-            float dy = usedCollisionBox.y - rect.y;        // change in y axis
-            float distance = (float) Math.sqrt((dx*dx) + (dy*dy));      // distance to centre
-
-            if (distance >= 100) { // If far away skip
-                continue;
-            }
-
-            if (usedCollisionBox.overlaps(rect)) {  // IF collission 
-                return false;
-            }
+        Vector2 worldCoords = new Vector2(
+            x * Bot.tileSize * scale + half,
+            y * Bot.tileSize * scale + half
+        );
+        if(diagonal){   // Use larger hitbox for diagonal
+            usedCollisionBox = greaterTempCollisioRectangle;
         }
+        else{
+            usedCollisionBox = tempCollisionRectangle;
+        }
+        usedCollisionBox.setCenter(worldCoords);
 
-        for (Entity i : entityList) {   // Loop through entities
-            if (i == this) {
-                continue;
-            }
-            if(this.attackTarget == i){
-                continue;
-            }
-            // Same stuff here
-            float dx = usedCollisionBox.x - i.currentXY.x;        // change in x axis
-            float dy = usedCollisionBox.y - i.currentXY.y;        // change in y axis
-            float distance = (float) Math.sqrt((dx*dx) + (dy*dy));      // distance to centre
+            for (Rectangle rect : boundaryCollisions) {
+                float dx = usedCollisionBox.x - rect.x;        // change in x axis
+                float dy = usedCollisionBox.y - rect.y;        // change in y axis
+                float distance = (float) Math.sqrt((dx*dx) + (dy*dy));      // distance to centre
 
-            if (distance > 100) {
-                continue;
-            }
+                if (distance >= 100) { // If far away skip
+                    continue;
+                }
 
-            //Do not check collision between DEAD entities <- Do not redeem the gift card ahh
-            if (i.isDead){
-                continue;
+                if (usedCollisionBox.overlaps(rect)) {  // IF collission 
+                    return false;
+                }
             }
 
-            Rectangle enemyHitBox = i.getCollisionBox();
-            if (usedCollisionBox.overlaps(enemyHitBox)) {
-                return false;
-            }
-        }    
-    return true;
-}
+            for (Entity i : entityList) {   // Loop through entities
+                if (i == this) {
+                    continue;
+                }
+                if(this.attackTarget == i){
+                    continue;
+                }
+                // Same stuff here
+                float dx = usedCollisionBox.x - i.currentXY.x;        // change in x axis
+                float dy = usedCollisionBox.y - i.currentXY.y;        // change in y axis
+                float distance = (float) Math.sqrt((dx*dx) + (dy*dy));      // distance to centre
+
+                if (distance > 100) {
+                    continue;
+                }
+
+                //Do not check collision between DEAD entities <- Do not redeem the gift card ahh
+                if (i.isDead){
+                    continue;
+                }
+
+                Rectangle enemyHitBox = i.getCollisionBox();
+                if (usedCollisionBox.overlaps(enemyHitBox)) {
+                    return false;
+                }
+            }    
+        return true;
+    }
 
 
     public List<Node> reconstructPath(Node end) {
@@ -306,18 +304,18 @@ boolean canStand(int x, int y,boolean diagonal) {
         List<Node> path = new ArrayList<>();
         Node current = end;
 
-        while (current != null) {
+        while (current != null) {   // Last node is null in linked list
             path.add(current);
             current = current.parent;
         }
 
-        Collections.reverse(path);
+        Collections.reverse(path);  // Static method
         return path;
     }
 
 }
 
-class Node {
+class Node {    // Node stores coords and the parent coord, for reconstructing
     int x, y;
     Node parent;
 

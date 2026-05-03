@@ -1,10 +1,12 @@
 package com.gdx.game;
 import com.badlogic.gdx.math.Vector2;
 class HeroBot extends Bot{
+    // Constructor
     HeroBot(BotPreset preset, int startX, int startY){
     super(preset, startX,startY);
     }
 
+    // This override prioritizes playe
     @Override
     public Entity getAttackTarget() {
         Entity nearestEntity = null;

@@ -1,6 +1,3 @@
-//TO DO:
-//Add Attack range when constructing DynamicSprite and rewrite updateMovement to be resued in the updateAttack accordingly
-
 package com.gdx.game;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;

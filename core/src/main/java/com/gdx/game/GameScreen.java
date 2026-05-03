@@ -10,7 +10,6 @@ package com.gdx.game;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -21,7 +20,6 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.*;       //Gets all viewport types (FixViewport, StrectViewport, ExtendViewport, etc)
@@ -109,10 +107,9 @@ public class GameScreen implements Screen {
     // Declare camera
     OrthographicCamera camera;
 
-    // TODO: REMOVE
     // DEBUGGING HITBOXES
-    ShapeRenderer shapeRenderer;  // DEBUG tool
-    ShapeRenderer shapeRendererGreen;
+    // ShapeRenderer shapeRenderer;  // DEBUG tool
+    // ShapeRenderer shapeRendererGreen;
 
 
     MainGame game;
@@ -183,9 +180,8 @@ public class GameScreen implements Screen {
         //Initialize the mapRenderer (this is the main working unit here which scales the tiledMap with our current game units)
         mapRenderer = new OrthogonalTiledMapRenderer(map, scale);       //We can pass our own spritebatch for optimization but will have to change some internal methods so jst let it use its own spritebatch for map
 
-        // TO DO: REMOVE
-        shapeRenderer = new ShapeRenderer();  // DEBUG tool
-        shapeRendererGreen = new ShapeRenderer();
+        // shapeRenderer = new ShapeRenderer();  // DEBUG tool
+        // shapeRendererGreen = new ShapeRenderer();
 
         // store all the map collisions
         ArrayList<Rectangle> boundaryCollisions = getMapCollisions();
@@ -267,53 +263,6 @@ public class GameScreen implements Screen {
         }
 
         batch.end();
-
-        // TO DO: REMOVE START {
-
-        //DEBUG FOR COLLISION
-        shapeRenderer.setProjectionMatrix(camera.combined);
-        shapeRendererGreen.setProjectionMatrix(camera.combined);
-        ArrayList<Rectangle> listOfHitbox = new ArrayList<Rectangle>();
-
-        // for (Entity e : Entity.entityList) {
-        //     listOfHitbox.add(e.getCollisionBox());
-        // }
-
-        // for (Rectangle rect : getMapCollisions()) {
-        //     listOfHitbox.add(rect);
-        // }
-        for (Rectangle rect: Bot.rectArray){
-            listOfHitbox.add(rect);
-        }
-
-        // Grid is sized to match map tiles (200x27 grid from getGrid)
-        float cellSize = worldWidth / mapWidth/Bot.gridSize;  // = 800/200 = 4 world units per tile
-
-        shapeRendererGreen.begin(ShapeRenderer.ShapeType.Line);
-        for(Node i : BotChaseState.nodeList){
-            int x = i.x;
-            int y = i.y; 
-                    shapeRendererGreen.setColor(0, 1, 0, 0.5f); // red = blocked
-                    shapeRendererGreen.rect(
-                    x * cellSize,
-                    y * cellSize,
-                    cellSize,
-                    cellSize
-                );
-
-                // Render at map tile position (already in world units
-            }
-
-        shapeRendererGreen.end();
-        listOfHitbox.add(mainTower.getCollisionBox());
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        for(Rectangle rect : listOfHitbox) {
-            shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
-        }
-        shapeRenderer.end();
-
-
-        // } REMOVE END
     }
 
     @Override
@@ -531,7 +480,7 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         batch.dispose();
-        shapeRenderer.dispose();   // TODO: Remove DEBUG tool
+        // shapeRenderer.dispose();   // Remove DEBUG tool
         mapRenderer.dispose();
 
         //Hud work dispose
@@ -640,11 +589,6 @@ public class GameScreen implements Screen {
 
             camera.position.lerp(playerPosition3D, 0.1f);            //THIS IS WHERE heroPos IS BEING USED (this brings smoothness for camera following)
 
-            //No need for the camera clamp commented below because hero is already clamped
-            //and in free roam camera is clamped (it doesnt break you can test)
-
-            //camera.position.x = MathUtils.clamp(heroPos.x, halfWidth - 1, (worldWidth - halfWidth) + 1);
-            //camera.position.y = MathUtils.clamp(heroPos.y, halfHeight - 1, (worldHeight - halfHeight) + 1);
         }
 
         // Movement
