@@ -249,7 +249,7 @@ public class GameScreen implements Screen {
         }
 
         // Grid is sized to match map tiles (200x27 grid from getGrid)
-        float cellSize = worldWidth / mapWidth;  // = 800/200 = 4 world units per tile
+        float cellSize = worldWidth / mapWidth/Bot.gridSize;  // = 800/200 = 4 world units per tile
 
         shapeRendererGreen.begin(ShapeRenderer.ShapeType.Line);
         for(Node i : BotChaseState.nodeList){

@@ -14,9 +14,10 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 class Bot extends DynamicEntity{
+    static int gridSize = 2;
     static ShapeRenderer shapeRenderer = new ShapeRenderer(); // DELETE
     public static ArrayList<Rectangle> rectArray = new ArrayList<>(); // DELETE
-    static float tileSize = GameScreen.tileSize;
+    static float tileSize = GameScreen.tileSize/gridSize;
     public static ArrayList<Bot> BotList = new ArrayList<>();
     static float scale = GameScreen.scale;
     int collisionCounter = 0;
@@ -193,7 +194,7 @@ class Bot extends DynamicEntity{
             };
 
             Queue<Node> queue = new LinkedList<>(); // FIFO mode
-            boolean[][] visited = new boolean[(int)GameScreen.worldWidth][(int)GameScreen.worldHeight];
+            boolean[][] visited = new boolean[(int)GameScreen.worldWidth *gridSize][(int)GameScreen.worldHeight*gridSize];
 
             Node start = new Node(sx, sy);
             queue.add(start);
@@ -240,11 +241,11 @@ class Bot extends DynamicEntity{
 boolean canStand(int x, int y,boolean diagonal) {
 
     Rectangle usedCollisionBox;
-    float half = (tileSize * scale) / 2f;
+    float half = (Bot.tileSize * scale) / 2f;
 
     Vector2 worldCoords = new Vector2(
-        x * tileSize * scale + half,
-        y * tileSize * scale + half
+        x * Bot.tileSize * scale + half,
+        y * Bot.tileSize * scale + half
     );
     if(diagonal){
         usedCollisionBox = greaterTempCollisioRectangle;

@@ -11,7 +11,7 @@ class HeroBot extends Bot{
         Entity nearestEntity = null;
         float nearestEnemyDistance = Float.MAX_VALUE;
         Entity player = GameScreen.getPlayer();
-        if(player.currentXY.dst(this.currentXY) >= attackRange+10){
+        if(player.currentXY.dst(this.currentXY) >= attackRange+10 && !player.isDead){
             return player;
         }
 
