@@ -323,6 +323,10 @@ public class GameScreen implements Screen {
         //To resize 
         hudStage.getViewport().update(width, height, true);
 
+        // Clear and rebuild so positions recalculate against new dimensions 
+        hudStage.clear();
+        buildHUD();
+
         //USE THIS IF YOU WANT FIXED RESIZING SCALE (Abit cursed)
 
         // float aspect = (float) width / (float) height;
@@ -335,8 +339,21 @@ public class GameScreen implements Screen {
     @Override
     public void show() {
         skin = new Skin(Gdx.files.internal("UI/uiskin.json"));
-        hudStage = new Stage(new ScreenViewport());
-        buildHUD();
+
+        // Smooth out the bitmap font when scaled by the viewport
+        skin.getFont("default-font").getRegion().getTexture().setFilter(
+            com.badlogic.gdx.graphics.Texture.TextureFilter.Linear,
+            com.badlogic.gdx.graphics.Texture.TextureFilter.Linear
+        );
+
+        //Viewport based off the small box lwjgl3 launcher gives (it then extends when fullscreen since its an extendviewport)
+        //Small 16:9 (adjusted in the lwjgl3 launcher as well)
+        hudStage = new Stage(new ExtendViewport(854, 480));
+
+        // Force viewport to know actual screen size before buildHUD positions anything
+        hudStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+
+        //We dont call buildHUD here because that is handled in resize()
     }
     // NEW METHOD (to be called in show())
     private void buildHUD() {
