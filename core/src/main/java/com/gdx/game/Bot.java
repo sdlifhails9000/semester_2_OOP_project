@@ -117,6 +117,10 @@ class Bot extends DynamicEntity{
     }
 
     public Entity getAttackTarget() {
+        if (currentState == BotAttackState) {
+            return attackTarget;
+        }
+
         Entity nearestEntity = null;
         float nearestEnemyDistance = Float.MAX_VALUE;
 
@@ -124,6 +128,12 @@ class Bot extends DynamicEntity{
         for (Entity entity : Entity.entityList) {
             // This skips allies. They aren't enemies, entities which are dead and itself
             if (this.isAlly == entity.isAlly || entity.isDead || this == entity) {
+                continue;
+            }
+
+            // So that we don't start attacking the arrows or the weapon
+            // That's dumb
+            if (entity instanceof Weapon || entity instanceof Projectile) {
                 continue;
             }
 
@@ -183,8 +193,8 @@ class Bot extends DynamicEntity{
     }
 
     // Breadth First Search
-    public List<Node> bfs(int sx, int sy, int gx, int gy){     
-    
+    public List<Node> bfs(int sx, int sy, int gx, int gy){
+
         int[][] dirs = {    // Directions to move to, removed diagonals, ADDED DIAGONALS AGAIN RAHHHHHH
                 {1, 0}, {-1, 0}, {0, 1}, {0, -1},
                 {1,1}, {1,-1}, {-1,1}, {-1,-1}
@@ -210,7 +220,7 @@ class Bot extends DynamicEntity{
                     // Calculate neighbour
                     int nx = current.x + d[0];
                     int ny = current.y + d[1];
-                    
+
                     // Check Validity
                     if (nx < 0 || ny < 0 || nx >= visited.length || ny >= visited[0].length) // Out of bounds
                         continue;
@@ -264,7 +274,7 @@ class Bot extends DynamicEntity{
                     continue;
                 }
 
-                if (usedCollisionBox.overlaps(rect)) {  // IF collission 
+                if (usedCollisionBox.overlaps(rect)) {  // IF collission
                     return false;
                 }
             }
@@ -294,7 +304,7 @@ class Bot extends DynamicEntity{
                 if (usedCollisionBox.overlaps(enemyHitBox)) {
                     return false;
                 }
-            }    
+            }
         return true;
     }
 

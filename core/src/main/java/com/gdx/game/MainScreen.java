@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
@@ -91,13 +92,14 @@ public class MainScreen implements Screen {
         menuMusic.play();
     }
 
-    
+
     // Main menu table — title + start button
     private Table createMainTable() {
         Table t = new Table();
         t.setFillParent(true);
 
-        Label title = new Label("DITTO 2", skin, "title");
+        Label title = new Label("DITTO 2\n<3", skin, "title");
+        title.setAlignment(Align.center);
         title.setFontScale(4f);
 
         TextButton startBtn = new TextButton("START GAME", skin, "hover-btn");

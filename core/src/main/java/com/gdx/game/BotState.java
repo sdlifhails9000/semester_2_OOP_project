@@ -14,7 +14,7 @@ import com.badlogic.gdx.math.Vector2;
 class BotIdleState implements State<Bot> {
     @Override
     public void enter(Bot e) {
-        e.currentAnimation = e.idleAnimation;       // starting animation as idle 
+        e.currentAnimation = e.idleAnimation;       // starting animation as idle
     }
 
     @Override
@@ -61,7 +61,7 @@ class BotAttackState implements State<Bot> {
             e.attackTarget = null;
             return;
         }
-        
+
 
         // If our hero is far from the enemy
         if (!e.isCloseToEnemy()){
@@ -97,7 +97,7 @@ class BotAttackState implements State<Bot> {
         e.animationTimer = 0;
     }
 }
-// If there is an atackTarget but it is far, this state is entered
+// If there is an attackTarget but it is far, this state is entered
 class BotChaseState implements State<Bot> {
     Vector2 lastValidPostion = new Vector2();
 
@@ -107,7 +107,7 @@ class BotChaseState implements State<Bot> {
     }
 
     public void update(Bot e, float delta){
-        
+
         lastValidPostion.set(e.currentXY);
 
         //If the entity itself dies
@@ -168,7 +168,7 @@ class BotChaseState implements State<Bot> {
         // Handle collision - revert movement when colliding
         if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()){
             // Calculate the direction we were trying to move (from last valid to current)
-            
+
             e.collisionCounter++;
 
             // Revert position to last valid state
@@ -178,9 +178,9 @@ class BotChaseState implements State<Bot> {
             e.updateBoxes();
 
             e.velocity.setZero();
-            
 
-            
+
+
             if(e.collisionCounter>1){ // Increase this counter if game lags when finding paths
                 if(attackTarget != null){
                     // Calculate BFS from CURRENT position to target position
@@ -192,10 +192,10 @@ class BotChaseState implements State<Bot> {
                         gx = tempGrid[0];
                         gy = tempGrid[1];
                     }
-                    
+
                     int sx = (int) (e.currentXY.x / Bot.tileSize / Bot.scale);
                     int sy = (int) (e.currentXY.y / Bot.tileSize / Bot.scale);
-                    
+
                     if(!e.canStand(sx, sy,false)){
                         int[] tempGrid = fixGridCoords(e, e.currentXY.x, e.currentXY.y);
                         sx = tempGrid[0];
@@ -205,7 +205,7 @@ class BotChaseState implements State<Bot> {
                     e.BFSpath = e.bfs(sx, sy, gx, gy);
                     if(e.BFSpath != null)
                     pathIndex = 0;
-                    
+
                     if(e.BFSpath != null) {
                         e.collisionCounter = 0;
                     }
@@ -221,39 +221,39 @@ class BotChaseState implements State<Bot> {
         e.velocity.setZero();
         e.animationTimer = 0;
     }
-    
+
     private int pathIndex = 0;
-    
-    public void moveOnPath(Bot e, float delta){    
+
+    public void moveOnPath(Bot e, float delta){
         // If we've reached the end of the path, clear it and return
         if(pathIndex >= e.BFSpath.size()){
             e.BFSpath = null;
             pathIndex = 0;
             return;
         }
-        
+
         // Get the current target node from the path
         Node targetNode = e.BFSpath.get(pathIndex);
 
        float unit = Bot.tileSize * Bot.scale;
-    
+
         // Centre of grid
         Vector2 pathTarget = new Vector2(
             targetNode.x * unit + (unit / 2f),
             targetNode.y * unit + (unit / 2f)
         );
-        
+
         // Move towards the path target
         e.moveTowards(pathTarget, delta);
-        
+
         // Update targetPosition for collision handling
         e.targetPosition.set(pathTarget);
-        
+
         // Check if we've reached the current path node (within tolerance)
         if(e.currentXY.epsilonEquals(pathTarget, 2.0f)){
             pathIndex++;
         }
-        
+
         // Revert Position
         if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()){
                 e.currentXY.x = lastValidPostion.x;
@@ -386,7 +386,7 @@ class BotDeadState implements State<Bot> {
             e.setCurrentPosition(-9999, -9999); // Some random position while we wait
             e.updateBoxes();
         }
-        
+
 
         if (!blocked){
             e.setTargetPosition(respawnPositionX, respawnPositionY);
@@ -403,5 +403,5 @@ class BotDeadState implements State<Bot> {
     @Override
     public void exit (Bot e) {
         e.animationTimer = 0;
-    }   
+    }
 }
