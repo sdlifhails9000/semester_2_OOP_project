@@ -331,10 +331,10 @@ enum WeaponPreset {
 }
 
 enum ProjectilePreset {
-    MAIN_TOWER("TowerAtlas/MainProjectile.atlas", true, 20, 30,1, 5),
-    MINI_TOWER("TowerAtlas/MiniProjectile.atlas",true, 20, 30, 1, 5),
+    MAIN_TOWER("TowerAtlas/MainProjectile.atlas", true, 20, 0,1, 5),
+    MINI_TOWER("TowerAtlas/MiniProjectile.atlas",true, 20, 0, 1, 5),
     ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainProjectile.atlas", false, 20, 0, 1, 5),
-    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniProjectile.atlas", false, 20, 30, 1, 5);
+    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniProjectile.atlas", false, 20, 0, 1, 5);
 
     final String assetPath;
 

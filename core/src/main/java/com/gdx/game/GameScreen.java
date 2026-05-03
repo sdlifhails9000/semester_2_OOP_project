@@ -35,7 +35,13 @@ import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import jdk.javadoc.internal.doclets.formats.html.Table;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+
+
 
 
 // This contain default values for specific hero types
@@ -88,6 +94,9 @@ public class GameScreen implements Screen {
     Bot g1, g2, g3, g4, g5, g6;
 
     Tower mainTower; // for testing
+    Tower miniTower;
+    Tower enemyMainTower;
+    Tower enemyMiniTower;
 
     //A variable to track elapsed time during animation
     // float stateTime; //Handled in Entity.java
@@ -108,6 +117,22 @@ public class GameScreen implements Screen {
 
     MainGame game;
 
+    //Match Timer Declaration (in seconds)
+    public float timeRemaining = 300f;   // 5 minutes
+
+    //Hud Declarations
+    private Stage hudStage;
+    private Skin skin;
+
+    private ProgressBar playerMainTowerBar;
+    private ProgressBar enemyMainTowerBar;
+    private ProgressBar playerMiniTowerBar;
+    private ProgressBar enemyMiniTowerBar;
+
+    private Label targetLabel;
+    private Label botCountLabel;
+    private Label timerLabel;
+
     public GameScreen(MainGame entry, HeroPreset preset) {
         // Initialize SpriteBatch
         batch = new SpriteBatch();
@@ -122,7 +147,11 @@ public class GameScreen implements Screen {
         hoverCoords = new Vector3();
 
         //Initialize the DYNAMIC SPRITES
-        mainTower = new Tower(TowerPreset.ENEMY_MAIN, 400, 54);
+        mainTower = new Tower(TowerPreset.MAIN, 400, 54);
+        miniTower = new Tower(TowerPreset.MINI,450, 54);
+        enemyMiniTower = new Tower(TowerPreset.ENEMY_MINI,450, 24);
+        enemyMainTower = new Tower(TowerPreset.ENEMY_MAIN,400, 24);
+
 
         //DRAW THE TOWER FIRST SO THAT WHEN TOWER DIES PLAYER CANNOT HIDE UNDER ITS RUBBLE
         player = new HeroPlayer(preset, 280, 50);
@@ -161,30 +190,39 @@ public class GameScreen implements Screen {
         // store all the map collisions
         ArrayList<Rectangle> boundaryCollisions = getMapCollisions();
         DynamicEntity.boundaryCollisions = boundaryCollisions;
-
-
     }
 
     @Override
     public void render(float delta) {
-        if (mainTower.isDead) {
-            game.setScreen(new EndGameScreen(game, true));
-        }
+        //Decides win/loose/draw condition
+        handleEndGameScreen(); 
 
-        clickEvent();    // Check left click movement
-        hoverEvent();    //Check if
+        //Decrement the timer
+        timeRemaining -= delta;
+        
+        //Handles left and right click
+        clickEvent();
 
+        //To view health when hovering over entities
+        hoverEvent();  
+
+        //To update states of EVERY entity
         for (Entity e : Entity.entityList) {
             e.Update(delta);
         }
 
+        //If you need a comment for this GET HELP
         cameraRoam(delta);  // Camera Free Roam
-
         camera.update();    //Update camera
 
         viewport.apply();   //Checks every frame if resized occured
         batch.setProjectionMatrix(camera.combined);
         draw();
+
+        //To keep hud alive and update its values
+        updateHUD();
+        hudStage.act(delta);
+        hudStage.draw();
 
     }
 
@@ -279,14 +317,11 @@ public class GameScreen implements Screen {
     }
 
     @Override
-    public void show() {
-
-    }
-
-
-    @Override
     public void resize(int width, int height){
         viewport.update(width, height, true);       //True to centre camera when resized (not resizing camera here as viewport was made to handle it)
+
+        //To resize 
+        hudStage.getViewport().update(width, height, true);
 
         //USE THIS IF YOU WANT FIXED RESIZING SCALE (Abit cursed)
 
@@ -294,6 +329,168 @@ public class GameScreen implements Screen {
         // camera.viewportWidth = cameraWidth * aspect;
         // camera.viewportHeight = cameraHeight;
     }
+
+    //----------------HUD WORK---------------
+
+    @Override
+    public void show() {
+        skin = new Skin(Gdx.files.internal("UI/uiskin.json"));
+        hudStage = new Stage(new ScreenViewport());
+        buildHUD();
+    }
+    // NEW METHOD (to be called in show())
+    private void buildHUD() {
+        float maxPlayerMainTowerHP = mainTower.maxHealth;   // use whatever your max HP field is called
+        float maxPlayerMiniTowerHP = miniTower.maxHealth;
+        float maxEnemyMiniTowerHP = enemyMiniTower.maxHealth;
+        float maxEnemyMainTowerHP = enemyMainTower.maxHealth;
+        
+
+        // --- TOP LEFT: Your tower ---
+        Table topLeft = new Table();
+        topLeft.top().left();
+        topLeft.setFillParent(false);
+        topLeft.pad(8);
+
+        //Labels declared and initialized
+        Label yourMainTowerLabel = new Label("ALLIED MAIN TOWER", skin);
+        Label yourMiniTowerLabel = new Label("ALLIED MINI TOWER", skin);
+
+        //Setting progress bars for the two allied towers
+        playerMainTowerBar = new ProgressBar(0, maxPlayerMainTowerHP, 1, false, skin);
+        playerMainTowerBar.setValue(maxPlayerMainTowerHP);
+
+        playerMiniTowerBar = new ProgressBar(0, maxPlayerMiniTowerHP, 1, false, skin);
+        playerMiniTowerBar.setValue(maxPlayerMiniTowerHP);
+
+        //Adding the above data into rows in the topLeft table
+        topLeft.add(yourMainTowerLabel).left().padBottom(2);
+        topLeft.row();
+        topLeft.add(playerMainTowerBar).width(140).height(10);
+        topLeft.row();
+        topLeft.add(yourMiniTowerLabel).left().padBottom(2);
+        topLeft.row();
+        topLeft.add(playerMiniTowerBar).width(140).height(10);
+
+        //Setting the table position in the overall stage aka the HUD
+        topLeft.setPosition(8, hudStage.getHeight() - 8);
+        topLeft.pack();
+        topLeft.setY(hudStage.getHeight() - topLeft.getHeight() - 8);
+        hudStage.addActor(topLeft);
+
+        // --- TOP RIGHT: Enemy tower ---
+        
+        Table topRight = new Table();
+        topRight.top().right();
+        topRight.pad(8);
+
+        //Labels declared and initialized
+        Label enemyMainTowerLabel = new Label("ENEMY MAIN TOWER", skin);
+        Label enemyMiniTowerLabel = new Label("ENEMY MINI TOWER", skin);
+        
+        //Setting progress bars for the two enemy towers
+        enemyMainTowerBar = new ProgressBar(0, maxEnemyMainTowerHP, 1, false, skin);
+        enemyMainTowerBar.setValue(maxEnemyMainTowerHP);   
+
+        enemyMiniTowerBar = new ProgressBar(0, maxEnemyMiniTowerHP, 1, false, skin);
+        enemyMiniTowerBar.setValue(maxEnemyMiniTowerHP);  
+
+        //Adding the above data into rows in the topRight table
+        topRight.add(enemyMainTowerLabel).right().padBottom(2);
+        topRight.row();
+        topRight.add(enemyMainTowerBar).width(140).height(10);
+        topRight.row();
+        topRight.add(enemyMiniTowerLabel).right().padBottom(2);
+        topRight.row();
+        topRight.add(enemyMiniTowerBar).width(140).height(10);
+
+        //Setting the table position in the overall stage aka the HUD
+        topRight.pack();
+        topRight.setPosition(
+            hudStage.getWidth() - topRight.getWidth() - 8,      //Subtracting padded value btw
+            hudStage.getHeight() - topRight.getHeight() - 8
+        );
+        hudStage.addActor(topRight);
+
+        // --- TOP CENTER: Timer ---
+
+        //Same comments as above two tables
+        Table topCenter = new Table();
+        topCenter.pad(8);
+
+        timerLabel = new Label("10:00", skin);
+
+        topCenter.add(timerLabel);
+        topCenter.pack();
+        topCenter.setPosition(
+            (hudStage.getWidth() / 2f) - (topCenter.getWidth() / 2f),
+            hudStage.getHeight() - topCenter.getHeight() - 8
+        );
+        hudStage.addActor(topCenter);
+
+        // --- BOTTOM LEFT: Current attack target ---
+        Table bottomLeft = new Table();
+        bottomLeft.bottom().left();
+        bottomLeft.pad(8);
+
+        targetLabel = new Label("NO TARGET", skin);
+
+        bottomLeft.add(targetLabel).left();
+        bottomLeft.pack();
+        bottomLeft.setPosition(8, 8);
+        hudStage.addActor(bottomLeft);
+
+        // --- BOTTOM RIGHT: Enemy bot count ---
+        Table bottomRight = new Table();
+        bottomRight.bottom().right();
+        bottomRight.pad(8);
+
+        botCountLabel = new Label("ENEMY BOTS: 0", skin);
+
+        bottomRight.add(botCountLabel).right();
+        bottomRight.pack();
+        bottomRight.setPosition(
+            hudStage.getWidth() - bottomRight.getWidth() - 8,
+            8
+        );
+        hudStage.addActor(bottomRight);
+    }
+
+    // NEW METHOD (to be called in render)
+    private void updateHUD() {
+        //Allied Tower HP
+        playerMainTowerBar.setValue(mainTower.currentHealth);
+        playerMiniTowerBar.setValue(miniTower.currentHealth);
+
+        //Enemy Tower HP
+        enemyMainTowerBar.setValue(enemyMainTower.currentHealth);
+        enemyMiniTowerBar.setValue(enemyMiniTower.currentHealth);
+
+        // Enemy tower — wire to real enemy tower when built
+        // enemyTowerBar.setValue(enemyTower.currentHealth);
+
+        // Attack target label
+        Entity target = player.getAttackTarget();
+        if (target != null) {
+            // Uses class name for now — replace with a name field on Entity if you add one
+            targetLabel.setText("TARGET: " + target.getClass().getSimpleName().toUpperCase());
+        } else {
+            targetLabel.setText("NO TARGET");
+        }
+
+        // Enemy bot count (filters by isAlly flag matching your existing pattern)
+        int enemyBotCount = 0;
+        for (Bot b : Bot.BotList) {
+            if (!b.isAlly) enemyBotCount++;
+        }
+        botCountLabel.setText("ENEMY BOTS: " + enemyBotCount);
+
+        // Timer display 
+        int minutes = (int)(timeRemaining / 60f);
+        int seconds = (int)(timeRemaining % 60f);
+        timerLabel.setText(String.format("%02d:%02d", minutes, seconds));
+    }
+
 
     @Override
     public void pause() {
@@ -307,14 +504,24 @@ public class GameScreen implements Screen {
 
     @Override
     public void hide() {
-
+        //Clear out all lists
+        Entity.entityList.clear();
+        HeroPlayer.heroList.clear();
+        Bot.BotList.clear();
+        Tower.towerList.clear();
     }
 
     @Override
     public void dispose() {
         batch.dispose();
-        shapeRenderer.dispose();   // TO DO: Remove DEBUG tool
+        shapeRenderer.dispose();   // TODO: Remove DEBUG tool
         mapRenderer.dispose();
+
+        //Hud work dispose
+        hudStage.dispose();
+        skin.dispose();
+
+        
     }
 
 
@@ -493,6 +700,77 @@ public class GameScreen implements Screen {
             return target.HealthBarSprite;
         }
         return null;
+    }
+
+    public void handleEndGameScreen() {
+        
+
+        //Direct Win condition
+        if (enemyMainTower.isDead) {
+            game.setScreen(new EndGameScreen(game, true, false));
+        }
+
+        //Direct Loose Condition
+        if (mainTower.isDead) {
+            game.setScreen(new EndGameScreen(game, false, false));
+        }
+
+        if (timeRemaining <= 0) {
+            int countDeadAllyTowers = 0;
+            int countDeadEnemyTowers = 0;
+
+            for (Tower t : Tower.towerList) {
+                
+                //Count Dead Ally Towers
+                if (t.isAlly && t.isDead) {
+                    countDeadAllyTowers++;
+                }
+
+                //Count Dead Enemy Towers
+                if (!t.isAlly && t.isDead) {
+                    countDeadEnemyTowers++;
+                }
+            }
+
+            //Decide win/draw/loose
+            if (countDeadAllyTowers > countDeadEnemyTowers) {
+                game.setScreen(new EndGameScreen(game, false, false));
+            }
+
+            else if (countDeadAllyTowers < countDeadEnemyTowers) {
+                game.setScreen(new EndGameScreen(game, true, false));
+            }
+
+            else {
+                float allyTowerHealth = 0;
+                float enemyTowerHealth = 0;
+
+                for (Tower t : Tower.towerList){
+                    if (t.isAlly ) {
+                        allyTowerHealth += t.currentHealth;     //Combined health of towers
+                    }
+                    else {
+                        enemyTowerHealth += t.currentHealth;    //Combined health of towers
+                    }
+                }
+                //Win if more health
+                if (allyTowerHealth > enemyTowerHealth){
+                    game.setScreen(new EndGameScreen(game, true, false));
+                }
+
+                //Loose if less health
+                else if (allyTowerHealth < enemyTowerHealth) {
+                    game.setScreen(new EndGameScreen(game, false, false)); 
+                }
+
+                //Draw if equal health
+                else {
+                    game.setScreen(new EndGameScreen(game, false, true));    //PlayerWon doesnt matter here
+                }
+                
+            }
+        }
+
     }
 
     public static Entity getPlayer(){
