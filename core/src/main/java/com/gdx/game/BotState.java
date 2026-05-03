@@ -297,7 +297,7 @@ class BotChaseState implements State<Bot> {
         ArrayList<int[]> validGridList =  new ArrayList<>();
 
         Queue<int[]> q = new LinkedList<>();    // Make queue of integer array
-        boolean[][] visited = new boolean[(int)GameScreen.worldWidth][(int)GameScreen.worldHeight];  // Make boolean list
+        boolean[][] visited = new boolean[(int)GameScreen.worldWidth*Bot.gridSize][(int)GameScreen.worldHeight*Bot.gridSize];  // Make boolean list
 
         q.add(new int[]{sx, sy}); // Add starting
         visited[sx][sy] = true;
@@ -322,6 +322,7 @@ class BotChaseState implements State<Bot> {
 
                 for(int[] i : validGridList){
                     float half = (Bot.tileSize * Bot.scale) / 2f;
+                    System.out.println(half);
                     Vector2 checkVector = new Vector2(i[0]* Bot.tileSize * Bot.scale + half,i[1]* Bot.tileSize * Bot.scale + half);
                     float newDist = defaultVector.dst(checkVector);
                     if(newDist<minDist){

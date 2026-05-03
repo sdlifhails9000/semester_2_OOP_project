@@ -14,9 +14,10 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 class Bot extends DynamicEntity{
+    static int gridSize = 2;
     static ShapeRenderer shapeRenderer = new ShapeRenderer(); // DELETE
     public static ArrayList<Rectangle> rectArray = new ArrayList<>(); // DELETE
-    static float tileSize = GameScreen.tileSize;
+    static float tileSize = GameScreen.tileSize/gridSize;
     public static ArrayList<Bot> BotList = new ArrayList<>();
     static float scale = GameScreen.scale;
     int collisionCounter = 0;
@@ -193,7 +194,7 @@ class Bot extends DynamicEntity{
             };
 
             Queue<Node> queue = new LinkedList<>(); // FIFO mode
-            boolean[][] visited = new boolean[(int)GameScreen.worldWidth][(int)GameScreen.worldHeight];
+            boolean[][] visited = new boolean[(int)GameScreen.worldWidth *gridSize][(int)GameScreen.worldHeight*gridSize];
 
             Node start = new Node(sx, sy);
             queue.add(start);
@@ -209,17 +210,19 @@ class Bot extends DynamicEntity{
                 }
 
                 for (int[] d : dirs) {
+                    // Calculate neighbour
                     int nx = current.x + d[0];
                     int ny = current.y + d[1];
-
-                    if (nx < 0 || ny < 0 || nx >= visited.length || ny >= visited[0].length)
+                    
+                    // Check Validity
+                    if (nx < 0 || ny < 0 || nx >= visited.length || ny >= visited[0].length) // Out of bounds
                         continue;
 
                     if (visited[nx][ny])
                         continue;
 
-                    if (Math.abs(d[0]) == 1 && Math.abs(d[1]) == 1){
-                        if (!canStand(nx, ny,true))
+                    if (Math.abs(d[0]) == 1 && Math.abs(d[1]) == 1){    // Seperate check for diagonals because at the current grid size they become glitchy
+                        if (!canStand(nx, ny,true)) // true just increases the sprite size a bit
                             continue;
                     }
                     else{
@@ -229,22 +232,22 @@ class Bot extends DynamicEntity{
                     Node next = new Node(nx, ny);
                     next.parent = current;
                     visited[nx][ny] = true;
-                    queue.add(next);
+                    queue.add(next);    // Add all neighbours to queue if they are valid
 
 
                 }
             }
-            return null;
+            return null;    // No path
         }
 
 boolean canStand(int x, int y,boolean diagonal) {
 
     Rectangle usedCollisionBox;
-    float half = (tileSize * scale) / 2f;
+    float half = (Bot.tileSize * scale) / 2f;
 
     Vector2 worldCoords = new Vector2(
-        x * tileSize * scale + half,
-        y * tileSize * scale + half
+        x * Bot.tileSize * scale + half,
+        y * Bot.tileSize * scale + half
     );
     if(diagonal){
         usedCollisionBox = greaterTempCollisioRectangle;
