@@ -125,11 +125,11 @@ public class GameScreen implements Screen {
         mainTower = new Tower(TowerPreset.ENEMY_MAIN, 400, 54);
 
         //DRAW THE TOWER FIRST SO THAT WHEN TOWER DIES PLAYER CANNOT HIDE UNDER ITS RUBBLE
-        player = new HeroPlayer(preset, 300, 50);
+        player = new HeroPlayer(preset, 280, 50);
         enemy = new HeroBot(HeroBotPreset.ENEMY_HERO_HEAVY, 300, 30);
 
         // //Initialize the goblins
-        // g1 = new Bot(GoblinPreset.GOBLIN, 10,20);
+        g1 = new Bot(GoblinPreset.GOBLIN, 310,30);
         // // g2 = new Goblin(Preset.GOBLIN, 20,20);
         //g3 = new Bot(GoblinPreset.GOBLIN, 300,30);
         //g4 = new Bot(GoblinPreset.ENEMY_GOBLIN, 300,40);

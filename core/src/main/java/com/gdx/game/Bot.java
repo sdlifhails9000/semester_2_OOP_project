@@ -177,7 +177,7 @@ class Bot extends DynamicEntity{
 
     @Override
     public void Update(float delta) {
-        this.setAttackTarget(this.getAttackTarget()); // Move to closest always
+        this.setAttackTarget(getAttackTarget()); // Move to closest always
         super.Update(delta);
         currentState.update(this, delta);
 

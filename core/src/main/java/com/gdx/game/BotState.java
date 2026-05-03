@@ -43,6 +43,12 @@ class BotAttackState implements State<Bot> {
 
     @Override
     public void update(Bot e, float delta){
+        System.out.println(e.getClass()+" AttackState");
+
+        if(e.getAttackTarget() == null){
+            e.setState(e.BotIdleState);
+        }
+
         // If the entity itself dies
         if (e.isDead){
             e.setState(e.BotDeadState);
@@ -50,12 +56,10 @@ class BotAttackState implements State<Bot> {
             return;
         }
         //If the target is dead
-        if (e.getAttackTarget() != null){
-            if (e.getAttackTarget().isDead) {
-                e.setState(e.BotIdleState);
-                e.attackTarget = null;
-                return;
-            }
+        if (e.getAttackTarget().isDead) {
+            e.setState(e.BotIdleState);
+            e.attackTarget = null;
+            return;
         }
         
 
@@ -104,7 +108,7 @@ class BotChaseState implements State<Bot> {
     }
 
     public void update(Bot e, float delta){
-
+        System.out.println(e.getClass()+" ChaseState");
         
         lastValidPostion.set(e.currentXY);
 
