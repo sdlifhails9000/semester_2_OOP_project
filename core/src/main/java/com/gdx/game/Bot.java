@@ -210,17 +210,19 @@ class Bot extends DynamicEntity{
                 }
 
                 for (int[] d : dirs) {
+                    // Calculate neighbour
                     int nx = current.x + d[0];
                     int ny = current.y + d[1];
-
-                    if (nx < 0 || ny < 0 || nx >= visited.length || ny >= visited[0].length)
+                    
+                    // Check Validity
+                    if (nx < 0 || ny < 0 || nx >= visited.length || ny >= visited[0].length) // Out of bounds
                         continue;
 
                     if (visited[nx][ny])
                         continue;
 
-                    if (Math.abs(d[0]) == 1 && Math.abs(d[1]) == 1){
-                        if (!canStand(nx, ny,true))
+                    if (Math.abs(d[0]) == 1 && Math.abs(d[1]) == 1){    // Seperate check for diagonals because at the current grid size they become glitchy
+                        if (!canStand(nx, ny,true)) // true just increases the sprite size a bit
                             continue;
                     }
                     else{
@@ -230,12 +232,12 @@ class Bot extends DynamicEntity{
                     Node next = new Node(nx, ny);
                     next.parent = current;
                     visited[nx][ny] = true;
-                    queue.add(next);
+                    queue.add(next);    // Add all neighbours to queue if they are valid
 
 
                 }
             }
-            return null;
+            return null;    // No path
         }
 
 boolean canStand(int x, int y,boolean diagonal) {
