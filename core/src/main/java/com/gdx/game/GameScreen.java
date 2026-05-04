@@ -145,22 +145,22 @@ public class GameScreen implements Screen {
 
         //Initialize the DYNAMIC SPRITES
         mainTower = new Tower(TowerPreset.MAIN, 156, 38);
-        miniTower = new Tower(TowerPreset.MINI,362, 38);
-        enemyMiniTower = new Tower(TowerPreset.ENEMY_MINI,490, 38);
+        miniTower = new Tower(TowerPreset.MINI,352, 38);
+        enemyMiniTower = new Tower(TowerPreset.ENEMY_MINI,500, 38);
         enemyMainTower = new Tower(TowerPreset.ENEMY_MAIN,680, 38);
 
 
         //DRAW THE TOWER FIRST SO THAT WHEN TOWER DIES PLAYER CANNOT HIDE UNDER ITS RUBBLE
-        player = new HeroPlayer(preset, 740, 38);
-        enemy = new HeroBot(HeroBotPreset.ENEMY_HERO_LIGHT, 300, 30);
+        player = new HeroPlayer(preset, 50, 38);
+        enemy = new HeroBot(HeroBotPreset.ENEMY_HERO_LIGHT, 750, 30);
 
         // //Initialize the goblins
-        // g1 = new Bot(GoblinPreset.GOBLIN, 40,28);
-        // g2 = new Bot(GoblinPreset.GOBLIN, 40,38);
-        // g3 = new Bot(GoblinPreset.GOBLIN, 40,50);
-        // g4 = new Bot(GoblinPreset.ENEMY_GOBLIN, 760,28);
-        // g5 = new Bot(GoblinPreset.ENEMY_GOBLIN, 760,38);
-        // g6 = new Bot(GoblinPreset.ENEMY_GOBLIN, 760,48);
+        g1 = new Bot(GoblinPreset.GOBLIN, 40,28);
+        g2 = new Bot(GoblinPreset.GOBLIN, 40,38);
+        g3 = new Bot(GoblinPreset.GOBLIN, 40,50);
+        g4 = new Bot(GoblinPreset.ENEMY_GOBLIN, 760,28);
+        g5 = new Bot(GoblinPreset.ENEMY_GOBLIN, 760,38);
+        g6 = new Bot(GoblinPreset.ENEMY_GOBLIN, 760,48);
 
         // Initialize Camera
         float height = Gdx.graphics.getHeight();    //For aspect ratio calculation

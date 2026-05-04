@@ -166,9 +166,9 @@ enum HeroBotPreset implements BotPreset  {
 
     HERO_LIGHT("HeroAtlas/lightHero.atlas", 20f, 15f, 10f, 100f, 0.70f, 8, 8, true, 1, 2),
 
-    ENEMY_HERO_LIGHT("HeroAtlas/lightEnemyHero.atlas", 20f, 15f, 10f, 14f, 0.70f, 8, 8, false, 1, 2),
+    ENEMY_HERO_LIGHT("HeroAtlas/lightEnemyHero.atlas", 20f, 15f, 10f, 100f, 0.70f, 8, 8, false, 1, 2),
 
-    ENEMY_HERO_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 20f, 10f, 100f, 1f, 10, 10, false, 1, 2);
+    ENEMY_HERO_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 20f, 10f, 140f, 1f, 10, 10, false, 1, 2);
 
     final String assetPath;
 
@@ -330,10 +330,10 @@ enum WeaponPreset {
 }
 
 enum ProjectilePreset {
-    MAIN_TOWER("TowerAtlas/MainProjectile.atlas", true, 20, 20, 1.5f, 5),
-    MINI_TOWER("TowerAtlas/MiniProjectile.atlas",true, 25, 15, 1, 4),
-    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainProjectile.atlas", false, 20, 20, 1.5f, 5),
-    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniProjectile.atlas", false, 25, 15, 1, 4);
+    MAIN_TOWER("TowerAtlas/MainProjectile.atlas", true, 25, 20, 1.5f, 5),
+    MINI_TOWER("TowerAtlas/MiniProjectile.atlas",true, 30, 15, 1, 4),
+    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainProjectile.atlas", false, 25, 20, 1.5f, 5),
+    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniProjectile.atlas", false, 30, 15, 1, 4);
 
     final String assetPath;
 
