@@ -3,6 +3,9 @@
 package com.gdx.game;
 import java.util.ArrayList;
 import java.util.Queue;
+
+import org.w3c.dom.NodeList;
+
 import java.util.LinkedList;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -100,7 +103,7 @@ class BotAttackState implements State<Bot> {
 // If there is an attackTarget but it is far, this state is entered
 class BotChaseState implements State<Bot> {
     Vector2 lastValidPostion = new Vector2();
-
+    static ArrayList<Node> nodeList = new ArrayList<>();
     public void enter(Bot e){
         e.currentAnimation = e.runAnimation;
         e.BFSpath = null;
@@ -118,11 +121,12 @@ class BotChaseState implements State<Bot> {
         }
 
         // If target is far from the node bot is moving towards
-        if(e.BFSlastNode!= null)
-            if(e.attackTarget.currentXY.dst(e.BFSlastNode.cpy().scl(Bot.tileSize*Bot.scale)) > 25){
-                e.BFSpath = null;
-                e.BFSlastNode = null;
-            }
+        // if(e.BFSlastNode!= null)
+        //     if(e.attackTarget.currentXY.dst(e.BFSlastNode.cpy().scl(Bot.tileSize*Bot.scale)) > 25
+        //         && pathIndex>5){
+        //         e.BFSpath = null;
+        //         e.BFSlastNode = null;
+        //     }
 
         // if Bot is close to an enemy then go into attack state
         if (e.isCloseToEnemy()){
@@ -181,7 +185,7 @@ class BotChaseState implements State<Bot> {
 
 
 
-            if(e.collisionCounter>1){ // Increase this counter if game lags when finding paths
+            if(e.collisionCounter>30){ // Increase this counter if game lags when finding paths
                 if(attackTarget != null){
                     // Calculate BFS from CURRENT position to target position
                     int gx = (int) (e.attackTarget.getCurrentPosition().x / Bot.tileSize / Bot.scale);
@@ -201,8 +205,10 @@ class BotChaseState implements State<Bot> {
                         sx = tempGrid[0];
                         sy = tempGrid[1];
                     }
-
                     e.BFSpath = e.bfs(sx, sy, gx, gy);
+                    for(Node i : e.BFSpath){
+                        nodeList.add(i);
+                    }
                     if(e.BFSpath != null)
                     pathIndex = 0;
 

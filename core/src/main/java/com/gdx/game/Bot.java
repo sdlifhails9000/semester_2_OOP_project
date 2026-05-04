@@ -126,8 +126,8 @@ class Bot extends DynamicEntity{
 
         // This finds the nearest enemy to this bot
         for (Entity entity : Entity.entityList) {
-            // This skips allies. They aren't enemies, entities which are dead and itself
-            if (this.isAlly == entity.isAlly || entity.isDead || this == entity) {
+            // This skips allies. They aren't enemies, entities which are dead, itself and the weapon and projectile produced by tower (By composition)
+            if (this.isAlly == entity.isAlly || entity.isDead || this == entity || entity instanceof Weapon || entity instanceof Projectile) {
                 continue;
             }
 
@@ -185,11 +185,19 @@ class Bot extends DynamicEntity{
 
     @Override
     public void Update(float delta) {
-        this.setAttackTarget(getAttackTarget()); // Move to closest always
-        super.Update(delta);
-        currentState.update(this, delta);
+        try{
+            this.setAttackTarget(getAttackTarget()); // Move to closest always
+            super.Update(delta);
+            currentState.update(this, delta);
 
-        updateHealthBar();
+            updateHealthBar();
+        }
+        catch(NullPointerException e){
+            System.out.println("Error Occured in Bot State");
+            e.printStackTrace();
+            // FallBack to Idle State
+            setState(BotIdleState);
+        }
     }
 
     // Breadth First Search
@@ -206,6 +214,7 @@ class Bot extends DynamicEntity{
             Node start = new Node(sx, sy);
             queue.add(start);
             visited[sx][sy] = true;
+            int nodeCount = 0;
 
             while (!queue.isEmpty()) { // No more nodes available
 
@@ -236,10 +245,14 @@ class Bot extends DynamicEntity{
                         if (!canStand(nx, ny,false))
                             continue;
                     }
+                    if(nodeCount>100){
+                        return reconstructPath(current);
+                    }
                     Node next = new Node(nx, ny);
                     next.parent = current;
                     visited[nx][ny] = true;
                     queue.add(next);    // Add all neighbours to queue if they are valid
+                    nodeCount++;
 
 
                 }
