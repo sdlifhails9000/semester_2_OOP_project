@@ -1,7 +1,5 @@
 package com.gdx.game;
 
-// TODO Add projectiles for towers
-// TODO Add dynamic hitbox whilst keeping collisionbox untouched
 
 // make the tower an Entity and make it's projectiles DynamicEntities that harm enemies
 

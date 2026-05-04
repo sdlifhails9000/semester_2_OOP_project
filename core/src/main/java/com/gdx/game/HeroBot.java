@@ -1,10 +1,12 @@
 package com.gdx.game;
 import com.badlogic.gdx.math.Vector2;
 class HeroBot extends Bot{
+    // Constructor
     HeroBot(BotPreset preset, int startX, int startY){
     super(preset, startX,startY);
     }
 
+    // This override prioritizes playe
     @Override
     public Entity getAttackTarget() {
         Entity nearestEntity = null;
@@ -18,6 +20,12 @@ class HeroBot extends Bot{
         for (Entity entity : Entity.entityList) {
             // This skips allies. They aren't enemies, entities which are dead and itself
             if (this.isAlly == entity.isAlly || entity.isDead || this == entity || entity instanceof Weapon || entity instanceof Projectile) {
+                continue;
+            }
+
+            // So that we don't start attacking the arrows or the weapon
+            // That's dumb
+            if (entity instanceof Weapon || entity instanceof Projectile) {
                 continue;
             }
 
