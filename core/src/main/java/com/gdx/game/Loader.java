@@ -16,13 +16,13 @@ import java.util.Map;
 
 enum HeroPreset {
     // Last is height ,second last is width
-    HERO_HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, true),
+    HERO_HEAVY("HeroAtlas/heavyHero.atlas", 15f, 20f, 10f, 140f, 1f, 10, 10, true),
 
-    HERO_LIGHT("HeroAtlas/lightHero.atlas", 20f, 20f, 10f, 100f, 0.5f, 10, 10, true),
+    HERO_LIGHT("HeroAtlas/lightHero.atlas", 20f, 15f, 10f, 100f, 0.70f, 8, 8, true),
 
-    ENEMY_HERO_LIGHT("HeroAtlas/lightEnemyHero.atlas", 20f, 20f, 10f, 125f, 0.5f, 10, 10, false),
+    ENEMY_HERO_LIGHT("HeroAtlas/lightEnemyHero.atlas", 20f, 15f, 10f, 14f, 0.70f, 8, 8, false),
 
-    ENEMY_HERO_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, false);
+    ENEMY_HERO_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 20f, 10f, 100f, 1f, 10, 10, false);
 
     final String assetPath;
 
@@ -72,8 +72,8 @@ interface BotPreset{
 
 enum GoblinPreset implements BotPreset {
     // Hardcoding gridspan at the end, width ,height
-    GOBLIN("GoblinAtlas/Goblin.atlas", 10, 20, 2, 75, 2, 8, 8, true,1,2),
-    ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 10, 0, 2, 75, 2, 8, 8, false,1,2);
+    GOBLIN("GoblinAtlas/Goblin.atlas", 10, 10, 2, 40, 1.25f, 7, 7, true,1,2),
+    ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 10, 10, 2, 40, 1.25f, 7, 7, false,1,2);
 
     final String assetPath;
 
@@ -163,13 +163,13 @@ enum GoblinPreset implements BotPreset {
 
 enum HeroBotPreset implements BotPreset  {
     // Last is height ,second last is width
-    HERO_HEAVY("HeroAtlas/heavyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, true, 1, 2),
+    HERO_HEAVY("HeroAtlas/heavyHero.atlas", 15f, 20f, 10f, 140f, 1f, 10, 10, true, 1, 2),
 
-    HERO_LIGHT("HeroAtlas/lightHero.atlas", 20f, 20f, 10f, 125f, 0.5f, 10, 10, true, 1, 2),
+    HERO_LIGHT("HeroAtlas/lightHero.atlas", 20f, 15f, 10f, 100f, 0.70f, 8, 8, true, 1, 2),
 
-    ENEMY_HERO_LIGHT("HeroAtlas/lightEnemyHero.atlas", 20f, 20f, 10f, 125f, 0.5f, 10, 10, false, 1, 2),
+    ENEMY_HERO_LIGHT("HeroAtlas/lightEnemyHero.atlas", 20f, 15f, 10f, 14f, 0.70f, 8, 8, false, 1, 2),
 
-    ENEMY_HERO_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 30f, 10f, 150f, 1f, 14, 12, false, 1, 2);
+    ENEMY_HERO_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 20f, 10f, 100f, 1f, 10, 10, false, 1, 2);
 
     final String assetPath;
 
@@ -263,13 +263,13 @@ enum TowerPreset {
         200, 20, 20, true),
 
     MINI("TowerAtlas/MiniTower.atlas",
-         200, 20, 20, true),
+         160, 18, 18, true),
 
     ENEMY_MAIN("TowerAtlas/EnemyMainTower.atlas",
          200, 20, 20, false),
 
     ENEMY_MINI("TowerAtlas/EnemyMiniTower.atlas",
-         200, 20, 20, false);
+         160, 18, 18, false);
 
     final String assetPath;
 
@@ -295,10 +295,10 @@ enum TowerPreset {
 }
 
 enum WeaponPreset {
-    MAIN_TOWER("TowerAtlas/MainTowerWeapon.atlas", true, 2, 40,  10, 10),
-    MINI_TOWER("TowerAtlas/MiniTowerWeapon.atlas",true, 2, 40, 6, 6),
-    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainTowerWeapon.atlas", false, 2, 40, 10, 10),
-    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniTowerWeapon.atlas", false, 2, 40, 6, 6);
+    MAIN_TOWER("TowerAtlas/MainTowerWeapon.atlas", true, 2, 40,  9, 9),
+    MINI_TOWER("TowerAtlas/MiniTowerWeapon.atlas",true, 2, 40, 7, 7),
+    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainTowerWeapon.atlas", false, 2, 40, 9, 9),
+    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniTowerWeapon.atlas", false, 2, 40, 7, 7);
 
     final String assetPath;
 
@@ -331,10 +331,10 @@ enum WeaponPreset {
 }
 
 enum ProjectilePreset {
-    MAIN_TOWER("TowerAtlas/MainProjectile.atlas", true, 20, 0,1, 5),
-    MINI_TOWER("TowerAtlas/MiniProjectile.atlas",true, 20, 0, 1, 5),
-    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainProjectile.atlas", false, 20, 0, 1, 5),
-    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniProjectile.atlas", false, 20, 0, 1, 5);
+    MAIN_TOWER("TowerAtlas/MainProjectile.atlas", true, 20, 20, 1.5f, 5),
+    MINI_TOWER("TowerAtlas/MiniProjectile.atlas",true, 25, 15, 1, 4),
+    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainProjectile.atlas", false, 20, 20, 1.5f, 5),
+    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniProjectile.atlas", false, 25, 15, 1, 4);
 
     final String assetPath;
 

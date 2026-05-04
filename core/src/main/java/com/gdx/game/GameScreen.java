@@ -74,7 +74,7 @@ public class GameScreen implements Screen {
 
     float aspectRatio = 0.5625f;        //Use to fix scaling (comment out viewport portion and see orthocamera libgdx way)
 
-    private float cameraWidth = 80f;                 // -> Visible Region
+    private float cameraWidth = 60f;                 // -> Visible Region
     private float cameraHeight = 80f;
 
     //Player move speed and camera move speed
@@ -147,23 +147,23 @@ public class GameScreen implements Screen {
         hoverCoords = new Vector3();
 
         //Initialize the DYNAMIC SPRITES
-        mainTower = new Tower(TowerPreset.MAIN, 400, 54);
-        miniTower = new Tower(TowerPreset.MINI,450, 54);
-        enemyMiniTower = new Tower(TowerPreset.ENEMY_MINI,450, 24);
-        enemyMainTower = new Tower(TowerPreset.ENEMY_MAIN,400, 24);
+        mainTower = new Tower(TowerPreset.MAIN, 156, 38);
+        miniTower = new Tower(TowerPreset.MINI,362, 38);
+        enemyMiniTower = new Tower(TowerPreset.ENEMY_MINI,490, 38);
+        enemyMainTower = new Tower(TowerPreset.ENEMY_MAIN,680, 38);
 
 
         //DRAW THE TOWER FIRST SO THAT WHEN TOWER DIES PLAYER CANNOT HIDE UNDER ITS RUBBLE
-        player = new HeroPlayer(preset, 280, 50);
-        enemy = new HeroBot(HeroBotPreset.ENEMY_HERO_HEAVY, 300, 30);
+        player = new HeroPlayer(preset, 740, 38);
+        enemy = new HeroBot(HeroBotPreset.ENEMY_HERO_LIGHT, 300, 30);
 
         // //Initialize the goblins
-        g1 = new Bot(GoblinPreset.GOBLIN, 310,30);
-        // // g2 = new Goblin(Preset.GOBLIN, 20,20);
-        //g3 = new Bot(GoblinPreset.GOBLIN, 300,30);
-        //g4 = new Bot(GoblinPreset.ENEMY_GOBLIN, 300,40);
-        // g5 = new Bot(GoblinPreset.ENEMY_GOBLIN, 330,40);
-        // g6 = new Bot(GoblinPreset.ENEMY_GOBLIN, 320,40);
+        // g1 = new Bot(GoblinPreset.GOBLIN, 40,28);
+        // g2 = new Bot(GoblinPreset.GOBLIN, 40,38);
+        // g3 = new Bot(GoblinPreset.GOBLIN, 40,50);
+        // g4 = new Bot(GoblinPreset.ENEMY_GOBLIN, 760,28);
+        // g5 = new Bot(GoblinPreset.ENEMY_GOBLIN, 760,38);
+        // g6 = new Bot(GoblinPreset.ENEMY_GOBLIN, 760,48);
 
         // Initialize Camera
         float height = Gdx.graphics.getHeight();    //For aspect ratio calculation

@@ -41,7 +41,7 @@ class Tower extends Entity {
         this.HealthBarSprite = new Sprite(fullHealthRegion);
 
         WeaponPreset weaponPreset = mapWeaponPreset(preset);
-        float offset = 5;
+        float offset = spriteHeight / 4;
 
         towerWeapon = new Weapon(weaponPreset, this, startX, startY + offset);
 

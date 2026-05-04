@@ -124,8 +124,8 @@ class Bot extends DynamicEntity{
 
         // This finds the nearest enemy to this bot
         for (Entity entity : Entity.entityList) {
-            // This skips allies. They aren't enemies, entities which are dead and itself
-            if (this.isAlly == entity.isAlly || entity.isDead || this == entity) {
+            // This skips allies. They aren't enemies, entities which are dead, itself and the weapon and projectile produced by tower (By composition)
+            if (this.isAlly == entity.isAlly || entity.isDead || this == entity || entity instanceof Weapon || entity instanceof Projectile) {
                 continue;
             }
 
