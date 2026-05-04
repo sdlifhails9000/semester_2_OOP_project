@@ -71,7 +71,7 @@ interface BotPreset{
 
 enum GoblinPreset implements BotPreset {
     // Hardcoding gridspan at the end, width ,height
-    GOBLIN("GoblinAtlas/Goblin.atlas", 10, 10, 2, 40, 1.25f, 7, 7, true,1,2),
+    GOBLIN("GoblinAtlas/Goblin.atlas", 10, 10, 2, 40, 1.25f, 10, 10, true,1,2),
     ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 10, 10, 2, 40, 1.25f, 7, 7, false,1,2);
 
     final String assetPath;
