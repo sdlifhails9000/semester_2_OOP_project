@@ -23,6 +23,12 @@ class HeroBot extends Bot{
                 continue;
             }
 
+            // So that we don't start attacking the arrows or the weapon
+            // That's dumb
+            if (entity instanceof Weapon || entity instanceof Projectile) {
+                continue;
+            }
+
             // Calculate distance
             Vector2 entityPos = entity.getCurrentPosition();
             float distance = entityPos.dst(getCurrentPosition());
