@@ -119,7 +119,8 @@ class BotChaseState implements State<Bot> {
 
         // If target is far from the node bot is moving towards
         if(e.BFSlastNode!= null)
-            if(e.attackTarget.currentXY.dst(e.BFSlastNode.cpy().scl(Bot.tileSize*Bot.scale)) > 25){
+            if(e.attackTarget.currentXY.dst(e.BFSlastNode.cpy().scl(Bot.tileSize*Bot.scale)) > 25
+                && pathIndex>5){
                 e.BFSpath = null;
                 e.BFSlastNode = null;
             }
@@ -181,7 +182,7 @@ class BotChaseState implements State<Bot> {
 
 
 
-            if(e.collisionCounter>1){ // Increase this counter if game lags when finding paths
+            if(e.collisionCounter>30){ // Increase this counter if game lags when finding paths
                 if(attackTarget != null){
                     // Calculate BFS from CURRENT position to target position
                     int gx = (int) (e.attackTarget.getCurrentPosition().x / Bot.tileSize / Bot.scale);

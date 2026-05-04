@@ -214,6 +214,7 @@ class Bot extends DynamicEntity{
             Node start = new Node(sx, sy);
             queue.add(start);
             visited[sx][sy] = true;
+            int nodeCount = 0;
 
             while (!queue.isEmpty()) { // No more nodes available
 
@@ -244,10 +245,14 @@ class Bot extends DynamicEntity{
                         if (!canStand(nx, ny,false))
                             continue;
                     }
+                    if(nodeCount>15){
+                        return reconstructPath(current);
+                    }
                     Node next = new Node(nx, ny);
                     next.parent = current;
                     visited[nx][ny] = true;
                     queue.add(next);    // Add all neighbours to queue if they are valid
+                    nodeCount++;
 
 
                 }
