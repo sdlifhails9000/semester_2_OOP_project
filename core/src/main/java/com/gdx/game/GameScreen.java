@@ -147,12 +147,12 @@ public class GameScreen implements Screen {
         //Initialize the DYNAMIC SPRITES
         mainTower = new Tower(TowerPreset.MAIN, 156, 38);
         miniTower = new Tower(TowerPreset.MINI,352, 38);
-        enemyMiniTower = new Tower(TowerPreset.ENEMY_MINI,750, 38);
+        enemyMiniTower = new Tower(TowerPreset.ENEMY_MINI,500, 38);
         enemyMainTower = new Tower(TowerPreset.ENEMY_MAIN,680, 38);
 
 
         //DRAW THE TOWER FIRST SO THAT WHEN TOWER DIES PLAYER CANNOT HIDE UNDER ITS RUBBLE
-        player = new HeroPlayer(preset, 300, 38);
+        player = new HeroPlayer(preset, 50, 38);
         enemy = new HeroBot(HeroBotPreset.ENEMY_HERO_LIGHT, 750, 30);
 
         // //Initialize the goblins
