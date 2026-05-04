@@ -27,15 +27,18 @@ public class EndGameScreen implements Screen {
     private Sound clickSound;
     private Music currentMusic;
 
+    private HeroPreset previousPreset;
+
     private static final float BG_R = 0.07f, BG_G = 0.07f, BG_B = 0.10f;
 
     // -----------------------------------------------------------------------
     // Constructor
     // -----------------------------------------------------------------------
-    public EndGameScreen(MainGame game, boolean playerWon, boolean draw) {
+    public EndGameScreen(MainGame game, boolean playerWon, boolean draw, HeroPreset preset) {
         this.game      = game;
         this.playerWon = playerWon;
         this.draw      = draw;
+        this.previousPreset = preset;
     }
 
     // -----------------------------------------------------------------------
@@ -125,7 +128,7 @@ public class EndGameScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 clickSound.play();
-                game.setScreen(new MainScreen(game));
+                game.setScreen(new GameScreen(game, previousPreset));
             }
         });
 

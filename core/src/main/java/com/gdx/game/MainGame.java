@@ -17,13 +17,16 @@ public class MainGame extends Game {
 
         // -------------- Queue all the assets in `manager` --------------
 
-        manager.load("atlas\\practiceAtlas.atlas", TextureAtlas.class);
+        manager.load("atlas/practiceAtlas.atlas", TextureAtlas.class);
 
         //Load sounds
         manager.load("Kwality_Sounds/Game_Click.mp3", Sound.class);
 
         // Load the main menu music
         manager.load("Kwality_Sounds/Menu_Music.mp3", Music.class);
+
+        // Load the ingame music
+        manager.load("Kwality_Sounds/Ingame_Music.mp3", Music.class);
 
         // Load the ending music
         manager.load("Kwality_Sounds/Game_Lose.wav", Music.class);

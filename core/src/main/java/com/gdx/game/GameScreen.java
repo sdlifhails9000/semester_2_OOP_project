@@ -10,6 +10,7 @@ package com.gdx.game;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -112,7 +113,6 @@ public class GameScreen implements Screen {
     // ShapeRenderer shapeRenderer;  // DEBUG tool
     ShapeRenderer shapeRendererGreen = new ShapeRenderer();
 
-
     MainGame game;
 
     //Match Timer Declaration (in seconds)
@@ -130,6 +130,9 @@ public class GameScreen implements Screen {
     private Label targetLabel;
     private Label botCountLabel;
     private Label timerLabel;
+
+    Music ingameMusic;
+    HeroPreset preset;
 
     public GameScreen(MainGame entry, HeroPreset preset) {
         // Initialize SpriteBatch
@@ -150,10 +153,10 @@ public class GameScreen implements Screen {
         enemyMiniTower = new Tower(TowerPreset.ENEMY_MINI,500, 38);
         enemyMainTower = new Tower(TowerPreset.ENEMY_MAIN,680, 38);
 
-
         //DRAW THE TOWER FIRST SO THAT WHEN TOWER DIES PLAYER CANNOT HIDE UNDER ITS RUBBLE
         player = new HeroPlayer(preset, 50, 38);
         enemy = new HeroBot(HeroBotPreset.ENEMY_HERO_LIGHT, 750, 30);
+        this.preset = preset;
 
         // //Initialize the goblins
         g1 = new Bot(GoblinPreset.GOBLIN, 40,28);
@@ -187,21 +190,26 @@ public class GameScreen implements Screen {
         // store all the map collisions
         ArrayList<Rectangle> boundaryCollisions = getMapCollisions();
         DynamicEntity.boundaryCollisions = boundaryCollisions;
+
+        ingameMusic = game.manager.get("Kwality_Sounds/Ingame_Music.mp3");
+        ingameMusic.setVolume(0.5f);
+        ingameMusic.setLooping(true);
+        ingameMusic.play();
     }
 
     @Override
     public void render(float delta) {
         //Decides win/loose/draw condition
-        handleEndGameScreen(); 
+        handleEndGameScreen();
 
         //Decrement the timer
         timeRemaining -= delta;
-        
+
         //Handles left and right click
         clickEvent();
 
         //To view health when hovering over entities
-        hoverEvent();  
+        hoverEvent();
 
         //To update states of EVERY entity
         for (Entity e : Entity.entityList) {
@@ -266,13 +274,13 @@ public class GameScreen implements Screen {
         batch.end();
 
                 float cellSize = worldWidth / mapWidth/Bot.gridSize;  // = 800/200 = 4 world units per tile
-            
-        
+
+
         shapeRendererGreen.setProjectionMatrix(camera.combined);
         shapeRendererGreen.begin(ShapeRenderer.ShapeType.Line);
         for(Node i : BotChaseState.nodeList){
             int x = i.x;
-            int y = i.y; 
+            int y = i.y;
                     shapeRendererGreen.setColor(0, 1, 0, 0.5f); // red = blocked
                     shapeRendererGreen.rect(
                     x * cellSize,
@@ -292,10 +300,10 @@ public class GameScreen implements Screen {
     public void resize(int width, int height){
         viewport.update(width, height, true);       //True to centre camera when resized (not resizing camera here as viewport was made to handle it)
 
-        //To resize 
+        //To resize
         hudStage.getViewport().update(width, height, true);
 
-        // Clear and rebuild so positions recalculate against new dimensions 
+        // Clear and rebuild so positions recalculate against new dimensions
         hudStage.clear();
         buildHUD();
 
@@ -333,7 +341,7 @@ public class GameScreen implements Screen {
         float maxPlayerMiniTowerHP = miniTower.maxHealth;
         float maxEnemyMiniTowerHP = enemyMiniTower.maxHealth;
         float maxEnemyMainTowerHP = enemyMainTower.maxHealth;
-        
+
 
         // --- TOP LEFT: Your tower ---
         Table topLeft = new Table();
@@ -368,7 +376,7 @@ public class GameScreen implements Screen {
         hudStage.addActor(topLeft);
 
         // --- TOP RIGHT: Enemy tower ---
-        
+
         Table topRight = new Table();
         topRight.top().right();
         topRight.pad(8);
@@ -376,13 +384,13 @@ public class GameScreen implements Screen {
         //Labels declared and initialized
         Label enemyMainTowerLabel = new Label("ENEMY MAIN TOWER", skin);
         Label enemyMiniTowerLabel = new Label("ENEMY MINI TOWER", skin);
-        
+
         //Setting progress bars for the two enemy towers
         enemyMainTowerBar = new ProgressBar(0, maxEnemyMainTowerHP, 1, false, skin);
-        enemyMainTowerBar.setValue(maxEnemyMainTowerHP);   
+        enemyMainTowerBar.setValue(maxEnemyMainTowerHP);
 
         enemyMiniTowerBar = new ProgressBar(0, maxEnemyMiniTowerHP, 1, false, skin);
-        enemyMiniTowerBar.setValue(maxEnemyMiniTowerHP);  
+        enemyMiniTowerBar.setValue(maxEnemyMiniTowerHP);
 
         //Adding the above data into rows in the topRight table
         topRight.add(enemyMainTowerLabel).right().padBottom(2);
@@ -474,7 +482,7 @@ public class GameScreen implements Screen {
         }
         botCountLabel.setText("ENEMY BOTS: " + enemyBotCount);
 
-        // Timer display 
+        // Timer display
         int minutes = (int)(timeRemaining / 60f);
         int seconds = (int)(timeRemaining % 60f);
         timerLabel.setText(String.format("%02d:%02d", minutes, seconds));
@@ -510,7 +518,7 @@ public class GameScreen implements Screen {
         hudStage.dispose();
         skin.dispose();
 
-        
+        ingameMusic.stop();
     }
 
 
@@ -687,16 +695,16 @@ public class GameScreen implements Screen {
     }
 
     public void handleEndGameScreen() {
-        
+
 
         //Direct Win condition
         if (enemyMainTower.isDead) {
-            game.setScreen(new EndGameScreen(game, true, false));
+            game.setScreen(new EndGameScreen(game, true, false, preset));
         }
 
         //Direct Loose Condition
         if (mainTower.isDead) {
-            game.setScreen(new EndGameScreen(game, false, false));
+            game.setScreen(new EndGameScreen(game, false, false, preset));
         }
 
         if (timeRemaining <= 0) {
@@ -704,7 +712,7 @@ public class GameScreen implements Screen {
             int countDeadEnemyTowers = 0;
 
             for (Tower t : Tower.towerList) {
-                
+
                 //Count Dead Ally Towers
                 if (t.isAlly && t.isDead) {
                     countDeadAllyTowers++;
@@ -718,11 +726,11 @@ public class GameScreen implements Screen {
 
             //Decide win/draw/loose
             if (countDeadAllyTowers > countDeadEnemyTowers) {
-                game.setScreen(new EndGameScreen(game, false, false));
+                game.setScreen(new EndGameScreen(game, false, false, preset));
             }
 
             else if (countDeadAllyTowers < countDeadEnemyTowers) {
-                game.setScreen(new EndGameScreen(game, true, false));
+                game.setScreen(new EndGameScreen(game, true, false, preset));
             }
 
             else {
@@ -739,19 +747,19 @@ public class GameScreen implements Screen {
                 }
                 //Win if more health
                 if (allyTowerHealth > enemyTowerHealth){
-                    game.setScreen(new EndGameScreen(game, true, false));
+                    game.setScreen(new EndGameScreen(game, true, false, preset));
                 }
 
                 //Loose if less health
                 else if (allyTowerHealth < enemyTowerHealth) {
-                    game.setScreen(new EndGameScreen(game, false, false)); 
+                    game.setScreen(new EndGameScreen(game, false, false, preset));
                 }
 
                 //Draw if equal health
                 else {
-                    game.setScreen(new EndGameScreen(game, false, true));    //PlayerWon doesnt matter here
+                    game.setScreen(new EndGameScreen(game, false, true, preset));    //PlayerWon doesnt matter here
                 }
-                
+
             }
         }
 
