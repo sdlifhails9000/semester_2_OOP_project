@@ -205,7 +205,7 @@ class Bot extends DynamicEntity{
 
         int[][] dirs = {    // Directions to move to, removed diagonals, ADDED DIAGONALS AGAIN RAHHHHHH
                 {1, 0}, {-1, 0}, {0, 1}, {0, -1},
-                {1,1}, {1,-1}, {-1,1}, {-1,-1}
+                //{1,1}, {1,-1}, {-1,1}, {-1,-1}
             };
 
             Queue<Node> queue = new LinkedList<>(); // FIFO mode
@@ -245,9 +245,9 @@ class Bot extends DynamicEntity{
                         if (!canStand(nx, ny,false))
                             continue;
                     }
-                    if(nodeCount>100){
-                        return reconstructPath(current);
-                    }
+                    // if(nodeCount){
+                    //     return reconstructPath(current);
+                    // }
                     Node next = new Node(nx, ny);
                     next.parent = current;
                     visited[nx][ny] = true;
