@@ -245,7 +245,7 @@ class Bot extends DynamicEntity{
                         if (!canStand(nx, ny,false))
                             continue;
                     }
-                    if(nodeCount>15){
+                    if(nodeCount>100){
                         return reconstructPath(current);
                     }
                     Node next = new Node(nx, ny);

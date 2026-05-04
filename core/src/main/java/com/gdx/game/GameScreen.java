@@ -15,6 +15,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -109,7 +110,7 @@ public class GameScreen implements Screen {
 
     // DEBUGGING HITBOXES
     // ShapeRenderer shapeRenderer;  // DEBUG tool
-    // ShapeRenderer shapeRendererGreen;
+    ShapeRenderer shapeRendererGreen = new ShapeRenderer();
 
 
     MainGame game;
@@ -263,6 +264,28 @@ public class GameScreen implements Screen {
         }
 
         batch.end();
+
+                float cellSize = worldWidth / mapWidth/Bot.gridSize;  // = 800/200 = 4 world units per tile
+            
+        
+        shapeRendererGreen.setProjectionMatrix(camera.combined);
+        shapeRendererGreen.begin(ShapeRenderer.ShapeType.Line);
+        for(Node i : BotChaseState.nodeList){
+            int x = i.x;
+            int y = i.y; 
+                    shapeRendererGreen.setColor(0, 1, 0, 0.5f); // red = blocked
+                    shapeRendererGreen.rect(
+                    x * cellSize,
+                    y * cellSize,
+                    cellSize,
+                    cellSize
+                );
+
+                // Render at map tile position (already in world units
+            }
+
+        shapeRendererGreen.end();
+
     }
 
     @Override
