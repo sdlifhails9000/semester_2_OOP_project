@@ -103,7 +103,7 @@ class BotAttackState implements State<Bot> {
 // If there is an attackTarget but it is far, this state is entered
 class BotChaseState implements State<Bot> {
     Vector2 lastValidPostion = new Vector2();
-    static ArrayList<Node> nodeList = new ArrayList<>();
+
     public void enter(Bot e){
         e.currentAnimation = e.runAnimation;
         e.BFSpath = null;
@@ -206,11 +206,9 @@ class BotChaseState implements State<Bot> {
                         sy = tempGrid[1];
                     }
                     e.BFSpath = e.bfs(sx, sy, gx, gy);
-                    for(Node i : e.BFSpath){
-                        nodeList.add(i);
-                    }
+
                     if(e.BFSpath != null)
-                    pathIndex = 0;
+                        pathIndex = 0;
 
                     if(e.BFSpath != null) {
                         e.collisionCounter = 0;
