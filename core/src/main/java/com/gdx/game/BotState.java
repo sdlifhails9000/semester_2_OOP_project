@@ -185,7 +185,7 @@ class BotChaseState implements State<Bot> {
 
 
 
-            if(e.collisionCounter>30){ // Increase this counter if game lags when finding paths
+            if(e.collisionCounter>1){ // Increase this counter if game lags when finding paths
                 if(attackTarget != null){
                     // Calculate BFS from CURRENT position to target position
                     int gx = (int) (e.attackTarget.getCurrentPosition().x / Bot.tileSize / Bot.scale);

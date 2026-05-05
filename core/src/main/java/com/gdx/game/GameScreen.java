@@ -116,7 +116,7 @@ public class GameScreen implements Screen {
     MainGame game;
 
     //Match Timer Declaration (in seconds)
-    public float timeRemaining = 300f;   // 5 minutes
+    public float timeRemaining = 180f;   // 5 minutes
 
     //Hud Declarations
     private Stage hudStage;
@@ -159,10 +159,10 @@ public class GameScreen implements Screen {
         this.preset = preset;
 
         // //Initialize the goblins
-        g1 = new Bot(GoblinPreset.GOBLIN, 40,28);
+        g1 = new Bot(GoblinPreset.GOBLIN, 30,44);
         g2 = new Bot(GoblinPreset.GOBLIN, 40,38);
         g3 = new Bot(GoblinPreset.GOBLIN, 40,50);
-        g4 = new Bot(GoblinPreset.ENEMY_GOBLIN, 760,28);
+        g4 = new Bot(GoblinPreset.ENEMY_GOBLIN, 770,44);
         g5 = new Bot(GoblinPreset.ENEMY_GOBLIN, 760,38);
         g6 = new Bot(GoblinPreset.ENEMY_GOBLIN, 760,48);
 

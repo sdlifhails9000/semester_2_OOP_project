@@ -15,13 +15,13 @@ import java.util.Map;
 
 enum HeroPreset {
     // Last is height ,second last is width
-    HERO_HEAVY("HeroAtlas/heavyHero.atlas", 15f, 20f, 10f, 140f, 1f, 10, 10, true),
+    HERO_HEAVY("HeroAtlas/heavyHero.atlas", 15f, 20f, 8f, 140f, 1f, 10, 10, true),
 
-    HERO_LIGHT("HeroAtlas/lightHero.atlas", 20f, 15f, 10f, 100f, 0.70f, 8, 8, true),
+    HERO_LIGHT("HeroAtlas/lightHero.atlas", 17.5f, 15f, 8f, 100f, 0.70f, 8, 8, true),
 
-    ENEMY_HERO_LIGHT("HeroAtlas/lightEnemyHero.atlas", 20f, 15f, 10f, 14f, 0.70f, 8, 8, false),
+    ENEMY_HERO_LIGHT("HeroAtlas/lightEnemyHero.atlas", 17.5f, 15f, 8f, 14f, 0.70f, 8, 8, false),
 
-    ENEMY_HERO_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 20f, 10f, 100f, 1f, 10, 10, false);
+    ENEMY_HERO_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 20f, 8f, 100f, 1f, 10, 10, false);
 
     final String assetPath;
 
@@ -71,8 +71,8 @@ interface BotPreset{
 
 enum GoblinPreset implements BotPreset {
     // Hardcoding gridspan at the end, width ,height
-    GOBLIN("GoblinAtlas/Goblin.atlas", 10, 10, 2, 40, 1.25f, 10, 10, true,1,2),
-    ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 10, 10, 2, 40, 1.25f, 7, 7, false,1,2);
+    GOBLIN("GoblinAtlas/Goblin.atlas", 12.5f, 5, 8, 40, 1.25f, 10, 10, true,1,2),
+    ENEMY_GOBLIN("GoblinAtlas/EnemyGoblin.atlas", 12.5f, 5, 8, 40, 1.25f, 7, 7, false,1,2);
 
     final String assetPath;
 
@@ -162,13 +162,13 @@ enum GoblinPreset implements BotPreset {
 
 enum HeroBotPreset implements BotPreset  {
     // Last is height ,second last is width
-    HERO_HEAVY("HeroAtlas/heavyHero.atlas", 15f, 20f, 10f, 140f, 1f, 10, 10, true, 1, 2),
+    HERO_HEAVY("HeroAtlas/heavyHero.atlas", 15f, 20f, 8f, 140f, 1f, 10, 10, true, 1, 2),
 
-    HERO_LIGHT("HeroAtlas/lightHero.atlas", 20f, 15f, 10f, 100f, 0.70f, 8, 8, true, 1, 2),
+    HERO_LIGHT("HeroAtlas/lightHero.atlas", 17.5f, 15f, 8f, 100f, 0.70f, 8, 8, true, 1, 2),
 
-    ENEMY_HERO_LIGHT("HeroAtlas/lightEnemyHero.atlas", 20f, 15f, 10f, 100f, 0.70f, 8, 8, false, 1, 2),
+    ENEMY_HERO_LIGHT("HeroAtlas/lightEnemyHero.atlas", 17.5f, 15f, 8f, 100f, 0.70f, 8, 8, false, 1, 2),
 
-    ENEMY_HERO_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 20f, 10f, 140f, 1f, 10, 10, false, 1, 2);
+    ENEMY_HERO_HEAVY("HeroAtlas/heavyEnemyHero.atlas", 15f, 20f, 8f, 140f, 1f, 10, 10, false, 1, 2);
 
     final String assetPath;
 
@@ -294,10 +294,10 @@ enum TowerPreset {
 }
 
 enum WeaponPreset {
-    MAIN_TOWER("TowerAtlas/MainTowerWeapon.atlas", true, 2, 40,  9, 9),
-    MINI_TOWER("TowerAtlas/MiniTowerWeapon.atlas",true, 2, 40, 7, 7),
-    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainTowerWeapon.atlas", false, 2, 40, 9, 9),
-    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniTowerWeapon.atlas", false, 2, 40, 7, 7);
+    MAIN_TOWER("TowerAtlas/MainTowerWeapon.atlas", true, 2, 50,  9, 9),
+    MINI_TOWER("TowerAtlas/MiniTowerWeapon.atlas",true, 2, 50, 7, 7),
+    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainTowerWeapon.atlas", false, 2, 50, 9, 9),
+    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniTowerWeapon.atlas", false, 2, 50, 7, 7);
 
     final String assetPath;
 
@@ -330,10 +330,10 @@ enum WeaponPreset {
 }
 
 enum ProjectilePreset {
-    MAIN_TOWER("TowerAtlas/MainProjectile.atlas", true, 25, 20, 1.5f, 5),
-    MINI_TOWER("TowerAtlas/MiniProjectile.atlas",true, 30, 15, 1, 4),
-    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainProjectile.atlas", false, 25, 20, 1.5f, 5),
-    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniProjectile.atlas", false, 30, 15, 1, 4);
+    MAIN_TOWER("TowerAtlas/MainProjectile.atlas", true, 30, 20, 1.5f, 5),
+    MINI_TOWER("TowerAtlas/MiniProjectile.atlas",true, 35, 15, 1, 4),
+    ENEMY_MAIN_TOWER("TowerAtlas/EnemyMainProjectile.atlas", false, 30, 20, 1.5f, 5),
+    ENEMY_MINI_TOWER("TowerAtlas/EnemyMiniProjectile.atlas", false, 35, 15, 1, 4);
 
     final String assetPath;
 
@@ -389,7 +389,7 @@ final class Loader {
     private static Map<HeroBotPreset, Animation<TextureRegion>> heroBotRunAnimation;
     private static Map<HeroBotPreset, Animation<TextureRegion>> heroBotIdleAnimation;
     private static Map<HeroBotPreset, Animation<TextureRegion>> heroBotAttackAnimation;
-    private static Map<HeroBotPreset, Animation<TextureRegion>> heroBotDeadAnimation; 
+    private static Map<HeroBotPreset, Animation<TextureRegion>> heroBotDeadAnimation;
 
     // Declaring hash map to store assets related to Tower, Weapon, Projectile (All three related in Tower.java)
     private static Map<TowerPreset, TextureAtlas> towerAtlass;
@@ -538,7 +538,7 @@ final class Loader {
             //Create goblin health bar sprite
             heroBotHealthBar.put(preset, atlas.findRegion("heartStrip"));
         }
-        
+
 
 
         //Store animation of TowerPreset in its destined hashmap
