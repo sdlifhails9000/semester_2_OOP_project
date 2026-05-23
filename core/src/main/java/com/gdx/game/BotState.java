@@ -111,6 +111,7 @@ class BotChaseState implements State<Bot> {
 
     public void update(Bot e, float delta){
 
+        Entity attackTarget = e.getAttackTarget();
         lastValidPostion.set(e.currentXY);
 
         //If the entity itself dies
@@ -142,7 +143,7 @@ class BotChaseState implements State<Bot> {
 
 
         // If the target is dead
-        Entity attackTarget = e.getAttackTarget();
+        
         if (attackTarget != null && e.getAttackTarget().isDead) {
             e.setState(e.BotIdleState);
             e.attackTarget = null;
@@ -167,8 +168,6 @@ class BotChaseState implements State<Bot> {
         e.targetPosition.y += e.velocity.y * delta;
         e.updateBoxes();
 
-
-
         // Handle collision - revert movement when colliding
         if (e.isCollidingWithEntity() || e.isCollidingWithBoundry()){
             // Calculate the direction we were trying to move (from last valid to current)
@@ -185,13 +184,13 @@ class BotChaseState implements State<Bot> {
 
 
 
-            if(e.collisionCounter>1){ // Increase this counter if game lags when finding paths
+            if(e.collisionCounter >= 0){ // Increase this counter if game lags when finding paths
                 if(attackTarget != null){
                     // Calculate BFS from CURRENT position to target position
                     int gx = (int) (e.attackTarget.getCurrentPosition().x / Bot.tileSize / Bot.scale);
                     int gy = (int) (e.attackTarget.getCurrentPosition().y / Bot.tileSize / Bot.scale);
 
-                    if(!e.canStand(gx,gy,false)){
+                    if(!e.canStand(gx,gy,true)){      //The diagonol was false before causing the slime to get stuck on bottom left corner of tower when retargeting
                         int[] tempGrid = fixGridCoords(e, e.attackTarget.getCurrentPosition().x, e.attackTarget.getCurrentPosition().y);
                         gx = tempGrid[0];
                         gy = tempGrid[1];
@@ -200,7 +199,7 @@ class BotChaseState implements State<Bot> {
                     int sx = (int) (e.currentXY.x / Bot.tileSize / Bot.scale);
                     int sy = (int) (e.currentXY.y / Bot.tileSize / Bot.scale);
 
-                    if(!e.canStand(sx, sy,false)){
+                    if(!e.canStand(sx, sy,true)){
                         int[] tempGrid = fixGridCoords(e, e.currentXY.x, e.currentXY.y);
                         sx = tempGrid[0];
                         sy = tempGrid[1];
@@ -216,7 +215,7 @@ class BotChaseState implements State<Bot> {
 
                 }
             }
-    }
+        }
     else
         e.setCenter(e.currentXY.x, e.currentXY.y);
     }
@@ -298,7 +297,7 @@ class BotChaseState implements State<Bot> {
             int currX = cur[0];
             int currY = cur[1];
 
-            if (e.canStand(currX, currY,false)) {
+            if (e.canStand(currX, currY,true)) {    //By setting diagonal true the collision box used is bigger 
                 validGridList.add(cur);
             }
             Vector2 defaultVector = new Vector2(x,y);
@@ -338,12 +337,13 @@ class BotChaseState implements State<Bot> {
     }
         return new int[]{sx,sy};
     }
+    
 }
 
 // Dead State, duh
 class BotDeadState implements State<Bot> {
-    private float timer = 0f;
-    private static final float MAX_RESPAWN_TIME = 5f; // In seconds btw
+    float deathTimer;
+    private final float MAX_RESPAWN_TIME = 5f; // In seconds btw
     private boolean isDying;
     private boolean isRespawing;
     private boolean blocked;
@@ -354,6 +354,7 @@ class BotDeadState implements State<Bot> {
         isDying = true;
         isRespawing = false;
         blocked = false;        //When in deadState your entity is not blocked
+        deathTimer = 0f;
     }
     // Called every frame
     public void update (Bot e, float delta) {
@@ -369,8 +370,8 @@ class BotDeadState implements State<Bot> {
             }
             return;
         }
-        else if (timer < MAX_RESPAWN_TIME) {
-            timer += delta;
+        else if (deathTimer < MAX_RESPAWN_TIME) {
+            deathTimer += delta;
             return;
         }
 
@@ -397,10 +398,11 @@ class BotDeadState implements State<Bot> {
             e.setCenter(respawnPositionX, respawnPositionY);
             e.currentHealth = e.maxHealth;
             e.isDead = false;
-            timer = 0f;
+            e.animationTimer = 0f;
+            deathTimer = 0f;
             isRespawing = true;     //This flag is what respawns the entity
             e.currentAnimation.setPlayMode(Animation.PlayMode.REVERSED);
-            e.animationTimer = 0f;
+            
         }
     }
 

@@ -192,7 +192,7 @@ public class GameScreen implements Screen {
         DynamicEntity.boundaryCollisions = boundaryCollisions;
 
         ingameMusic = game.manager.get("Kwality_Sounds/Ingame_Music.mp3");
-        ingameMusic.setVolume(0.5f);
+        ingameMusic.setVolume(0f);
         ingameMusic.setLooping(true);
         ingameMusic.play();
     }

@@ -33,7 +33,7 @@ class Tower extends Entity {
         deadAnimation = Loader.dead(preset);
 
         towerIdleState = new TowerIdleState();
-        towerDeadState = new TowerDeadState();
+        towerDeadState = new TowerDeadState();  //No need to clone because they dont respawn (with reversed dead animation)
         currentState = towerIdleState;
 
         //Loads healthBarSprite and sets it above the hero with offset

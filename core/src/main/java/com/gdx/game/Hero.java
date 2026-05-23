@@ -66,7 +66,13 @@ class HeroPlayer extends DynamicEntity {
         //Loads Animations
         this.attackAnimation = Loader.attack(preset);
         this.runAnimation = Loader.run(preset);
-        this.deadAnimation = Loader.dead(preset);
+
+        //Cloning the deadAnimation per entity WHICH CAN RESPAWN
+        //because in deadState they reverse it when respawning 
+        //and since its shared locally it breaks the animation for rest if they are also dead (Gives ghost respawning corpses on the battlefield)
+        Animation<TextureRegion> deadAnim = Loader.dead(preset);
+        this.deadAnimation = new Animation<>(deadAnim.getFrameDuration(), deadAnim.getKeyFrames());
+        this.deadAnimation.setPlayMode(deadAnim.getPlayMode());
 
         //Loads Stats
         this.attackRange = preset.attackRange;

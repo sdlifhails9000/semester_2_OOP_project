@@ -280,7 +280,7 @@ class HeroChaseState implements State<HeroPlayer> {
 
 class HeroDeadState implements State<HeroPlayer> {
     private float timer = 0f;
-    private static final float MAX_RESPAWN_TIME = 5f; // In seconds btw
+    private final float MAX_RESPAWN_TIME = 5f; // In seconds btw
     private boolean isDying;
     private boolean isRespawing;
     private boolean blocked;

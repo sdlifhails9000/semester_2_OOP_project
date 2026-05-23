@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import java.util.concurrent.ThreadLocalRandom;
 
 class Bot extends DynamicEntity{
     static int gridSize = 1;
@@ -18,8 +19,8 @@ class Bot extends DynamicEntity{
     public static ArrayList<Bot> BotList = new ArrayList<>();
     static float scale = GameScreen.scale;
     int collisionCounter = 0;
-    Rectangle tempCollisionRectangle = new Rectangle(0,0,collisionBox.width,collisionBox.height);
-    Rectangle greaterTempCollisioRectangle = new Rectangle(0,0,collisionBox.width*2f,collisionBox.height*2f);
+    Rectangle tempCollisionRectangle = new Rectangle(0,0, collisionBox.width, collisionBox.height);
+    Rectangle greaterTempCollisioRectangle = new Rectangle(0,0, collisionBox.width * 2f, collisionBox.height * 2f);
 
     //Entities Declaration
     Entity attackTarget;
@@ -42,6 +43,8 @@ class Bot extends DynamicEntity{
     int gridSpanWidth;
     List<Node> BFSpath;
     Vector2 BFSlastNode = null;
+
+    
 
 
     //Animation Declaration (Idle and dead is handled in Entity.java)   (Current animation is in entity.java because idle and dead is handled there)
@@ -74,7 +77,13 @@ class Bot extends DynamicEntity{
 
         this.attackAnimation = Loader.attack(preset);
         this.runAnimation = Loader.run(preset);
-        this.deadAnimation = Loader.dead(preset);
+
+        //Cloning the deadAnimation per entity which can respawn
+        //because in deadState they reverse it when respawning 
+        //and since its shared locally it breaks the animation for rest if they are also dead (Gives ghost respawning corpses on the battlefield)
+        Animation<TextureRegion> deadAnim = Loader.dead(preset);
+        this.deadAnimation = new Animation<>(deadAnim.getFrameDuration(), deadAnim.getKeyFrames());
+        this.deadAnimation.setPlayMode(deadAnim.getPlayMode());
 
         this.attackRange = preset.getAttackRange();
         this.attackSpeed = preset.getAttackSpeed();
@@ -117,6 +126,7 @@ class Bot extends DynamicEntity{
     }
 
     public Entity getAttackTarget() {
+        //Goblins are dumb they battle to death when engaged in combat
         if (currentState == BotAttackState) {
             return attackTarget;
         }
@@ -227,8 +237,8 @@ class Bot extends DynamicEntity{
 
                 for (int[] d : dirs) {
                     // Calculate neighbour
-                    int nx = current.x + d[0];
-                    int ny = current.y + d[1];
+                    int nx = current.x + d[0];  //Gives the x coord from dirs made above (the 4 directions)
+                    int ny = current.y + d[1];  //Gives the y coords from dirs made above (the 4 directions)
 
                     // Check Validity
                     if (nx < 0 || ny < 0 || nx >= visited.length || ny >= visited[0].length) // Out of bounds
@@ -283,12 +293,12 @@ class Bot extends DynamicEntity{
                 float dy = usedCollisionBox.y - rect.y;        // change in y axis
                 float distance = (float) Math.sqrt((dx*dx) + (dy*dy));      // distance to centre
 
-                if (distance >= 100) { // If far away skip
+                if (distance >= 20) { // If far away skip
                     continue;
                 }
 
                 if (usedCollisionBox.overlaps(rect)) {  // IF collission
-                    return false;
+                    return false;   //Cannot stand there duh
                 }
             }
 
@@ -304,7 +314,7 @@ class Bot extends DynamicEntity{
                 float dy = usedCollisionBox.y - i.currentXY.y;        // change in y axis
                 float distance = (float) Math.sqrt((dx*dx) + (dy*dy));      // distance to centre
 
-                if (distance > 100) {
+                if (distance > 20) {
                     continue;
                 }
 
@@ -332,7 +342,7 @@ class Bot extends DynamicEntity{
             current = current.parent;
         }
 
-        Collections.reverse(path);  // Static method
+        Collections.reverse(path);  // Static method 
         return path;
     }
 
